@@ -103,7 +103,7 @@ void fill_triangles(Buffer *buffer, const float (*data), uint NUM_TRIANGLES)
 			left[1] = triangle->points[top][1] - (left[0] * triangle->points[top][0]);
 		}
 
-		Uint32 color = 0xFFFFFFFF;
+		Uint32 color = triangle->colors[0];
 
 		if(abs(left[0]) > 0.01 && abs(right[0]) > 0.01) {
 			uint yStart = std::max((float)0.0, triangle->points[top][1]);
@@ -126,7 +126,7 @@ void fill_triangles(Buffer *buffer, const float (*data), uint NUM_TRIANGLES)
 				xRight = std::min(xRight, (float)buffer->dimensions[0]);
 
 				for(int x=(uint)xLeft; x<(uint)xRight; x++) {
-					buffer->pixels[yOffset + x] = (buffer->dimensions[0] / (float)x) * 0xFFFFFFFF;
+					buffer->pixels[yOffset + x] = color;
 				}
 			}
 		}
@@ -160,7 +160,7 @@ void fill_triangles(Buffer *buffer, const float (*data), uint NUM_TRIANGLES)
 				xRight = std::min(xRight, (float)buffer->dimensions[0]);
 
 				for(uint x=(uint)xLeft; x<(uint)xRight; x++) {
-					buffer->pixels[yOffset + x] = (buffer->dimensions[0] / (float)x) * 0xFFFFFFFF;
+					buffer->pixels[yOffset + x] = color;
 				}
 			}
 		}

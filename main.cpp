@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
 	triangle.points[2].axes[1] = 0.75;
 	draw_triangle(&buffer, &triangle, 0x0000FFFF);
 	*/
-	#define N_T 1
+	#define N_T 2000
 
 	float triangles[N_T * 24] = {
 		0.5, 0.25, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0,
