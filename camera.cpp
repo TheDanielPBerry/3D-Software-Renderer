@@ -18,19 +18,24 @@
 #define P_SIZE 3
 struct Plane {
 	float points[P_SIZE][3];
-	float average[P_SIZE];
-	float distance_squared;
-	float tx_coords[P_SIZE][2];
-	Uint32 color;
-	struct Plane *left;
-	struct Plane *right;
+	float color[4];
+	//float average[P_SIZE];
+	//float distance_squared;
+	//float tx_coords[P_SIZE][2];
+	//struct Plane *left;
+	//struct Plane *right;
 };
 
-void project(Plane (*plane), float (*triangle))
+void project(Plane (*plane), float (*triangle), float (*transform))
 {
 	for(uint p=0; p<P_SIZE; p++) {
-		triangle[p] = plane->points[p][0] * (1 / (plane->points[p][2] + 0.01));
-		triangle[p+1] = plane->points[p][1] * (1 / (plane->points[p][2] + 0.01));
+		const uint P_OFFSET = p * 8;
+		triangle[P_OFFSET] = ((plane->points[p][0] + transform[0]) * (1 / ((plane->points[p][2] + transform[2]) + 0.01))) + 0.5;
+		triangle[P_OFFSET + 1] = ((plane->points[p][1] + transform[1]) * (1 / ((plane->points[p][2] + transform[2]) + 0.01)) + 0.5);
+		triangle[P_OFFSET + 2] = plane->color[0];
+		triangle[P_OFFSET + 3] = plane->color[1];
+		triangle[P_OFFSET + 4] = plane->color[2];
+		triangle[P_OFFSET + 5] = plane->color[3];
 	}
 }
 
@@ -48,24 +53,60 @@ Plane *insert(Plane *root, Plane *p, uint dim)
 
 
 
-std::vector<Plane> chunk;
 
-void build_cube()
+void build_cube(std::vector<Plane> &chunk)
 {
+	//Top Face
 	chunk.push_back(Plane{
 		.points = {
-			{0.75, 0.75, 5.0},
-			{0.25, 0.75, 5.0},
-			{0.25, 0.25, 5.0},
+			{0.5, -0.0, 3.5},
+			{0.5, -0.0, 4.5},
+			{-0.5, -0.0, 4.5},
 		},
-		.color = 0xFF00FFFF
+		.color ={1.0, 1.0, 0.0, 1.0}
 	});
 	chunk.push_back(Plane{
 		.points = {
-			{0.75, 0.75, 5.0},
-			{0.75, 0.25, 5.0},
-			{0.25, 0.25, 5.0},
+			{0.5, -0.0, 3.5},
+			{-0.5, -0.0, 3.5},
+			{-0.5, -0.0, 4.5},
 		},
-		.color = 0xFF00FFFF
+		.color = {1.0, 0.0, 1.0, 0.5}
+	});
+
+	//Bottom Face
+	chunk.push_back(Plane{
+		.points = {
+			{0.5, 1.0, 3.5},
+			{-0.5, 1.0, 3.5},
+			{-0.5, 1.0, 4.5},
+		},
+		.color ={1.0, 1.0, 0.0, 1.0}
+	});
+	chunk.push_back(Plane{
+		.points = {
+			{0.5, 1.0, 3.5},
+			{0.5, 1.0, 4.5},
+			{-0.5, 1.0, 4.5},
+		},
+		.color = {1.0, 0.0, 1.0, 0.5}
+	});
+
+	//Left Face
+	chunk.push_back(Plane{
+		.points = {
+			{-0.5, 1.0, 3.5},
+			{-0.5, 1.0, 4.5},
+			{-0.5, 0.0, 4.5},
+		},
+		.color ={1.0, 1.0, 0.0, 1.0}
+	});
+	chunk.push_back(Plane{
+		.points = {
+			{-0.5, 1.0, 3.5},
+			{-0.5, 0.0, 3.5},
+			{-0.5, 0.0, 4.5},
+		},
+		.color = {1.0, 0.0, 1.0, 0.5}
 	});
 }

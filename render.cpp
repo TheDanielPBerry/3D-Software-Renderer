@@ -24,7 +24,7 @@ struct Triangle2f {
 * [b.x, b.y, b.r, b.g, b.b, b.tx, b.ty] 
 * [c.x, c.y, c.r, c.g, c.b, c.tx, c.ty] 
 */
-void fill_triangles(Buffer *buffer, const float (*data), uint NUM_TRIANGLES)
+void fill_triangles(Buffer *buffer, std::vector<float> data, uint NUM_TRIANGLES)
 {
 	const uint NUM_POINTS = 3;
 
@@ -38,12 +38,14 @@ void fill_triangles(Buffer *buffer, const float (*data), uint NUM_TRIANGLES)
 	const uint VEC_TEX_Y = 7;
 	const uint P_SIZE = 8;
 
+	const uint TRIANGLE_S = 24;
+
 	Triangle2f geometry;
 	Triangle2f *triangle = &geometry;
 
 	uint next_triangle = (NUM_POINTS * P_SIZE);
 	for(uint t=0; t<NUM_TRIANGLES; t++) {
-		uint t_offset = t * P_SIZE;
+		uint t_offset = t * TRIANGLE_S;
 		for(uint p=0; p<NUM_POINTS; p++) {
 			const uint P_OFFSET = t_offset + (p * P_SIZE);
 			triangle->points[p][0] = data[P_OFFSET+VEC_X] * buffer->dimensions[0];

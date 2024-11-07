@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 #include <SDL2/SDL.h>
 
@@ -9,5 +10,5 @@ struct Buffer {
 	Uint32 (*pixels);
 };
 
-void fill_triangles(Buffer *buffer, const float (*data), const uint NUM_TRIANGLES);
+void fill_triangles(Buffer *buffer, std::vector<float> data, const uint NUM_TRIANGLES);
 void draw_triangle(struct Buffer *buffer, geo2d::triangle2f *t, uint color);
