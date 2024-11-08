@@ -13,17 +13,17 @@ void build_scene(std::vector<Plane> &scene)
 			//Bottom Face
 			scene.push_back(Plane{
 				.points = {
-					{(float)(x + 0.5), 1.0, (float)(z - 0.5)},
-					{(float)(x + -0.5), 1.0, (float)(z - 0.5)},
-					{(float)(x + -0.5), 1.0, (float)(z + 0.5)},
+					{(float)(x + 0.5), 1.5, (float)(z - 0.5)},
+					{(float)(x + -0.5), 1.5, (float)(z - 0.5)},
+					{(float)(x + -0.5), 1.5, (float)(z + 0.5)},
 				},
 				.color =0xFF00FFFF
 			});
 			scene.push_back(Plane{
 				.points = {
-					{(float)(x + 0.5), 1.0, (float)(z + -0.5)},
-					{(float)(x + 0.5), 1.0,  (float)(z + 0.5)},
-					{(float)(x + -0.5), 1.0,  (float)(z + 0.5)},
+					{(float)(x + 0.5), 1.5, (float)(z + -0.5)},
+					{(float)(x + 0.5), 1.5,  (float)(z + 0.5)},
+					{(float)(x + -0.5), 1.5,  (float)(z + 0.5)},
 				},
 				.color = 0x00FFFFFF
 			});

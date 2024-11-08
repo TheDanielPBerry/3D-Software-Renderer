@@ -64,7 +64,7 @@ void interpolate_lines(
 		for(uint x=xLeft; x<xRight; x++) {
 			float x_percentage = (x-xLeft) / x_diff;
 			float z = (x_percentage * z_diff) + z_left;
-			if(z_buffer[yOffset + x] > z) {
+			if(z_buffer[yOffset + x] > z && z > 0.01) {
 				buffer[yOffset + x] = plane.color;
 				z_buffer[yOffset + x] = z;
 			}
