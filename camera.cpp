@@ -56,57 +56,62 @@ Plane *insert(Plane *root, Plane *p, uint dim)
 
 void build_cube(std::vector<Plane> &chunk)
 {
-	//Top Face
-	chunk.push_back(Plane{
-		.points = {
-			{0.5, -0.0, 3.5},
-			{0.5, -0.0, 4.5},
-			{-0.5, -0.0, 4.5},
-		},
-		.color ={1.0, 1.0, 0.0, 1.0}
-	});
-	chunk.push_back(Plane{
-		.points = {
-			{0.5, -0.0, 3.5},
-			{-0.5, -0.0, 3.5},
-			{-0.5, -0.0, 4.5},
-		},
-		.color = {1.0, 0.0, 1.0, 0.5}
-	});
+	// //Top Face
+	// chunk.push_back(Plane{
+	// 	.points = {
+	// 		{0.5, -0.0, 3.5},
+	// 		{0.5, -0.0, 4.5},
+	// 		{-0.5, -0.0, 4.5},
+	// 	},
+	// 	.color ={1.0, 1.0, 0.0, 1.0}
+	// });
+	// chunk.push_back(Plane{
+	// 	.points = {
+	// 		{0.5, -0.0, 3.5},
+	// 		{-0.5, -0.0, 3.5},
+	// 		{-0.5, -0.0, 4.5},
+	// 	},
+	// 	.color = {1.0, 0.0, 1.0, 0.5}
+	// });
 
-	//Bottom Face
-	chunk.push_back(Plane{
-		.points = {
-			{0.5, 1.0, 3.5},
-			{-0.5, 1.0, 3.5},
-			{-0.5, 1.0, 4.5},
-		},
-		.color ={1.0, 1.0, 0.0, 1.0}
-	});
-	chunk.push_back(Plane{
-		.points = {
-			{0.5, 1.0, 3.5},
-			{0.5, 1.0, 4.5},
-			{-0.5, 1.0, 4.5},
-		},
-		.color = {1.0, 0.0, 1.0, 0.5}
-	});
-
-	//Left Face
-	chunk.push_back(Plane{
-		.points = {
-			{-0.5, 1.0, 3.5},
-			{-0.5, 1.0, 4.5},
-			{-0.5, 0.0, 4.5},
-		},
-		.color ={1.0, 1.0, 0.0, 1.0}
-	});
-	chunk.push_back(Plane{
-		.points = {
-			{-0.5, 1.0, 3.5},
-			{-0.5, 0.0, 3.5},
-			{-0.5, 0.0, 4.5},
-		},
-		.color = {1.0, 0.0, 1.0, 0.5}
-	});
+	for(float x=-10; x<10; x++) {
+		for(float z=1; z<10; z++) {
+			//Bottom Face
+			chunk.push_back(Plane{
+				.points = {
+					{(float)(x + 0.5), 1.0, (float)(z - 0.5)},
+					{(float)(x + -0.5), 1.0, (float)(z - 0.5)},
+					{(float)(x + -0.5), 1.0, (float)(z + 0.5)},
+				},
+				.color ={1.0, 1.0, 0.0, 1.0}
+			});
+			chunk.push_back(Plane{
+				.points = {
+					{(float)(x + 0.5), 1.0, (float)(z + -0.5)},
+					{(float)(x + 0.5), 1.0,  (float)(z + 0.5)},
+					{(float)(x + -0.5), 1.0,  (float)(z + 0.5)},
+				},
+				.color = {1.0, 0.0, 1.0, 0.5}
+			});
+		}
+	}
+	std::cout << chunk.size() << std::endl;
+	//
+	// //Left Face
+	// chunk.push_back(Plane{
+	// 	.points = {
+	// 		{-0.5, 1.0, 3.5},
+	// 		{-0.5, 1.0, 4.5},
+	// 		{-0.5, 0.0, 4.5},
+	// 	},
+	// 	.color ={1.0, 1.0, 0.0, 1.0}
+	// });
+	// chunk.push_back(Plane{
+	// 	.points = {
+	// 		{-0.5, 1.0, 3.5},
+	// 		{-0.5, 0.0, 3.5},
+	// 		{-0.5, 0.0, 4.5},
+	// 	},
+	// 	.color = {1.0, 0.0, 1.0, 0.5}
+	// });
 }

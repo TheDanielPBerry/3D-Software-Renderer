@@ -80,7 +80,19 @@ void fill_triangles(Buffer *buffer, std::vector<float> data, uint NUM_TRIANGLES)
 			top = middle;
 			middle = temp;
 		}
-
+		//Test if all the points are under 0
+		if(triangle->points[top][0] < 0.0 && triangle->points[middle][0] < 0.0 && triangle->points[bottom][0] < 0.0) {
+			continue;
+		}
+		if(triangle->points[top][1] < 0.0 && triangle->points[middle][1] < 0.0 && triangle->points[bottom][1] < 0.0) {
+			continue;
+		}
+		if(triangle->points[top][0] < 1.0 && triangle->points[middle][0] < 1.0 && triangle->points[bottom][0] < 1.0) {
+			continue;
+		}
+		if(triangle->points[top][1] < 1.0 && triangle->points[middle][1] < 1.0 && triangle->points[bottom][1] < 1.0) {
+			continue;
+		}
 
 		//Calculate coeffecients of first set of lines
 		float left[2];
