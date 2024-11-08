@@ -1,10 +1,9 @@
 #include <SDL2/SDL.h>
 
-#include "Texture.h"
 
 typedef struct Vec2f {
-	float y;
 	float x;
+	float y;
 
 	Vec2f operator+(const Vec2f &b)
 	{
@@ -38,5 +37,14 @@ typedef struct Plane {
 	Vec3f buffer[N_POINTS];
 	Uint32 color;
 	Vec2f texture_coords[N_POINTS];
-	Texture *texture;
 } Plane;
+
+
+
+/**
+ * @param plane container with applicable data to store 3d points in space and their respective 2d points
+ * @param transform tranforms that move the camera
+ * @param dimensions
+ * The 2d points will be projected and accompanied by the z-distance of the transform
+*/
+void project_transform_and_scale(Plane &plane, const Vec3f &transform, const Vec2f &dimensions);

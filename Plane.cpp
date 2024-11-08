@@ -28,6 +28,15 @@ typedef struct Vec3f {
 			z + b.z
 		};
 	}
+
+	Vec3f operator*(const Vec3f &b)
+	{
+		return Vec3f {
+			x * b.x,
+			y * b.y,
+			z * b.z
+		};
+	}
 } Vec3f;
 
 
@@ -38,7 +47,6 @@ typedef struct Plane {
 	Vec3f buffer[N_POINTS];
 	Uint32 color;
 	Vec2f texture_coords[N_POINTS];
-	Texture *texture;
 } Plane;
 
 
@@ -60,27 +68,15 @@ float distance_squared(const Vec3f v)
  * @param dimensions
  * The 2d points will be projected and accompanied by the z-distance of the transform
 */
-void project_transform_and_scale(Plane &plane, Vec3f transform, Vec2f dimensions)
+void project_transform_and_scale(Plane &plane, const Vec3f &transform, const Vec2f &dimensions)
 {
 	for(uint p=0; p<N_POINTS; p++) {
-		plane.buffer[p].x = ((plane.points[p].x + transform.x)
-			* (1 /  (plane.points[p].z + FRUSTUM_VIEWPOINT_DISTANCE))) * dimensions.x;
+		plane.buffer[p].x = (((plane.points[p].x + transform.x)
+			* (1 / (plane.points[p].z + FRUSTUM_VIEWPOINT_DISTANCE + transform.z))) + 0.5) * dimensions.x;
 
-		plane.buffer[p].y = ((plane.points[p].y + transform.y)
-			* (1 /  (plane.points[p].z + FRUSTUM_VIEWPOINT_DISTANCE))) * dimensions.y;
+		plane.buffer[p].y = (((plane.points[p].y + transform.y)
+			* (1 / (plane.points[p].z + FRUSTUM_VIEWPOINT_DISTANCE + transform.z))) + 0.5) * dimensions.y;
 		//Buffer Z contains squared distance from viewpoint to 2d pixel
 		plane.buffer[p].z = distance_squared(plane.points[p] + transform);
-	}
-}
-
-void project(Plane &plane)
-{
-	for(uint p=0; p<N_POINTS; p++) {
-		plane.buffer[p].x = plane.points[p].x * (1 /  (plane.points[p].z + FRUSTUM_VIEWPOINT_DISTANCE));
-		plane.buffer[p].y = plane.points[p].y * (1 /  (plane.points[p].z + FRUSTUM_VIEWPOINT_DISTANCE));
-		//Buffer Z contains squared distance from viewpoint to 2d pixel
-		plane.buffer[p].z = (plane.points[p].x * plane.points[p].x)
-			+ (plane.points[p].y * plane.points[p].y)
-			+ (plane.points[p].z * plane.points[p].z);
 	}
 }

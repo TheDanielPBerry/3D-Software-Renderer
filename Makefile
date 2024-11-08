@@ -11,9 +11,16 @@ run: build
 debug: build
 	gdb ./$(output)
 
-build:
-	$(cc) -o $(output) main.cpp Plane.cpp rasterize.cpp $(flags)
+dependencies = obj/Plane.o obj/rasterize.o
 
+build: $(dependencies)
+	$(cc) -o $(output) main.cpp $(dependencies) $(flags)
+
+
+obj/%.o: %.cpp
+	$(cc) -c $< -o $@ $(flags)
+
+	
 build_floor:
 	$(cc) -o floor main.cpp render.cpp camera.cpp $(flags)
 

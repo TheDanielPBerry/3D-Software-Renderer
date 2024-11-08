@@ -4,11 +4,33 @@
 #include <cstdlib>
 #include <vector>
 
-#include "render.h"
-#include "camera.h"
+#include "rasterize.h"
 
+void build_scene(std::vector<Plane> &scene)
+{
+	for(float x=-10; x<10; x++) {
+		for(float z=1; z<10; z++) {
+			//Bottom Face
+			scene.push_back(Plane{
+				.points = {
+					{(float)(x + 0.5), 1.0, (float)(z - 0.5)},
+					{(float)(x + -0.5), 1.0, (float)(z - 0.5)},
+					{(float)(x + -0.5), 1.0, (float)(z + 0.5)},
+				},
+				.color =0xFF00FFFF
+			});
+			scene.push_back(Plane{
+				.points = {
+					{(float)(x + 0.5), 1.0, (float)(z + -0.5)},
+					{(float)(x + 0.5), 1.0,  (float)(z + 0.5)},
+					{(float)(x + -0.5), 1.0,  (float)(z + 0.5)},
+				},
+				.color = 0x00FFFFFF
+			});
+		}
+	}
+}
 
-uint buffer[1920][1080];
 
 int main(int argc, char* argv[]) {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -16,10 +38,10 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	const int WIDTH = 1024;
-	const int HEIGHT = 800;
+	uint SCREEN_WIDTH = 1024;
+	uint SCREEN_HEIGHT = 800;
 
-	SDL_Window* window = SDL_CreateWindow("Pixel Buffer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
+	SDL_Window* window = SDL_CreateWindow("Pixel Buffer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 	if (!window) {
 		std::cerr << "Window creation failed: " << SDL_GetError() << std::endl;
 		SDL_Quit();
@@ -36,33 +58,23 @@ int main(int argc, char* argv[]) {
 
 
 	// Create a pixel buffer
-	Uint32* pixels = new Uint32[WIDTH * HEIGHT];
-	for (int i = 0; i < WIDTH * HEIGHT; ++i) {
-		pixels[i] = 0xFF0000FF; // Red color
+	Uint32 *screen_buffer = new Uint32[SCREEN_WIDTH * SCREEN_HEIGHT];
+	float *z_buffer = new float[SCREEN_WIDTH * SCREEN_HEIGHT];
+	for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; ++i) {
+		screen_buffer[i] = 0xFF0000FF; // Red color
 	}
+	Vec2f dimensions = Vec2f{ (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT };
 
 
-	Buffer buffer;
-	buffer.dimensions[0] = WIDTH;
-	buffer.dimensions[1] = HEIGHT;
-	buffer.pixels = pixels;
-
-	std::vector<Plane> chunk;
-	build_cube(chunk);
-
-	float transform[3] = {0,0,0};
-
-
-	const uint n_triangles = chunk.size();
-	std::vector<float> triangles(24 * n_triangles);
-	for(uint i=0; i<n_triangles; i++) {
-		project(&(chunk[i]), &(triangles[i*24]), transform);
-	}
-	fill_triangles(&buffer, triangles, n_triangles);
+	std::vector<Plane> scene;
+	scene.reserve(360);
+	build_scene(scene);
+	Vec3f transform = Vec3f{0,0,0};
+	draw_scene(scene, screen_buffer, dimensions, transform, z_buffer);
 
 	// Create a texture from the pixel buffer
-	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, WIDTH, HEIGHT);
-	SDL_UpdateTexture(texture, NULL, pixels, WIDTH * sizeof(Uint32));
+	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, SCREEN_WIDTH, SCREEN_HEIGHT);
+	SDL_UpdateTexture(texture, NULL, screen_buffer, SCREEN_WIDTH * sizeof(Uint32));
 
 	// Render the texture
 	SDL_RenderClear(renderer);
@@ -73,14 +85,13 @@ int main(int argc, char* argv[]) {
 	SDL_Event event;
 	bool running = true;
 	while (running) {
-		for (int i = 0; i < WIDTH * HEIGHT; ++i) {
-			pixels[i] = 0xFF0000FF; // Red color
+		for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; ++i) {
+			screen_buffer[i] = 0xFF0000FF; // Red color
+			z_buffer[i] = INFINITY;
 		}
-		for(uint i=0; i<n_triangles; i++) {
-			project(&chunk[i], &(triangles[i*24]), transform);
-		}
-		fill_triangles(&buffer, triangles, n_triangles);
-		SDL_UpdateTexture(texture, NULL, pixels, WIDTH * sizeof(Uint32));
+		draw_scene(scene, screen_buffer, dimensions, transform, z_buffer);
+
+		SDL_UpdateTexture(texture, NULL, screen_buffer, SCREEN_WIDTH * sizeof(Uint32));
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, texture, NULL, NULL);
 		SDL_RenderPresent(renderer);
@@ -97,17 +108,17 @@ int main(int argc, char* argv[]) {
 					} else if(event.key.keysym.scancode  == 41) {
 						running = false;
 					} else if(event.key.keysym.scancode  == 26 || event.key.keysym.scancode == 14) {
-						transform[2] -= 0.2;
+						transform.z -= 0.2;
 					} else if(event.key.keysym.scancode  == 22 || event.key.keysym.scancode == 13) {
-						transform[2] += 0.2;
+						transform.z += 0.2;
 					} else if(event.key.keysym.scancode  == 11 || event.key.keysym.scancode == 4) {
-						transform[0] += 0.2;
+						transform.x += 0.2;
 					} else if(event.key.keysym.scancode  == 15 || event.key.keysym.scancode == 7) {
-						transform[0] -= 0.2;
+						transform.x -= 0.2;
 					} else if(event.key.keysym.scancode  == 44) {
-						transform[1] += 0.2;
+						transform.y += 0.2;
 					} else if(event.key.keysym.scancode  == 225) {
-						transform[1] -= 0.2;
+						transform.y -= 0.2;
 					} else {
 						std::cout << event.key.keysym.scancode << std::endl;
 					}
@@ -116,9 +127,8 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	chunk.clear();
-	triangles.clear();
-	delete[] pixels;
+	scene.clear();
+	delete[] screen_buffer;
 	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
