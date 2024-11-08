@@ -29,6 +29,27 @@ void build_scene(std::vector<Plane> &scene)
 			});
 		}
 	}
+	for(float x=-5; x<5; x++) {
+		for(float y=-5; y<5; y++) {
+			scene.push_back(Plane{
+				.points = {
+					{(float)(x + 0.5), (float)(y + 0.5), 5.0},
+					{(float)(x + 0.5), (float)(y - 0.5),  5.0},
+					{(float)(x - 0.5), (float)(y - 0.5),  5.0},
+				},
+				.color = 0x0000FFFF,
+			});
+			scene.push_back(Plane{
+				.points = {
+					{(float)(x + 0.5), (float)(y + 0.5), 5.0},
+					{(float)(x - 0.5), (float)(y + 0.5),  5.0},
+					{(float)(x - 0.5), (float)(y - 0.5),  5.0},
+				},
+				.color = 0x00AAFFFF,
+			});
+	 	}
+	}
+	std::cout << "Scene triangle count: " << scene.size() << std::endl;
 }
 
 
@@ -67,7 +88,7 @@ int main(int argc, char* argv[]) {
 
 
 	std::vector<Plane> scene;
-	scene.reserve(360);
+	scene.reserve(1180);
 	build_scene(scene);
 	Vec3f transform = Vec3f{0,0,0};
 	draw_scene(scene, screen_buffer, dimensions, transform, z_buffer);
