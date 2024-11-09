@@ -11,7 +11,8 @@ void interpolate_lines(
 	const Vec2f &left,
 	const Vec2f &right,
 	Vec2f &y_bounds,
-	const Vec3f &z_bounds,
+	const Vec2f &z_bounds_left,
+	const Vec2f &z_bounds_right,
 	const Vec2f &dimensions,
 	Uint32 *buffer,
 	float *z_buffer
@@ -31,8 +32,23 @@ void interpolate_lines(
 
 	//Used to calculate progress from top to bottom
 	float vertical_diff = y_bounds.y - y_bounds.x;
-	float left_diff = z_bounds.x - z_bounds.y;
-	float right_diff = z_bounds.x - z_bounds.z;
+	float left_slope = (z_bounds_left.y - z_bounds_left.x) / vertical_diff;
+	float right_slope = (z_bounds_right.y - z_bounds_right.x) / vertical_diff;
+	float left_intercept = z_bounds_left.x - (left_slope * y_bounds.x);
+	float right_intercept = z_bounds_right.x - (right_slope * y_bounds.x);
+
+	Vec2f middle = Vec2f {
+		dimensions.x / 2,
+		dimensions.y / 2,
+	};
+	
+	uint alpha = plane.color % 256;
+	plane.color /= 256;
+	uint blue = plane.color % 256;
+	plane.color /= 256;
+	uint green = plane.color % 256;
+	plane.color /= 256;
+	uint red = plane.color % 256;
 
 	for(uint y=y_bounds.x; y<y_bounds.y; y++) {
 		uint yOffset = y * dimensions.x;
@@ -56,16 +72,23 @@ void interpolate_lines(
 		xRight = std::min(xRight, dimensions.x);
 
 		float y_percentage = (y - y_bounds.x) / vertical_diff;
-		float z_left = (left_diff * y_percentage) + z_bounds.y;
-		float z_right = (right_diff * y_percentage) + z_bounds.z;
-		float z_diff = z_left - z_right;
-		float x_diff = (xRight-xLeft);
+		float z_left = (left_slope * y) + left_intercept;
+		float z_right = (right_slope * y) + right_intercept;
+		//float z = (z_left + z_right) / 2.0;
+		float z_slope = (z_right - z_left) / (xRight - xLeft);
+		float z_intercept = z_left - (z_slope * xLeft);
 
 		for(uint x=xLeft; x<xRight; x++) {
-			float x_percentage = (x-xLeft) / x_diff;
-			float z = (x_percentage * z_diff) + z_left;
-			if(z_buffer[yOffset + x] > z && z > 0.01) {
-				buffer[yOffset + x] = plane.color;
+			float z = (z_slope * x) + z_intercept;
+			if(z_buffer[yOffset + x] > z && z > 0.1) {
+				float z_inverse = 10000/(z*z);
+				float cone = 10000 / ((x - middle.x)*(x - middle.x) + (y-middle.y)*(y-middle.y));
+
+				Uint32 pixel = (std::min((int)(red * z_inverse * cone),(int)red) << 24);
+				pixel += (std::min((int)(green * z_inverse * cone), (int)green) << 16);
+				pixel += (std::min((int)(blue * z_inverse * cone), (int)blue) << 8);
+				pixel += alpha;
+				buffer[yOffset + x] = pixel;
 				z_buffer[yOffset + x] = z;
 			}
 		}
@@ -123,18 +146,25 @@ void rasterize(Plane &plane, Uint32 *buffer, const Vec2f &dimensions, float *z_b
 	//X is slope and the Y is the y-intercept of each line
 	Vec2f leftCoeff;
 	Vec2f rightCoeff;
+
+	Vec2f z_bounds_left;
+	Vec2f z_bounds_right;
 	if(leftOrientedTriangle) {
 		leftCoeff.x = (plane.buffer[top].y - plane.buffer[middle].y) / (plane.buffer[top].x - plane.buffer[middle].x);
 		leftCoeff.y = plane.buffer[top].y - (leftCoeff.x * plane.buffer[top].x);
+		z_bounds_left = Vec2f{plane.buffer[top].z, plane.buffer[middle].z};
 
 		rightCoeff.x = (plane.buffer[top].y - plane.buffer[bottom].y) / (plane.buffer[top].x - plane.buffer[bottom].x);
 		rightCoeff.y = plane.buffer[top].y - (rightCoeff.x * plane.buffer[top].x);
+		z_bounds_right = Vec2f{plane.buffer[top].z, plane.buffer[bottom].z};
 	} else {
 		leftCoeff.x = (plane.buffer[top].y - plane.buffer[bottom].y) / (plane.buffer[top].x - plane.buffer[bottom].x);
 		leftCoeff.y = plane.buffer[top].y - (leftCoeff.x * plane.buffer[top].x);
+		z_bounds_left = Vec2f{plane.buffer[top].z, plane.buffer[bottom].z};
 
 		rightCoeff.x = (plane.buffer[top].y - plane.buffer[middle].y) / (plane.buffer[top].x - plane.buffer[middle].x);
 		rightCoeff.y = plane.buffer[top].y - (rightCoeff.x * plane.buffer[top].x);
+		z_bounds_right = Vec2f{plane.buffer[top].z, plane.buffer[middle].z};
 	}
 	if(leftCoeff.x == INFINITY || leftCoeff.x == -INFINITY) {
 		leftCoeff.y = plane.buffer[top].x;
@@ -148,13 +178,8 @@ void rasterize(Plane &plane, Uint32 *buffer, const Vec2f &dimensions, float *z_b
 		std::min(plane.buffer[middle].y, dimensions.y)
 	};
 
-	Vec3f z_bounds{
-		plane.buffer[top].z,
-		plane.buffer[middle].z,
-		plane.buffer[bottom].z,
-	};
 
-	interpolate_lines(plane, leftCoeff, rightCoeff, y_bounds, z_bounds, dimensions, buffer, z_buffer);
+	interpolate_lines(plane, leftCoeff, rightCoeff, y_bounds, z_bounds_left, z_bounds_right, dimensions, buffer, z_buffer);
 
 	if(leftOrientedTriangle) {
 		leftCoeff.x = (plane.buffer[middle].y - plane.buffer[bottom].y) / (plane.buffer[middle].x - plane.buffer[bottom].x);
@@ -164,6 +189,7 @@ void rasterize(Plane &plane, Uint32 *buffer, const Vec2f &dimensions, float *z_b
 		} else {
 			leftCoeff.y = plane.buffer[bottom].y - (leftCoeff.x * plane.buffer[bottom].x);
 		}
+		z_bounds_left = Vec2f{plane.buffer[middle].z, plane.buffer[bottom].z};
 	} else {
 		rightCoeff.x = (plane.buffer[middle].y - plane.buffer[bottom].y) / (plane.buffer[middle].x - plane.buffer[bottom].x);
 		if(rightCoeff.x == INFINITY || rightCoeff.x == -INFINITY) {
@@ -171,24 +197,28 @@ void rasterize(Plane &plane, Uint32 *buffer, const Vec2f &dimensions, float *z_b
 		} else {
 			rightCoeff.y = plane.buffer[bottom].y - (rightCoeff.x * plane.buffer[bottom].x);
 		}
+		z_bounds_right = Vec2f{plane.buffer[middle].z, plane.buffer[bottom].z};
 	}
 	y_bounds = Vec2f {
 		std::max(plane.buffer[middle].y, (float)0.0),
 		std::min(plane.buffer[bottom].y, dimensions.y)
 	};
-	interpolate_lines(plane, leftCoeff, rightCoeff, y_bounds, z_bounds, dimensions, buffer, z_buffer);
+	interpolate_lines(plane, leftCoeff, rightCoeff, y_bounds, z_bounds_left, z_bounds_right, dimensions, buffer, z_buffer);
 }
 
-void draw_scene(std::vector<Plane> scene, Uint32 *buffer, const Vec2f &dimensions, const Vec3f &transform, float *z_buffer)
+void draw_scene(std::vector<Plane> scene, Uint32 *buffer, const Vec2f &dimensions, const Vec3f &transform, const Vec3f &rotate, float *z_buffer)
 {
 	for(uint p=0; p<scene.size(); p++) {
+		//Perhaps a nice way to cull rearward faces
+		//If one point is behind the camera, make the z 0
+		//If 2 points are behind, hide the triangle
 		if((scene[p].points[0].z + transform.z) < 0 
 			&& (scene[p].points[1].z + transform.z) < 0 
 			&& (scene[p].points[2].z + transform.z) < 0) {
 			//Don't bother with triangles behind the camera
 			continue;
 		}
-		project_transform_and_scale(scene[p], transform, dimensions);
+		project_transform_and_scale(scene[p], transform, rotate, dimensions);
 		rasterize(scene[p], buffer, dimensions, z_buffer);
 	}
 }

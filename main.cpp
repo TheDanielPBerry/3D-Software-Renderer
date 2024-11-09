@@ -9,43 +9,43 @@
 void build_scene(std::vector<Plane> &scene)
 {
 	for(float x=-10; x<10; x++) {
-		for(float z=1; z<10; z++) {
+		for(float z=1; z<12; z++) {
 			//Bottom Face
 			scene.push_back(Plane{
 				.points = {
-					{(float)(x + 0.5), 1.5, (float)(z - 0.5)},
-					{(float)(x + -0.5), 1.5, (float)(z - 0.5)},
-					{(float)(x + -0.5), 1.5, (float)(z + 0.5)},
+					{(float)(x + 0.5), 1, (float)(z - 0.5)},
+					{(float)(x + -0.5), 1, (float)(z - 0.5)},
+					{(float)(x + -0.5), 1, (float)(z + 0.5)},
 				},
-				.color =0xFF00FFFF
+				.color =0x0000FFFF
 			});
 			scene.push_back(Plane{
 				.points = {
-					{(float)(x + 0.5), 1.5, (float)(z + -0.5)},
-					{(float)(x + 0.5), 1.5,  (float)(z + 0.5)},
-					{(float)(x + -0.5), 1.5,  (float)(z + 0.5)},
+					{(float)(x + 0.5), 1, (float)(z + -0.5)},
+					{(float)(x + 0.5), 1,  (float)(z + 0.5)},
+					{(float)(x + -0.5), 1,  (float)(z + 0.5)},
 				},
-				.color = 0x00FFFFFF
+				.color = 0x0000FFFF
 			});
 		}
 	}
 	for(float x=-5; x<5; x++) {
-		for(float y=-5; y<5; y++) {
+		for(float y=-2; y<4; y++) {
 			scene.push_back(Plane{
 				.points = {
-					{(float)(x + 0.5), (float)(y + 0.5), 5.0},
-					{(float)(x + 0.5), (float)(y - 0.5),  5.0},
-					{(float)(x - 0.5), (float)(y - 0.5),  5.0},
+					{(float)(x + 0.5), (float)(y + 0.5), 9},
+					{(float)(x + 0.5), (float)(y - 0.5), 9},
+					{(float)(x - 0.5), (float)(y - 0.5), 9},
 				},
-				.color = 0x0000FFFF,
+				.color = 0xFF00FFFF,
 			});
 			scene.push_back(Plane{
 				.points = {
-					{(float)(x + 0.5), (float)(y + 0.5), 5.0},
-					{(float)(x - 0.5), (float)(y + 0.5),  5.0},
-					{(float)(x - 0.5), (float)(y - 0.5),  5.0},
+					{(float)(x + 0.5), (float)(y + 0.5), 9},
+					{(float)(x - 0.5), (float)(y + 0.5), 9},
+					{(float)(x - 0.5), (float)(y - 0.5), 9},
 				},
-				.color = 0x00AAFFFF,
+				.color = 0xFF00FFFF,
 			});
 	 	}
 	}
@@ -91,7 +91,8 @@ int main(int argc, char* argv[]) {
 	scene.reserve(1180);
 	build_scene(scene);
 	Vec3f transform = Vec3f{0,0,0};
-	draw_scene(scene, screen_buffer, dimensions, transform, z_buffer);
+	Vec3f rotate = Vec3f{0,0,0};
+	draw_scene(scene, screen_buffer, dimensions, transform, rotate, z_buffer);
 
 	// Create a texture from the pixel buffer
 	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -110,7 +111,7 @@ int main(int argc, char* argv[]) {
 			screen_buffer[i] = 0xFF0000FF; // Red color
 			z_buffer[i] = INFINITY;
 		}
-		draw_scene(scene, screen_buffer, dimensions, transform, z_buffer);
+		draw_scene(scene, screen_buffer, dimensions, transform, rotate, z_buffer);
 
 		SDL_UpdateTexture(texture, NULL, screen_buffer, SCREEN_WIDTH * sizeof(Uint32));
 		SDL_RenderClear(renderer);
@@ -140,6 +141,10 @@ int main(int argc, char* argv[]) {
 						transform.y += 0.2;
 					} else if(event.key.keysym.scancode  == 225) {
 						transform.y -= 0.2;
+					} else if(event.key.keysym.scancode  == 79) {
+						rotate.y -= 0.2;
+					} else if(event.key.keysym.scancode  == 80) {
+						rotate.y += 0.2;
 					} else {
 						std::cout << event.key.keysym.scancode << std::endl;
 					}

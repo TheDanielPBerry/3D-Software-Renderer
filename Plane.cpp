@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <cmath>
 
 #include "Texture.h"
 
@@ -68,14 +69,18 @@ float distance_squared(const Vec3f v)
  * @param dimensions
  * The 2d points will be projected and accompanied by the z-distance of the transform
 */
-void project_transform_and_scale(Plane &plane, const Vec3f &transform, const Vec2f &dimensions)
+void project_transform_and_scale(Plane &plane, const Vec3f &transform, const Vec3f rotate, const Vec2f &dimensions)
 {
 	for(uint p=0; p<N_POINTS; p++) {
+		float z = plane.points[p].z + transform.z + FRUSTUM_VIEWPOINT_DISTANCE;
+		if(z < FRUSTUM_VIEWPOINT_DISTANCE) {
+			z = FRUSTUM_VIEWPOINT_DISTANCE;
+		}
 		plane.buffer[p].x = (((plane.points[p].x + transform.x)
-			* (1 / (plane.points[p].z + FRUSTUM_VIEWPOINT_DISTANCE + transform.z))) + 0.5) * dimensions.x;
+			* (1 / z)) + 0.5) * dimensions.y;
 
 		plane.buffer[p].y = (((plane.points[p].y + transform.y)
-			* (1 / (plane.points[p].z + FRUSTUM_VIEWPOINT_DISTANCE + transform.z))) + 0.5) * dimensions.y;
+			* (1 / z)) + 0.5) * dimensions.y;
 		//Buffer Z contains squared distance from viewpoint to 2d pixel
 		plane.buffer[p].z = distance_squared(plane.points[p] + transform);
 	}

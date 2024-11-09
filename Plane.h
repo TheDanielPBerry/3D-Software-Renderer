@@ -48,3 +48,4 @@ typedef struct Plane {
  * The 2d points will be projected and accompanied by the z-distance of the transform
 */
 void project_transform_and_scale(Plane &plane, const Vec3f &transform, const Vec2f &dimensions);
+void project_transform_and_scale(Plane &plane, const Vec3f &transform, const Vec3f rotate, const Vec2f &dimensions);
