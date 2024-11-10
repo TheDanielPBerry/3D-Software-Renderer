@@ -5,13 +5,13 @@
 #include <vector>
 #include <chrono>
 
+#include "Light.h"
 #include "rasterize.h"
 
 void build_scene(std::vector<Plane> &scene)
 {
-	/*
-	for(float x=-10; x<10; x+=1.01) {
-		for(float z=1; z<12; z+=1.02) {
+	for(float x=-5; x<5; x+=1) {
+		for(float z=5; z<12; z+=1) {
 			//Bottom Face
 			scene.push_back(Plane{
 				.points = {
@@ -19,7 +19,7 @@ void build_scene(std::vector<Plane> &scene)
 					{(float)(x + -0.5), 1, (float)(z - 0.5)},
 					{(float)(x + -0.5), 1, (float)(z + 0.5)},
 				},
-				.color =0x0000FF88
+				.color = {{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0}},
 			});
 			scene.push_back(Plane{
 				.points = {
@@ -27,7 +27,7 @@ void build_scene(std::vector<Plane> &scene)
 					{(float)(x + 0.5), 1,  (float)(z + 0.5)},
 					{(float)(x + -0.5), 1,  (float)(z + 0.5)},
 				},
-				.color = 0x0000FF88
+				.color = {{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0}},
 			});
 		}
 	}
@@ -39,7 +39,7 @@ void build_scene(std::vector<Plane> &scene)
 					{(float)(x + 0.5), (float)(y - 0.5), 9},
 					{(float)(x - 0.5), (float)(y - 0.5), 9},
 				},
-				.color = 0xFF00FFFF,
+				.color = {{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0}},
 			});
 			scene.push_back(Plane{
 				.points = {
@@ -47,18 +47,18 @@ void build_scene(std::vector<Plane> &scene)
 					{(float)(x - 0.5), (float)(y + 0.5), 9},
 					{(float)(x - 0.5), (float)(y - 0.5), 9},
 				},
-				.color = 0xFF00FFFF,
+				.color = {{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0}},
 			});
 	 	}
 	}
-	*/
+	/*
 	scene.push_back(Plane{
 		.points = {
 			{(float)(10), (float)(10), 6},
 			{(float)(10), (float)(-10), 6},
 			{(float)(-10), (float)(-10), 6},
 		},
-		.color = 0xFF00FFFF,
+		.color = Vec4f {1.0, 1.0, 0.0, 1.0},
 	});
 	scene.push_back(Plane{
 		.points = {
@@ -66,7 +66,7 @@ void build_scene(std::vector<Plane> &scene)
 			{(float)(-10), (float)(10), 6},
 			{(float)(-10), (float)(-10), 6},
 		},
-		.color = 0xFF00FFFF,
+		.color = Vec4f {1.0, 1.0, 0.0, 1.0},
 	});
 	scene.push_back(Plane{
 		.points = {
@@ -74,7 +74,7 @@ void build_scene(std::vector<Plane> &scene)
 			{(float)(-10), 1, (float)(-10)},
 			{(float)(-10), 1, (float)(10)},
 		},
-		.color =0x0000FF88
+		.color = 0xFF00FFFF,
 	});
 	scene.push_back(Plane{
 		.points = {
@@ -82,8 +82,9 @@ void build_scene(std::vector<Plane> &scene)
 			{(float)(10), 1,  (float)(10)},
 			{(float)(-10), 1,  (float)(10)},
 		},
-		.color = 0x0000FF88
+		.color =0x0000FF88
 	});
+	*/
 	std::cout << "Scene triangle count: " << scene.size() << std::endl;
 }
 
@@ -123,11 +124,15 @@ int main(int argc, char* argv[]) {
 
 
 	std::vector<Plane> scene;
-	scene.reserve(1180);
 	build_scene(scene);
-	Vec3f transform = Vec3f{0,0,0};
+
+	std::vector<Light> lights;
+	some_lights(lights);
+	light_scene(scene, lights);
+
+	Vec3f translate = Vec3f{0,0,0};
 	Vec3f rotate = Vec3f{0,0,0};
-	draw_scene(scene, screen_buffer, dimensions, transform, rotate, z_buffer);
+	draw_scene(scene, screen_buffer, dimensions, translate, rotate, z_buffer);
 
 	// Create a texture from the pixel buffer
 	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -149,7 +154,7 @@ int main(int argc, char* argv[]) {
 			screen_buffer[i] = 0xFF0000FF; // Red color
 			z_buffer[i] = INFINITY;
 		}
-		draw_scene(scene, screen_buffer, dimensions, transform, rotate, z_buffer);
+		draw_scene(scene, screen_buffer, dimensions, translate, rotate, z_buffer);
 		if(std::time(nullptr) == timestamp) {
 			frameCount ++;
 		} else {
@@ -175,17 +180,17 @@ int main(int argc, char* argv[]) {
 					} else if(event.key.keysym.scancode  == 41) {
 						running = false;
 					} else if(event.key.keysym.scancode  == 26 || event.key.keysym.scancode == 14) {
-						transform.z -= 0.2;
+						translate.z -= 0.2;
 					} else if(event.key.keysym.scancode  == 22 || event.key.keysym.scancode == 13) {
-						transform.z += 0.2;
+						translate.z += 0.2;
 					} else if(event.key.keysym.scancode  == 11 || event.key.keysym.scancode == 4) {
-						transform.x += 0.2;
+						translate.x += 0.2;
 					} else if(event.key.keysym.scancode  == 15 || event.key.keysym.scancode == 7) {
-						transform.x -= 0.2;
+						translate.x -= 0.2;
 					} else if(event.key.keysym.scancode  == 44) {
-						transform.y += 0.2;
+						translate.y += 0.2;
 					} else if(event.key.keysym.scancode  == 225) {
-						transform.y -= 0.2;
+						translate.y -= 0.2;
 					} else if(event.key.keysym.scancode  == 79) {
 						rotate.y -= 0.2;
 					} else if(event.key.keysym.scancode  == 80) {

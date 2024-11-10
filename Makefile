@@ -2,7 +2,7 @@ cc = g++
 
 flags = -g `sdl2-config --cflags --libs`
 
-output = raster
+output = render
 
 
 run: build
@@ -11,7 +11,7 @@ run: build
 debug: build
 	gdb ./$(output)
 
-dependencies = obj/Plane.o obj/rasterize.o
+dependencies = obj/Plane.o obj/rasterize.o obj/Light.o
 
 build: $(dependencies)
 	$(cc) -o $(output) main.cpp $(dependencies) $(flags)

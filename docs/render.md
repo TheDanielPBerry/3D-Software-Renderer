@@ -45,3 +45,11 @@ Pipeline goes from top to bottom
 
 1 2d vertex per vertice for texture coordinates
 We can interpolate textures the same way we did with the z buffer
+
+1 float for luminosity
+
+
+Ways this is better so far than the 3d renderer I built in high school
+- optimizations regarding cache efficiency and lowering dynamic memory allocations
+- Ability to do per pixel z-distance calculations and calculate per pixel lighting
+- Vertices behind frustum are being cut, so no rubber banding around camera (Big Win)
