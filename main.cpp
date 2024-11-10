@@ -3,13 +3,15 @@
 #include <iostream>
 #include <cstdlib>
 #include <vector>
+#include <chrono>
 
 #include "rasterize.h"
 
 void build_scene(std::vector<Plane> &scene)
 {
-	for(float x=-10; x<10; x++) {
-		for(float z=1; z<12; z++) {
+	/*
+	for(float x=-10; x<10; x+=1.01) {
+		for(float z=1; z<12; z+=1.02) {
 			//Bottom Face
 			scene.push_back(Plane{
 				.points = {
@@ -17,7 +19,7 @@ void build_scene(std::vector<Plane> &scene)
 					{(float)(x + -0.5), 1, (float)(z - 0.5)},
 					{(float)(x + -0.5), 1, (float)(z + 0.5)},
 				},
-				.color =0x0000FFFF
+				.color =0x0000FF88
 			});
 			scene.push_back(Plane{
 				.points = {
@@ -25,7 +27,7 @@ void build_scene(std::vector<Plane> &scene)
 					{(float)(x + 0.5), 1,  (float)(z + 0.5)},
 					{(float)(x + -0.5), 1,  (float)(z + 0.5)},
 				},
-				.color = 0x0000FFFF
+				.color = 0x0000FF88
 			});
 		}
 	}
@@ -49,6 +51,39 @@ void build_scene(std::vector<Plane> &scene)
 			});
 	 	}
 	}
+	*/
+	scene.push_back(Plane{
+		.points = {
+			{(float)(10), (float)(10), 6},
+			{(float)(10), (float)(-10), 6},
+			{(float)(-10), (float)(-10), 6},
+		},
+		.color = 0xFF00FFFF,
+	});
+	scene.push_back(Plane{
+		.points = {
+			{(float)(10), (float)(10), 6},
+			{(float)(-10), (float)(10), 6},
+			{(float)(-10), (float)(-10), 6},
+		},
+		.color = 0xFF00FFFF,
+	});
+	scene.push_back(Plane{
+		.points = {
+			{(float)(10), 1, (float)(-10)},
+			{(float)(-10), 1, (float)(-10)},
+			{(float)(-10), 1, (float)(10)},
+		},
+		.color =0x0000FF88
+	});
+	scene.push_back(Plane{
+		.points = {
+			{(float)(10), 1, (float)(-10)},
+			{(float)(10), 1,  (float)(10)},
+			{(float)(-10), 1,  (float)(10)},
+		},
+		.color = 0x0000FF88
+	});
 	std::cout << "Scene triangle count: " << scene.size() << std::endl;
 }
 
@@ -106,12 +141,22 @@ int main(int argc, char* argv[]) {
 	// Event loop
 	SDL_Event event;
 	bool running = true;
+
+	uint frameCount = 0;
+	auto timestamp = std::time(nullptr);
 	while (running) {
 		for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; ++i) {
 			screen_buffer[i] = 0xFF0000FF; // Red color
 			z_buffer[i] = INFINITY;
 		}
 		draw_scene(scene, screen_buffer, dimensions, transform, rotate, z_buffer);
+		if(std::time(nullptr) == timestamp) {
+			frameCount ++;
+		} else {
+			std::cout << frameCount << " fps" << std::endl;
+			timestamp = std::time(nullptr);
+			frameCount = 0;
+		}
 
 		SDL_UpdateTexture(texture, NULL, screen_buffer, SCREEN_WIDTH * sizeof(Uint32));
 		SDL_RenderClear(renderer);
