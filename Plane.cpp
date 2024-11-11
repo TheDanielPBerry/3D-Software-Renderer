@@ -59,7 +59,7 @@ typedef struct Plane {
 } Plane;
 
 
-#define FRUSTUM_VIEWPOINT_DISTANCE 0.01
+#define FRUSTUM_VIEWPOINT_DISTANCE 0.0001
 
 
 /**
@@ -102,12 +102,41 @@ Vec2f ident(const Vec3f t, const char type)
 	return v;
 }
 
+float line(Vec2f &coeff, float x)
+{
+	if(coeff.x == INFINITY || coeff.x == -INFINITY) {
+		//If the slope is infinity, use the y-intercept as the only value
+		return coeff.y;
+	}
+	return (x - coeff.y) / coeff.x;
+}
+
+void check_infinity(Vec2f &coeffs, const float target)
+{
+	//If slope is infinite / vertical, set y-intercept to use same var the whole time
+	if(coeffs.x == INFINITY || coeffs.x == -INFINITY) {
+		coeffs.y = target;
+	}
+}
+
+/*
+void coeffs(const Vec3f &a, const Vec3f &b, Vec2f &dest)
+{
+	//Slope is rise over run
+	dest.x = (a.y - b.y) / (a.x - b.x);
+	//Y-intercept is y - slope * x
+	dest.y = a.y - (dest.x * a.x);
+	check_infinity(dest, a.x);
+}
+*/
+
 void coeffs(const Vec2f &a, const Vec2f &b, Vec2f &dest)
 {
 	//Slope is rise over run
 	dest.x = (a.y - b.y) / (a.x - b.x);
 	//Y-intercept is y - slope * x
 	dest.y = a.y - (dest.x * a.x);
+	check_infinity(dest, a.x);
 }
 
 void transform(Plane &plane, const Vec3f &translate, const Vec3f &rotate)
@@ -125,14 +154,17 @@ void transform(Plane &plane, const Vec3f &translate, const Vec3f &rotate)
 */
 void project_and_scale(Plane &plane, const Vec2f &dimensions)
 {
+	float ratio = (dimensions.x * dimensions.x / dimensions.y);
 	for(uint p=0; p<N_POINTS; p++) {
-		if(plane.buffer[p].z < FRUSTUM_VIEWPOINT_DISTANCE) {
-			plane.buffer[p].z = FRUSTUM_VIEWPOINT_DISTANCE;
+		float z = plane.buffer[p].z;
+		if(z < FRUSTUM_VIEWPOINT_DISTANCE) {
+			z = FRUSTUM_VIEWPOINT_DISTANCE;
 		}
-		plane.buffer[p].x = ((plane.buffer[p].x
-			* (1 / (plane.buffer[p].z + FRUSTUM_VIEWPOINT_DISTANCE))) + 0.5) * dimensions.y;
 
+		plane.buffer[p].x = ((plane.buffer[p].x
+			* (1 / (abs(z) + FRUSTUM_VIEWPOINT_DISTANCE))) + 0.5) * dimensions.x;
+		
 		plane.buffer[p].y = ((plane.buffer[p].y 
-			* (1 / (plane.buffer[p].z + FRUSTUM_VIEWPOINT_DISTANCE))) + 0.5) * dimensions.y;
+			* (1 / (z + FRUSTUM_VIEWPOINT_DISTANCE))) + 0.5) * dimensions.y;
 	}
 }

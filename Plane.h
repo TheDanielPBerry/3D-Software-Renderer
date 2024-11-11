@@ -47,6 +47,10 @@ typedef struct Plane {
 
 Vec2f ident(const Vec3f t, const char type);
 
+float line(Vec2f &coeff, float x);
+
+void check_infinity(Vec2f &coeffs, const float target);
+
 void coeffs(const Vec2f &a, const Vec2f &b, Vec2f &dest);
 
 float distance_squared(const Vec3f &a, const Vec3f &b);

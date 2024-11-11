@@ -49,6 +49,23 @@ void build_scene(std::vector<Plane> &scene)
 				},
 				.color = {{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0}},
 			});
+
+			scene.push_back(Plane{
+				.points = {
+					{(float)(x + 0.5), (float)(y + 0.5), (float)(x + 0.5) + 7},
+					{(float)(x + 0.5), (float)(y - 0.5), (float)(x + 0.5) + 7},
+					{(float)(x - 0.5), (float)(y - 0.5), (float)(x - 0.5) + 7},
+				},
+				.color = {{0.0, 1.0, 0.0, 1.0},{0.0, 1.0, 0.0, 1.0},{0.0, 1.0, 0.0, 1.0}},
+			});
+			scene.push_back(Plane{
+				.points = {
+					{(float)(x + 0.5), (float)(y + 0.5), (float)(x + 0.5) + 7},
+					{(float)(x - 0.5), (float)(y + 0.5), (float)(x - 0.5) + 7},
+					{(float)(x - 0.5), (float)(y - 0.5), (float)(x - 0.5) + 7},
+				},
+				.color = {{0.0, 1.0, 0.0, 1.0},{0.0, 1.0, 0.0, 1.0},{0.0, 1.0, 0.0, 1.0}},
+			});
 	 	}
 	}
 	/*
@@ -151,7 +168,7 @@ int main(int argc, char* argv[]) {
 	auto timestamp = std::time(nullptr);
 	while (running) {
 		for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; ++i) {
-			screen_buffer[i] = 0xFF0000FF; // Red color
+			screen_buffer[i] = 0x000000FF; // Red color
 			z_buffer[i] = INFINITY;
 		}
 		draw_scene(scene, screen_buffer, dimensions, translate, rotate, z_buffer);
