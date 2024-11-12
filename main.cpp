@@ -1,109 +1,16 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_video.h>
 #include <iostream>
 #include <cstdlib>
 #include <vector>
 #include <chrono>
 
+#include "scene.h"
 #include "Light.h"
 #include "rasterize.h"
 
-void build_scene(std::vector<Plane> &scene)
-{
-	for(float x=-5; x<5; x+=1) {
-		for(float z=5; z<12; z+=1) {
-			//Bottom Face
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5), 1, (float)(z - 0.5)},
-					{(float)(x + -0.5), 1, (float)(z - 0.5)},
-					{(float)(x + -0.5), 1, (float)(z + 0.5)},
-				},
-				.color = {{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0}},
-			});
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5), 1, (float)(z + -0.5)},
-					{(float)(x + 0.5), 1,  (float)(z + 0.5)},
-					{(float)(x + -0.5), 1,  (float)(z + 0.5)},
-				},
-				.color = {{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0}},
-			});
-		}
-	}
-	for(float x=-5; x<5; x++) {
-		for(float y=-2; y<4; y++) {
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5), (float)(y + 0.5), 9},
-					{(float)(x + 0.5), (float)(y - 0.5), 9},
-					{(float)(x - 0.5), (float)(y - 0.5), 9},
-				},
-				.color = {{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0}},
-			});
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5), (float)(y + 0.5), 9},
-					{(float)(x - 0.5), (float)(y + 0.5), 9},
-					{(float)(x - 0.5), (float)(y - 0.5), 9},
-				},
-				.color = {{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0}},
-			});
-
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5), (float)(y + 0.5), (float)(x + 0.5) + 7},
-					{(float)(x + 0.5), (float)(y - 0.5), (float)(x + 0.5) + 7},
-					{(float)(x - 0.5), (float)(y - 0.5), (float)(x - 0.5) + 7},
-				},
-				.color = {{0.0, 1.0, 0.0, 1.0},{0.0, 1.0, 0.0, 1.0},{0.0, 1.0, 0.0, 1.0}},
-			});
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5), (float)(y + 0.5), (float)(x + 0.5) + 7},
-					{(float)(x - 0.5), (float)(y + 0.5), (float)(x - 0.5) + 7},
-					{(float)(x - 0.5), (float)(y - 0.5), (float)(x - 0.5) + 7},
-				},
-				.color = {{0.0, 1.0, 0.0, 1.0},{0.0, 1.0, 0.0, 1.0},{0.0, 1.0, 0.0, 1.0}},
-			});
-	 	}
-	}
-	/*
-	scene.push_back(Plane{
-		.points = {
-			{(float)(10), (float)(10), 6},
-			{(float)(10), (float)(-10), 6},
-			{(float)(-10), (float)(-10), 6},
-		},
-		.color = Vec4f {1.0, 1.0, 0.0, 1.0},
-	});
-	scene.push_back(Plane{
-		.points = {
-			{(float)(10), (float)(10), 6},
-			{(float)(-10), (float)(10), 6},
-			{(float)(-10), (float)(-10), 6},
-		},
-		.color = Vec4f {1.0, 1.0, 0.0, 1.0},
-	});
-	scene.push_back(Plane{
-		.points = {
-			{(float)(10), 1, (float)(-10)},
-			{(float)(-10), 1, (float)(-10)},
-			{(float)(-10), 1, (float)(10)},
-		},
-		.color = 0xFF00FFFF,
-	});
-	scene.push_back(Plane{
-		.points = {
-			{(float)(10), 1, (float)(-10)},
-			{(float)(10), 1,  (float)(10)},
-			{(float)(-10), 1,  (float)(10)},
-		},
-		.color =0x0000FF88
-	});
-	*/
-	std::cout << "Scene triangle count: " << scene.size() << std::endl;
-}
 
 
 int main(int argc, char* argv[]) {
@@ -141,7 +48,8 @@ int main(int argc, char* argv[]) {
 
 
 	std::vector<Plane> scene;
-	build_scene(scene);
+	std::vector<SDL_Surface *> texture_pool;
+	build_scene(scene, texture_pool);
 
 	std::vector<Light> lights;
 	some_lights(lights);
@@ -190,6 +98,7 @@ int main(int argc, char* argv[]) {
 					running = false;
 					break;
 				case SDL_MOUSEMOTION:
+					rotate.y += + 0.05 * event.motion.xrel;
 					break;
 				case SDL_KEYDOWN:
 					if(event.key.keysym.scancode  == 5) {
@@ -198,8 +107,10 @@ int main(int argc, char* argv[]) {
 						running = false;
 					} else if(event.key.keysym.scancode  == 26 || event.key.keysym.scancode == 14) {
 						translate.z -= 0.2;
+						//translate.x += sin(rotate.y) * 0.2;
 					} else if(event.key.keysym.scancode  == 22 || event.key.keysym.scancode == 13) {
 						translate.z += 0.2;
+						//translate.x -= sin(rotate.y) * 0.2;
 					} else if(event.key.keysym.scancode  == 11 || event.key.keysym.scancode == 4) {
 						translate.x += 0.2;
 					} else if(event.key.keysym.scancode  == 15 || event.key.keysym.scancode == 7) {
@@ -221,7 +132,12 @@ int main(int argc, char* argv[]) {
 	}
 
 	scene.clear();
+	texture_pool.clear();
 	delete[] screen_buffer;
+	for(uint i=0; i<texture_pool.size(); i++) {
+		//SDL_DestroyTexture(texture_pool[i]);
+		SDL_DestroyWindowSurface(window);
+	}
 	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);

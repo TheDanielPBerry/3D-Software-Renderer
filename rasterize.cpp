@@ -33,6 +33,7 @@ void interpolate_lines(
 	//Extract out the formula for the z value based on y
 	//Interpolate the 3d x,y,z based on the y-2d & x-2d
 	//Use those interpolations to calculate distance to viewpoint based on all three interpolations
+	////Maybe interpolate on 3d x,y,z and do distance calculation per pixel
 	Vec2f left_coeff_z, right_coeff_z;
 	coeffs(ident(plane.buffer[left[START]], -2), ident(plane.buffer[left[END]], -2), left_coeff_z);
 	coeffs(ident(plane.buffer[right[START]], -2), ident(plane.buffer[right[END]], -2), right_coeff_z);
@@ -54,6 +55,25 @@ void interpolate_lines(
 	Vec2f left_coeff_alpha, right_coeff_alpha;
 	coeffs(Vec2f { plane.color[left[START]].w, plane.buffer[left[START]].y }, Vec2f { plane.color[left[END]].w, plane.buffer[left[END]].y }, left_coeff_alpha);
 	coeffs(Vec2f { plane.color[right[START]].w, plane.buffer[right[START]].y }, Vec2f { plane.color[right[END]].w, plane.buffer[right[END]].y }, right_coeff_alpha);
+
+
+	Vec2f left_coeff_texture_x, right_coeff_texture_x;
+	if(plane.texture != nullptr) {
+		coeffs(Vec2f { plane.texture_coords[left[START]].x * plane.texture->w, plane.buffer[left[START]].y }, 
+			Vec2f { plane.texture_coords[left[END]].x * plane.texture->w, plane.buffer[left[END]].y }, left_coeff_texture_x);
+
+		coeffs(Vec2f { plane.texture_coords[right[START]].x * plane.texture->w, plane.buffer[right[START]].y }, 
+		 Vec2f { plane.texture_coords[right[END]].x * plane.texture->w, plane.buffer[right[END]].y }, right_coeff_texture_x);
+	}
+
+	Vec2f left_coeff_texture_y, right_coeff_texture_y;
+	if(plane.texture != nullptr) {
+		coeffs(Vec2f { plane.texture_coords[left[START]].y * plane.texture->h, plane.buffer[left[START]].y }, 
+			Vec2f { plane.texture_coords[left[END]].y * plane.texture->h, plane.buffer[left[END]].y }, left_coeff_texture_y);
+
+		coeffs(Vec2f { plane.texture_coords[right[START]].y * plane.texture->h, plane.buffer[right[START]].y }, 
+			Vec2f { plane.texture_coords[right[END]].y * plane.texture->h, plane.buffer[right[END]].y }, right_coeff_texture_y);
+	}
 
 	y_bounds.x = std::min(y_bounds.x, dimensions.y);
 	y_bounds.y = std::max((float)0.0, y_bounds.y);
@@ -102,6 +122,20 @@ void interpolate_lines(
 		Vec2f alpha_coeff;
 		coeffs(Vec2f{alpha_right, x_right}, Vec2f{alpha_left, x_left}, alpha_coeff);
 
+		Vec2f texture_x_coeff;
+		if(plane.texture != nullptr) {
+			float texture_x_left = line(left_coeff_texture_x, y);
+			float texture_x_right = line(right_coeff_texture_x, y);
+			coeffs(Vec2f{texture_x_right, x_right}, Vec2f{texture_x_left, x_left}, texture_x_coeff);
+		}
+
+		Vec2f texture_y_coeff;
+		if(plane.texture != nullptr) {
+			float texture_y_left = line(left_coeff_texture_y, y);
+			float texture_y_right = line(right_coeff_texture_y, y);
+			coeffs(Vec2f{texture_y_right, x_right}, Vec2f{texture_y_left, x_left}, texture_y_coeff);
+		}
+
 		x_left = std::max((float)0.0, x_left);
 		x_left = std::min(x_left, dimensions.x);
 		x_right = std::max((float)0.0, x_right);
@@ -116,10 +150,51 @@ void interpolate_lines(
 				float blue = line(blue_coeff, x);
 				float alpha = line(alpha_coeff, x);
 
-				Uint32 pixel = ((uint)(std::min((red * luminosity),red) * 255) << 24);
-				pixel += ((uint)(std::min((green * luminosity), green) * 255) << 16);
-				pixel += ((uint)(std::min((blue * luminosity), blue) * 255) << 8);
-				pixel += alpha * 255;
+
+				Uint32 pixel;
+				if(plane.texture != nullptr) {
+					int texture_coord_x = line(texture_x_coeff, x);
+					texture_coord_x = std::max(texture_coord_x, 0);
+					texture_coord_x = std::min(texture_coord_x, plane.texture->w);
+
+					int texture_coord_y = line(texture_y_coeff, x);
+					texture_coord_y = std::max(texture_coord_y, 0);
+					texture_coord_y = std::min(texture_coord_y, plane.texture->h);
+
+					const u_char pixel_size = plane.texture->pitch / plane.texture->w;
+					red *= ((u_char *)plane.texture->pixels)[(plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size) + 0];
+					green *= ((u_char *)plane.texture->pixels)[(plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size) + 1];
+					blue *= ((u_char *)plane.texture->pixels)[(plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size) + 2];
+					alpha *= ((u_char *)plane.texture->pixels)[(plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size) + 3];
+
+					pixel = ((uint)(std::min((red * luminosity),red)) << 24);
+					pixel += ((uint)(std::min((green * luminosity), green)) << 16);
+					pixel += ((uint)(std::min((blue * luminosity), blue)) << 8);
+					pixel += alpha;
+					// alpha *= ((float)(texture_pixel % 256)) / 256.0;
+					// texture_pixel /= 256;
+					// blue *= ((float)(texture_pixel % 256)) / 256.0;
+					// texture_pixel /= 256;
+					// green *= ((float)(texture_pixel % 256)) / 256.0;
+					// texture_pixel /= 256;
+					// red *= ((float)(texture_pixel % 256)) / 256.0;
+
+					// alpha *= ((float)(texture_pixel & 0x000000FF)) / 256.0;
+					// blue *= ((float)(texture_pixel & 0x0000FF00)) / 256.0;
+					// green *= ((float)(texture_pixel & 0x00FF0000)) / 256.0;
+					// red *= ((float)(texture_pixel & 0xFF000000)) / 256.0;
+					// uint texture_blue = texture_pixel % 256;
+					// texture_pixel /= 256;
+					// uint texture_green = texture_pixel % 256;
+					// texture_pixel /= 256;
+					// uint texture_red = texture_pixel % 256;
+				} else {
+					pixel = ((uint)(std::min((red * luminosity),red) * 255) << 24);
+					pixel += ((uint)(std::min((green * luminosity), green) * 255) << 16);
+					pixel += ((uint)(std::min((blue * luminosity), blue) * 255) << 8);
+					pixel += alpha * 255;
+				}
+
 
 				buffer[yOffset + x] = pixel;
 				z_buffer[yOffset + x] = z;
@@ -128,89 +203,6 @@ void interpolate_lines(
 	}
 }
 
-void interpolate_lines(
-	Plane &plane,
-	const Vec2f &left,
-	const Vec2f &right,
-	Vec2f &y_bounds,
-	const Vec2f &z_bounds_left,
-	const Vec2f &z_bounds_right,
-	const Vec2f &dimensions,
-	Uint32 *buffer,
-	float *z_buffer
-)
-{
-	if(abs(left.x) < 0.01 || abs(right.x) < 0.01) {
-		//If either of the slopes are near horizontal, we don't need to draw it
-		return;
-	}
-
-	y_bounds.x = std::min(y_bounds.x, dimensions.y);
-	y_bounds.y = std::max((float)0.0, y_bounds.y);
-
-	//Set the left and right bounds to the second value on the function
-	//If the slope is infinite it will use this for the entire range
-	float xLeft = left.y, xRight = right.y;
-
-	//Used to calculate progress from top to bottom
-	float vertical_diff = y_bounds.y - y_bounds.x;
-	float left_slope = (z_bounds_left.y - z_bounds_left.x) / vertical_diff;
-	float right_slope = (z_bounds_right.y - z_bounds_right.x) / vertical_diff;
-	float left_intercept = z_bounds_left.x - (left_slope * y_bounds.x);
-	float right_intercept = z_bounds_right.x - (right_slope * y_bounds.x);
-
-	Vec2f middle = Vec2f {
-		dimensions.x / 2,
-		dimensions.y / 2,
-	};
-	
-	float red = plane.color[0].x;
-	float green = plane.color[0].y;
-	float blue = plane.color[0].z;
-	float alpha = plane.color[0].w;
-
-	for(uint y=y_bounds.x; y<y_bounds.y; y++) {
-		uint yOffset = y * dimensions.x;
-
-		if(left.x != INFINITY && left.x != -INFINITY) {
-			xLeft = ((y - left.y) / left.x);
-		}
-		if(std::isnan(xLeft)) {
-			return;
-		}
-		xLeft = std::max((float)0.0, xLeft);
-		xLeft = std::min(xLeft, dimensions.x);
-
-		if(right.x != INFINITY && right.x != -INFINITY) {
-			xRight = ((y - right.y) / right.x);
-		}
-		if(std::isnan(xRight)) {
-			return;
-		}
-		xRight = std::max((float)0.0, xRight);
-		xRight = std::min(xRight, dimensions.x);
-
-		float y_percentage = (y - y_bounds.x) / vertical_diff;
-		float z_left = (left_slope * y) + left_intercept;
-		float z_right = (right_slope * y) + right_intercept;
-		//float z = (z_left + z_right) / 2.0;
-		float z_slope = (z_right - z_left) / (xRight - xLeft);
-		float z_intercept = z_left - (z_slope * xLeft);
-
-		for(uint x=xLeft; x<xRight; x++) {
-			float z = (z_slope * x) + z_intercept;
-			float luminosity = 1.0;
-			if(z_buffer[yOffset + x] > z && z > 0.1) {
-				Uint32 pixel = ((uint)(std::min((red * luminosity),red) * 255) << 24);
-				pixel += ((uint)(std::min((green * luminosity), green) * 255) << 16);
-				pixel += ((uint)(std::min((blue * luminosity), blue) * 255) << 8);
-				pixel += alpha;
-				buffer[yOffset + x] = pixel;
-				z_buffer[yOffset + x] = z;
-			}
-		}
-	}
-}
 
 /**
 * The plan for this function is to take points that are already projected and mapped for a buffer and rasterize them.

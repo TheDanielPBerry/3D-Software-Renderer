@@ -56,6 +56,7 @@ typedef struct Plane {
 	Vec3f buffer[N_POINTS];
 	Vec4f color[N_POINTS];
 	Vec2f texture_coords[N_POINTS];
+	SDL_Surface *texture;
 } Plane;
 
 
@@ -111,37 +112,34 @@ float line(Vec2f &coeff, float x)
 	return (x - coeff.y) / coeff.x;
 }
 
-void check_infinity(Vec2f &coeffs, const float target)
+bool check_infinity(Vec2f &coeffs, const float target)
 {
 	//If slope is infinite / vertical, set y-intercept to use same var the whole time
 	if(coeffs.x == INFINITY || coeffs.x == -INFINITY) {
 		coeffs.y = target;
+		return true;
 	}
+	return false;
 }
 
-/*
-void coeffs(const Vec3f &a, const Vec3f &b, Vec2f &dest)
-{
-	//Slope is rise over run
-	dest.x = (a.y - b.y) / (a.x - b.x);
-	//Y-intercept is y - slope * x
-	dest.y = a.y - (dest.x * a.x);
-	check_infinity(dest, a.x);
-}
-*/
 
 void coeffs(const Vec2f &a, const Vec2f &b, Vec2f &dest)
 {
 	//Slope is rise over run
 	dest.x = (a.y - b.y) / (a.x - b.x);
-	//Y-intercept is y - slope * x
-	dest.y = a.y - (dest.x * a.x);
-	check_infinity(dest, a.x);
+	if(!check_infinity(dest, a.x)) {
+		//Y-intercept is y - slope * x
+		dest.y = a.y - (dest.x * a.x);
+	}
 }
 
 void transform(Plane &plane, const Vec3f &translate, const Vec3f &rotate)
 {
+	float cosine = cos(rotate.y), sine = sin(rotate.y);
 	for(u_char p=0; p<N_POINTS; p++) {
+		// plane.buffer[p] = Vec3f { plane.points[p].x, plane.points[p].y, plane.points[p].z };
+		// plane.buffer[p].x = (plane.buffer[p].x * cosine) - (plane.buffer[p].z * sine);
+		// plane.buffer[p].z = (plane.buffer[p].z * cosine) + (plane.buffer[p].x * sine);
 		plane.buffer[p] = plane.points[p] + translate;
 	}
 }
@@ -160,9 +158,10 @@ void project_and_scale(Plane &plane, const Vec2f &dimensions)
 		if(z < FRUSTUM_VIEWPOINT_DISTANCE) {
 			z = FRUSTUM_VIEWPOINT_DISTANCE;
 		}
+		float ratio = dimensions.y * dimensions.y / dimensions.x;
 
 		plane.buffer[p].x = ((plane.buffer[p].x
-			* (1 / (abs(z) + FRUSTUM_VIEWPOINT_DISTANCE))) + 0.5) * dimensions.x;
+			* (1 / (z + FRUSTUM_VIEWPOINT_DISTANCE))) + 0.5) * dimensions.x;
 		
 		plane.buffer[p].y = ((plane.buffer[p].y 
 			* (1 / (z + FRUSTUM_VIEWPOINT_DISTANCE))) + 0.5) * dimensions.y;
