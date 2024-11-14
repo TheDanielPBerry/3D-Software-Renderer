@@ -1,7 +1,6 @@
 #include <SDL2/SDL.h>
 #include <cmath>
 
-#include "Texture.h"
 
 typedef struct Vec2f {
 	float x;
@@ -60,7 +59,7 @@ typedef struct Plane {
 } Plane;
 
 
-#define FRUSTUM_VIEWPOINT_DISTANCE 0.0001
+#define FRUSTUM_VIEWPOINT_DISTANCE 0.001
 
 
 /**

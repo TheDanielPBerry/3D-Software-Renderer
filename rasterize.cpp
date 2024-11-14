@@ -38,6 +38,13 @@ void interpolate_lines(
 	coeffs(ident(plane.buffer[left[START]], -2), ident(plane.buffer[left[END]], -2), left_coeff_z);
 	coeffs(ident(plane.buffer[right[START]], -2), ident(plane.buffer[right[END]], -2), right_coeff_z);
 
+	
+	Vec2f left_coeff_perspective, right_coeff_perspective;
+	coeffs(Vec2f { 1 / plane.buffer[left[START]].z, plane.buffer[left[START]].y }, 
+		Vec2f { 1 / plane.buffer[left[END]].z, plane.buffer[left[END]].y }, left_coeff_perspective);
+	coeffs(Vec2f { 1 / plane.buffer[right[START]].z, plane.buffer[right[START]].y }, 
+		Vec2f { 1 / plane.buffer[right[END]].z, plane.buffer[right[END]].y }, right_coeff_perspective);
+
 
 	//Interpolate each corners color
 	Vec2f left_coeff_red, right_coeff_red;
@@ -58,21 +65,34 @@ void interpolate_lines(
 
 
 	Vec2f left_coeff_texture_x, right_coeff_texture_x;
-	if(plane.texture != nullptr) {
-		coeffs(Vec2f { plane.texture_coords[left[START]].x * plane.texture->w, plane.buffer[left[START]].y }, 
-			Vec2f { plane.texture_coords[left[END]].x * plane.texture->w, plane.buffer[left[END]].y }, left_coeff_texture_x);
-
-		coeffs(Vec2f { plane.texture_coords[right[START]].x * plane.texture->w, plane.buffer[right[START]].y }, 
-		 Vec2f { plane.texture_coords[right[END]].x * plane.texture->w, plane.buffer[right[END]].y }, right_coeff_texture_x);
-	}
-
 	Vec2f left_coeff_texture_y, right_coeff_texture_y;
+	Vec2f left_coeff_yz, right_coeff_yz;
 	if(plane.texture != nullptr) {
-		coeffs(Vec2f { plane.texture_coords[left[START]].y * plane.texture->h, plane.buffer[left[START]].y }, 
-			Vec2f { plane.texture_coords[left[END]].y * plane.texture->h, plane.buffer[left[END]].y }, left_coeff_texture_y);
+		coeffs(Vec2f { (plane.texture_coords[left[START]].x * plane.texture->w) / plane.buffer[left[START]].z, 
+			plane.buffer[left[START]].y }, 
+		Vec2f { (plane.texture_coords[left[END]].x * plane.texture->w) / plane.buffer[left[END]].z, 
+		 	plane.buffer[left[END]].y }, left_coeff_texture_x);
 
-		coeffs(Vec2f { plane.texture_coords[right[START]].y * plane.texture->h, plane.buffer[right[START]].y }, 
-			Vec2f { plane.texture_coords[right[END]].y * plane.texture->h, plane.buffer[right[END]].y }, right_coeff_texture_y);
+		coeffs(Vec2f { (plane.texture_coords[right[START]].x * plane.texture->w) / plane.buffer[right[START]].z, 
+			plane.buffer[right[START]].y }, 
+		 Vec2f { (plane.texture_coords[right[END]].x * plane.texture->w) / plane.buffer[right[END]].z, 
+			 plane.buffer[right[END]].y }, right_coeff_texture_x);
+
+		coeffs(Vec2f { (plane.texture_coords[left[START]].y * plane.texture->h) / plane.buffer[left[START]].z, 
+			plane.buffer[left[START]].y}, 
+		Vec2f { (plane.texture_coords[left[END]].y * plane.texture->h) / plane.buffer[left[END]].z, 
+			 plane.buffer[left[END]].y }, left_coeff_texture_y);
+
+		coeffs(Vec2f { (plane.texture_coords[right[START]].y * plane.texture->h) / plane.buffer[right[START]].z, 
+			plane.buffer[right[START]].y }, 
+		Vec2f { (plane.texture_coords[right[END]].y * plane.texture->h) / plane.buffer[right[END]].z, 
+		 	plane.buffer[right[END]].y}, right_coeff_texture_y);
+
+		coeffs(Vec2f { plane.buffer[left[START]].y / plane.points[left[START]].z, plane.buffer[left[START]].y }, 
+			Vec2f { plane.buffer[left[END]].y / plane.points[left[END]].z, plane.buffer[left[END]].y }, left_coeff_yz);
+
+		coeffs(Vec2f { plane.buffer[right[START]].y / plane.points[right[START]].z, plane.buffer[right[START]].y }, 
+			Vec2f { plane.buffer[right[END]].y / plane.points[right[END]].z, plane.buffer[right[END]].y }, right_coeff_yz);
 	}
 
 	y_bounds.x = std::min(y_bounds.x, dimensions.y);
@@ -101,7 +121,7 @@ void interpolate_lines(
 		coeffs(Vec2f{z_right, x_right}, Vec2f{z_left, x_left}, z_coeff);
 
 
-		//Color Interolations
+		//Color Interpolations
 		float red_left = line(left_coeff_red, y);
 		float red_right = line(right_coeff_red, y);
 		Vec2f red_coeff;
@@ -122,15 +142,19 @@ void interpolate_lines(
 		Vec2f alpha_coeff;
 		coeffs(Vec2f{alpha_right, x_right}, Vec2f{alpha_left, x_left}, alpha_coeff);
 
+
 		Vec2f texture_x_coeff;
+		Vec2f texture_y_coeff;
+		Vec2f perspective_coeff;
 		if(plane.texture != nullptr) {
+			float left_perspective = line(left_coeff_perspective, y);
+			float right_perspective = line(right_coeff_perspective, y);
+			coeffs(Vec2f{right_perspective, x_right}, Vec2f{left_perspective, x_left}, perspective_coeff);
+
 			float texture_x_left = line(left_coeff_texture_x, y);
 			float texture_x_right = line(right_coeff_texture_x, y);
 			coeffs(Vec2f{texture_x_right, x_right}, Vec2f{texture_x_left, x_left}, texture_x_coeff);
-		}
 
-		Vec2f texture_y_coeff;
-		if(plane.texture != nullptr) {
 			float texture_y_left = line(left_coeff_texture_y, y);
 			float texture_y_right = line(right_coeff_texture_y, y);
 			coeffs(Vec2f{texture_y_right, x_right}, Vec2f{texture_y_left, x_left}, texture_y_coeff);
@@ -153,11 +177,12 @@ void interpolate_lines(
 
 				Uint32 pixel;
 				if(plane.texture != nullptr) {
-					int texture_coord_x = line(texture_x_coeff, x);
+					float perspective = line(perspective_coeff, x);
+					int texture_coord_x = (line(texture_x_coeff, x) / (perspective));
 					texture_coord_x = std::max(texture_coord_x, 0);
-					texture_coord_x = std::min(texture_coord_x, plane.texture->w);
+					texture_coord_x %= plane.texture->w;
 
-					int texture_coord_y = line(texture_y_coeff, x);
+					int texture_coord_y = (line(texture_y_coeff, x) / (perspective));
 					texture_coord_y = std::max(texture_coord_y, 0);
 					texture_coord_y = std::min(texture_coord_y, plane.texture->h);
 
@@ -171,23 +196,6 @@ void interpolate_lines(
 					pixel += ((uint)(std::min((green * luminosity), green)) << 16);
 					pixel += ((uint)(std::min((blue * luminosity), blue)) << 8);
 					pixel += alpha;
-					// alpha *= ((float)(texture_pixel % 256)) / 256.0;
-					// texture_pixel /= 256;
-					// blue *= ((float)(texture_pixel % 256)) / 256.0;
-					// texture_pixel /= 256;
-					// green *= ((float)(texture_pixel % 256)) / 256.0;
-					// texture_pixel /= 256;
-					// red *= ((float)(texture_pixel % 256)) / 256.0;
-
-					// alpha *= ((float)(texture_pixel & 0x000000FF)) / 256.0;
-					// blue *= ((float)(texture_pixel & 0x0000FF00)) / 256.0;
-					// green *= ((float)(texture_pixel & 0x00FF0000)) / 256.0;
-					// red *= ((float)(texture_pixel & 0xFF000000)) / 256.0;
-					// uint texture_blue = texture_pixel % 256;
-					// texture_pixel /= 256;
-					// uint texture_green = texture_pixel % 256;
-					// texture_pixel /= 256;
-					// uint texture_red = texture_pixel % 256;
 				} else {
 					pixel = ((uint)(std::min((red * luminosity),red) * 255) << 24);
 					pixel += ((uint)(std::min((green * luminosity), green) * 255) << 16);

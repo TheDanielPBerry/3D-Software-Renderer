@@ -21,6 +21,28 @@ std::pair<SDL_Surface *, uint> load_texture(const char *filePath, std::vector<SD
 
 void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_pool)
 {
+	std::pair<SDL_Surface *, uint> brick = load_texture("assets/bricks.png", texture_pool);
+	float x = 0.0, z= 0.0, y  = 0.0;
+	scene.push_back(Plane{
+		.points = {
+			{(float)(x + 0.5 - 0), (float)(y + 0.5), (float)(x + 0.5) + 2},
+			{(float)(x + 0.5 - 0), (float)(y - 0.5), (float)(x + 0.5) + 2},
+			{(float)(x - 0.5 - 0), (float)(y - 0.5), (float)(x - 0.5) + 2},
+		},
+		.color = {{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0}},
+		.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 } },
+		.texture = brick.first,
+	});
+	scene.push_back(Plane{
+		.points = {
+			{(float)(x + 0.5 - 0), (float)(y + 0.5), (float)(x + 0.5) + 2},
+			{(float)(x - 0.5 - 0), (float)(y + 0.5), (float)(x - 0.5) + 2},
+			{(float)(x - 0.5 - 0), (float)(y - 0.5), (float)(x - 0.5) + 2},
+		},
+		.color = {{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0}},
+		.texture_coords = {{ 1, 1 }, { 0, 1 }, { 0 , 0 } },
+		.texture = brick.first,
+	});
 
 	std::pair<SDL_Surface *, uint> floor = load_texture("assets/floor.png", texture_pool);
 	for(float x=-5; x<5; x+=1) {
@@ -34,7 +56,7 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 				},
 				.color = {{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0}},
 				.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 }},
-				.texture = floor.first,
+				.texture = brick.first,
 			});
 			scene.push_back(Plane{
 				.points = {
@@ -44,13 +66,12 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 				},
 				.color = {{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0}},
 				.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 }},
-				.texture = floor.first,
+				.texture = brick.first,
 			});
 		}
 	}
 
 
-	std::pair<SDL_Surface *, uint> brick = load_texture("assets/bricks.png", texture_pool);
 	for(float x=-2; x<2; x++) {
 		for(float y=-2; y<2; y++) {
 			scene.push_back(Plane{
