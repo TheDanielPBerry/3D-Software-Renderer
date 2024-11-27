@@ -84,6 +84,7 @@ int main(int argc, char* argv[]) {
 			frameCount ++;
 		} else {
 			std::cout << frameCount << " fps" << std::endl;
+			std::cout << "Y: " << rotate.y << std::endl;
 			timestamp = std::time(nullptr);
 			frameCount = 0;
 		}
@@ -98,7 +99,8 @@ int main(int argc, char* argv[]) {
 					running = false;
 					break;
 				case SDL_MOUSEMOTION:
-					rotate.y += + 0.05 * event.motion.xrel;
+					rotate.y += 0.05 * event.motion.xrel;
+					//std::cout << rotate.y << std::endl;
 					break;
 				case SDL_KEYDOWN:
 					if(event.key.keysym.scancode  == 5) {
@@ -106,23 +108,25 @@ int main(int argc, char* argv[]) {
 					} else if(event.key.keysym.scancode  == 41) {
 						running = false;
 					} else if(event.key.keysym.scancode  == 26 || event.key.keysym.scancode == 14) {
-						translate.z -= 0.2;
-						//translate.x += sin(rotate.y) * 0.2;
+						translate.z -= cos(rotate.y) * 0.2;
+						translate.x -= sin(rotate.y) * 0.2;
 					} else if(event.key.keysym.scancode  == 22 || event.key.keysym.scancode == 13) {
-						translate.z += 0.2;
-						//translate.x -= sin(rotate.y) * 0.2;
+						translate.z += cos(rotate.y) * 0.2;
+						translate.x += sin(rotate.y) * 0.2;
 					} else if(event.key.keysym.scancode  == 11 || event.key.keysym.scancode == 4) {
-						translate.x += 0.2;
+						translate.x += cos(rotate.y) * 0.2;
+						translate.z -= sin(rotate.y) * 0.2;
 					} else if(event.key.keysym.scancode  == 15 || event.key.keysym.scancode == 7) {
-						translate.x -= 0.2;
+						translate.x -= cos(rotate.y) * 0.2;
+						translate.z += sin(rotate.y) * 0.2;
 					} else if(event.key.keysym.scancode  == 44) {
 						translate.y += 0.2;
 					} else if(event.key.keysym.scancode  == 225) {
 						translate.y -= 0.2;
 					} else if(event.key.keysym.scancode  == 79) {
-						rotate.y -= 0.2;
-					} else if(event.key.keysym.scancode  == 80) {
 						rotate.y += 0.2;
+					} else if(event.key.keysym.scancode  == 80) {
+						rotate.y -= 0.2;
 					} else {
 						std::cout << event.key.keysym.scancode << std::endl;
 					}
@@ -136,7 +140,7 @@ int main(int argc, char* argv[]) {
 	delete[] screen_buffer;
 	for(uint i=0; i<texture_pool.size(); i++) {
 		//SDL_DestroyTexture(texture_pool[i]);
-		SDL_DestroyWindowSurface(window);
+		//SDL_DestroyWindowSurface(window);
 	}
 	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);

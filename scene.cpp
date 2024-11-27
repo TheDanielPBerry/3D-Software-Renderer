@@ -56,7 +56,7 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 				},
 				.color = {{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0}},
 				.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 }},
-				.texture = brick.first,
+				.texture = floor.first,
 			});
 			scene.push_back(Plane{
 				.points = {
@@ -66,7 +66,7 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 				},
 				.color = {{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0}},
 				.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 }},
-				.texture = brick.first,
+				.texture = floor.first,
 			});
 		}
 	}

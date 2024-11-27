@@ -136,10 +136,9 @@ void transform(Plane &plane, const Vec3f &translate, const Vec3f &rotate)
 {
 	float cosine = cos(rotate.y), sine = sin(rotate.y);
 	for(u_char p=0; p<N_POINTS; p++) {
-		// plane.buffer[p] = Vec3f { plane.points[p].x, plane.points[p].y, plane.points[p].z };
-		// plane.buffer[p].x = (plane.buffer[p].x * cosine) - (plane.buffer[p].z * sine);
-		// plane.buffer[p].z = (plane.buffer[p].z * cosine) + (plane.buffer[p].x * sine);
-		plane.buffer[p] = plane.points[p] + translate;
+		plane.buffer[p].x = ((plane.points[p].x * cosine) - (plane.points[p].z * sine)) + (translate.x * cosine - translate.z * sine);
+		plane.buffer[p].z = ((plane.points[p].z * cosine) + (plane.points[p].x * sine)) + (translate.z * cosine + translate.x * sine);
+		plane.buffer[p].y = plane.points[p].y + translate.y;
 	}
 }
 
@@ -151,13 +150,12 @@ void transform(Plane &plane, const Vec3f &translate, const Vec3f &rotate)
 */
 void project_and_scale(Plane &plane, const Vec2f &dimensions)
 {
-	float ratio = (dimensions.x * dimensions.x / dimensions.y);
+	const float ratio = (dimensions.x / dimensions.y) * 500;
 	for(uint p=0; p<N_POINTS; p++) {
 		float z = plane.buffer[p].z;
 		if(z < FRUSTUM_VIEWPOINT_DISTANCE) {
 			z = FRUSTUM_VIEWPOINT_DISTANCE;
 		}
-		float ratio = dimensions.y * dimensions.y / dimensions.x;
 
 		plane.buffer[p].x = ((plane.buffer[p].x
 			* (1 / (z + FRUSTUM_VIEWPOINT_DISTANCE))) + 0.5) * dimensions.x;
