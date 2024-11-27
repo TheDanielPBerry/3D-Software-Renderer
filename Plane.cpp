@@ -134,11 +134,18 @@ void coeffs(const Vec2f &a, const Vec2f &b, Vec2f &dest)
 
 void transform(Plane &plane, const Vec3f &translate, const Vec3f &rotate)
 {
-	float cosine = cos(rotate.y), sine = sin(rotate.y);
+	Vec3f cosine = Vec3f { cos(rotate.x), cos(rotate.y), 0};
+	Vec3f sine = Vec3f { sin(rotate.x), sin(rotate.y), 0 };
 	for(u_char p=0; p<N_POINTS; p++) {
-		plane.buffer[p].x = ((plane.points[p].x * cosine) - (plane.points[p].z * sine)) + (translate.x * cosine - translate.z * sine);
-		plane.buffer[p].z = ((plane.points[p].z * cosine) + (plane.points[p].x * sine)) + (translate.z * cosine + translate.x * sine);
-		plane.buffer[p].y = plane.points[p].y + translate.y;
+		plane.buffer[p] = plane.points[p] + translate;
+		float x = (plane.buffer[p].x * cosine.y) - (plane.buffer[p].z * sine.y);
+		float z = (plane.buffer[p].z * cosine.y) + (plane.buffer[p].x * sine.y);
+		
+		float y = (plane.buffer[p].y * cosine.x) - (z * sine.x);
+		z = (z * cosine.x) + (plane.buffer[p].y * sine.x);
+		plane.buffer[p].x = x;
+		plane.buffer[p].y = y;
+		plane.buffer[p].z = z;
 	}
 }
 

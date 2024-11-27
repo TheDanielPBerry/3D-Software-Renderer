@@ -84,6 +84,7 @@ int main(int argc, char* argv[]) {
 			frameCount ++;
 		} else {
 			std::cout << frameCount << " fps" << std::endl;
+			std::cout << "X: " << rotate.x << std::endl;
 			std::cout << "Y: " << rotate.y << std::endl;
 			timestamp = std::time(nullptr);
 			frameCount = 0;
@@ -100,7 +101,12 @@ int main(int argc, char* argv[]) {
 					break;
 				case SDL_MOUSEMOTION:
 					rotate.y += 0.05 * event.motion.xrel;
-					//std::cout << rotate.y << std::endl;
+					#define PI_OVER_TWO 1.4
+					if(event.motion.yrel > 0 && rotate.x < PI_OVER_TWO) {
+						rotate.x += 0.05 * event.motion.yrel;
+					} else if(event.motion.yrel < 0 && rotate.x > -PI_OVER_TWO) {
+						rotate.x += 0.05 * event.motion.yrel;
+					}
 					break;
 				case SDL_KEYDOWN:
 					if(event.key.keysym.scancode  == 5) {
