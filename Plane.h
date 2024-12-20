@@ -35,6 +35,11 @@ typedef struct Vec4f {
 } Vec4f;
 
 
+typedef struct Entity {
+	Vec3f pos;
+	Vec3f vel;
+} Entity;
+
 #define N_POINTS 3
 
 typedef struct Plane {
@@ -43,6 +48,8 @@ typedef struct Plane {
 	Vec4f color[N_POINTS];
 	Vec2f texture_coords[N_POINTS];
 	SDL_Surface *texture;
+	char orientation = 0;
+	Entity *entity;
 } Plane;
 
 
