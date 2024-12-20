@@ -21,7 +21,7 @@ obj/%.o: %.cpp
 	$(cc) -c $< -o $@ $(flags)
 
 	
-build_floor:
-	$(cc) -o floor main.cpp render.cpp camera.cpp $(flags)
+clean:
+	rm obj/*
 
 

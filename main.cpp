@@ -83,9 +83,9 @@ int main(int argc, char* argv[]) {
 		if(std::time(nullptr) == timestamp) {
 			frameCount ++;
 		} else {
-			std::cout << frameCount << " fps" << std::endl;
-			std::cout << "X: " << rotate.x << std::endl;
-			std::cout << "Y: " << rotate.y << std::endl;
+			//std::cout << frameCount << " fps" << std::endl;
+			//std::cout << "X: " << rotate.x << std::endl;
+			//std::cout << "Y: " << rotate.y << std::endl;
 			timestamp = std::time(nullptr);
 			frameCount = 0;
 		}

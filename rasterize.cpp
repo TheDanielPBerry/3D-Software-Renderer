@@ -7,8 +7,6 @@
 
 
 
-
-
 void interpolate_lines(
 	Plane &plane,
 	const u_char left[2],
@@ -259,6 +257,7 @@ void rasterize(Plane &plane, Uint32 *buffer, const Vec2f &dimensions, float *z_b
 			* (plane.buffer[middle].y - plane.buffer[top].y))
 			- ((plane.buffer[bottom].y - plane.buffer[top].y)
 			* (plane.buffer[middle].x - plane.buffer[top].x))) > 0;
+
 	
 	Vec2f y_bounds = Vec2f {
 		std::max(plane.buffer[top].y, (float)0.0),
