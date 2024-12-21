@@ -25,23 +25,23 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 	float x = 0.0, z= 0.0, y  = 0.0;
 	scene.push_back(Plane{
 		.points = {
-			{(float)(x + 0.5 - 0), (float)(y + 0.5), (float)(x + 0.5) + 2},
-			{(float)(x + 0.5 - 0), (float)(y - 0.5), (float)(x + 0.5) + 2},
-			{(float)(x - 0.5 - 0), (float)(y - 0.5), (float)(x - 0.5) + 2},
+			{(float)(x + 0.5 - 0), (float)(y + 0.5),  2},
+			{(float)(x - 0.5 - 0), (float)(y + 0.5),  2},
+			{(float)(x - 0.5 - 0), (float)(y - 0.5),  2},
 		},
 		.color = {{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0}},
-		.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 } },
+		.texture_coords = {{ 1, 1 }, { 0, 1 }, { 0 , 0 } },
 		.texture = brick.first,
 		.orientation = 1,
 	});
 	scene.push_back(Plane{
 		.points = {
 			{(float)(x + 0.5 - 0), (float)(y + 0.5), (float)(x + 0.5) + 2},
-			{(float)(x - 0.5 - 0), (float)(y + 0.5), (float)(x - 0.5) + 2},
+			{(float)(x + 0.5 - 0), (float)(y - 0.5), (float)(x + 0.5) + 2},
 			{(float)(x - 0.5 - 0), (float)(y - 0.5), (float)(x - 0.5) + 2},
 		},
 		.color = {{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0}},
-		.texture_coords = {{ 1, 1 }, { 0, 1 }, { 0 , 0 } },
+		.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 } },
 		.texture = brick.first,
 		.orientation = 1,
 	});
