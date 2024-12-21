@@ -64,7 +64,6 @@ void interpolate_lines(
 
 	Vec2f left_coeff_texture_x, right_coeff_texture_x;
 	Vec2f left_coeff_texture_y, right_coeff_texture_y;
-	Vec2f left_coeff_yz, right_coeff_yz;
 	if(plane.texture != nullptr) {
 		coeffs(Vec2f { (plane.texture_coords[left[START]].x * plane.texture->w) / plane.buffer[left[START]].z, 
 			plane.buffer[left[START]].y }, 
@@ -86,11 +85,6 @@ void interpolate_lines(
 		Vec2f { (plane.texture_coords[right[END]].y * plane.texture->h) / plane.buffer[right[END]].z, 
 		 	plane.buffer[right[END]].y}, right_coeff_texture_y);
 
-		coeffs(Vec2f { plane.buffer[left[START]].y / plane.points[left[START]].z, plane.buffer[left[START]].y }, 
-			Vec2f { plane.buffer[left[END]].y / plane.points[left[END]].z, plane.buffer[left[END]].y }, left_coeff_yz);
-
-		coeffs(Vec2f { plane.buffer[right[START]].y / plane.points[right[START]].z, plane.buffer[right[START]].y }, 
-			Vec2f { plane.buffer[right[END]].y / plane.points[right[END]].z, plane.buffer[right[END]].y }, right_coeff_yz);
 	}
 
 	y_bounds.x = std::min(y_bounds.x, dimensions.y);

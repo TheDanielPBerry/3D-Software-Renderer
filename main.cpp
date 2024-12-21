@@ -7,6 +7,7 @@
 #include <vector>
 #include <chrono>
 
+#include "model.h"
 #include "scene.h"
 #include "Light.h"
 #include "rasterize.h"
@@ -18,9 +19,12 @@ int main(int argc, char* argv[]) {
 		std::cerr << "SDL initialization failed: " << SDL_GetError() << std::endl;
 		return 1;
 	}
+	
+	SDL_DisplayMode DM;
+	SDL_GetCurrentDisplayMode(0, &DM);
+	SDL_Rect screen_rect = SDL_Rect{0, 0, int(DM.w*0.8), int(DM.h*0.8)};
 
-	SDL_Rect screen_rect = SDL_Rect{0, 0, 1024, 800};
-	Vec2f dimensions = Vec2f{ (float)floor(screen_rect.w/4), (float)floor(screen_rect.h/4) };
+	Vec2f dimensions = Vec2f{ (float)floor(screen_rect.w/2), (float)floor(screen_rect.h/3) };
 
 	SDL_Window* window = SDL_CreateWindow("Pixel Buffer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_rect.w, screen_rect.h, SDL_WINDOW_SHOWN);
 	if (!window) {
@@ -49,6 +53,7 @@ int main(int argc, char* argv[]) {
 
 	std::vector<Plane> scene;
 	std::vector<SDL_Surface *> texture_pool;
+	load_obj_model("assets/models/shotgun.obj", scene, nullptr, texture_pool);
 	build_scene(scene, texture_pool);
 
 	std::vector<Light> lights;
@@ -83,7 +88,7 @@ int main(int argc, char* argv[]) {
 		if(std::time(nullptr) == timestamp) {
 			frameCount ++;
 		} else {
-			//std::cout << frameCount << " fps" << std::endl;
+			std::cout << frameCount <<" fps" << std::endl;
 			//std::cout << "X: " << rotate.x << std::endl;
 			//std::cout << "Y: " << rotate.y << std::endl;
 			timestamp = std::time(nullptr);
