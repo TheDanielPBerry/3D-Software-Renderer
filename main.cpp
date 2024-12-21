@@ -22,9 +22,9 @@ int main(int argc, char* argv[]) {
 	
 	SDL_DisplayMode DM;
 	SDL_GetCurrentDisplayMode(0, &DM);
-	SDL_Rect screen_rect = SDL_Rect{0, 0, int(DM.w*0.8), int(DM.h*0.8)};
+	SDL_Rect screen_rect = SDL_Rect{0, 0, int(DM.w*0.9), int(DM.h*0.8)};
 
-	Vec2f dimensions = Vec2f{ (float)floor(screen_rect.w/2), (float)floor(screen_rect.h/3) };
+	Vec2f dimensions = Vec2f{ (float)floor(screen_rect.w/2.5), (float)floor(screen_rect.h/2.5) };
 
 	SDL_Window* window = SDL_CreateWindow("Pixel Buffer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_rect.w, screen_rect.h, SDL_WINDOW_SHOWN);
 	if (!window) {
@@ -53,7 +53,6 @@ int main(int argc, char* argv[]) {
 
 	std::vector<Plane> scene;
 	std::vector<SDL_Surface *> texture_pool;
-	load_obj_model("assets/models/shotgun.obj", scene, nullptr, texture_pool);
 	build_scene(scene, texture_pool);
 
 	std::vector<Light> lights;
@@ -78,6 +77,7 @@ int main(int argc, char* argv[]) {
 	bool running = true;
 
 	uint frameCount = 0;
+	float speed = 0.2;
 	auto timestamp = std::time(nullptr);
 	while (running) {
 		for (int i = 0; i < dimensions.x * dimensions.y; ++i) {
@@ -104,6 +104,9 @@ int main(int argc, char* argv[]) {
 				case SDL_QUIT:
 					running = false;
 					break;
+				case SDL_MOUSEWHEEL:
+					speed *= event.wheel.direction > 0 ? 2 : 0.5;
+					break;
 				case SDL_MOUSEMOTION:
 					rotate.y += 0.05 * event.motion.xrel;
 					#define PI_OVER_TWO 1.4
@@ -119,25 +122,25 @@ int main(int argc, char* argv[]) {
 					} else if(event.key.keysym.scancode  == 41) {
 						running = false;
 					} else if(event.key.keysym.scancode  == 26 || event.key.keysym.scancode == 14) {
-						translate.z -= cos(rotate.y) * 0.2;
-						translate.x -= sin(rotate.y) * 0.2;
+						translate.z -= cos(rotate.y) * speed;
+						translate.x -= sin(rotate.y) * speed;
 					} else if(event.key.keysym.scancode  == 22 || event.key.keysym.scancode == 13) {
-						translate.z += cos(rotate.y) * 0.2;
-						translate.x += sin(rotate.y) * 0.2;
+						translate.z += cos(rotate.y) * speed;
+						translate.x += sin(rotate.y) * speed;
 					} else if(event.key.keysym.scancode  == 11 || event.key.keysym.scancode == 4) {
-						translate.x += cos(rotate.y) * 0.2;
-						translate.z -= sin(rotate.y) * 0.2;
+						translate.x += cos(rotate.y) * speed;
+						translate.z -= sin(rotate.y) * speed;
 					} else if(event.key.keysym.scancode  == 15 || event.key.keysym.scancode == 7) {
-						translate.x -= cos(rotate.y) * 0.2;
-						translate.z += sin(rotate.y) * 0.2;
+						translate.x -= cos(rotate.y) * speed;
+						translate.z += sin(rotate.y) * speed;
 					} else if(event.key.keysym.scancode  == 44) {
-						translate.y += 0.2;
+						translate.y += speed;
 					} else if(event.key.keysym.scancode  == 225) {
-						translate.y -= 0.2;
+						translate.y -= speed;
 					} else if(event.key.keysym.scancode  == 79) {
-						rotate.y += 0.2;
+						rotate.y += speed;
 					} else if(event.key.keysym.scancode  == 80) {
-						rotate.y -= 0.2;
+						rotate.y -= speed;
 					} else {
 						std::cout << event.key.keysym.scancode << std::endl;
 					}

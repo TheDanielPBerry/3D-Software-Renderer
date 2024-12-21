@@ -7,14 +7,15 @@
 
 
 
-void interpolate_lines(
+Vec2f interpolate_lines(
 	Plane &plane,
 	const u_char left[2],
 	const u_char right[2],
 	Vec2f &y_bounds,
 	const Vec2f &dimensions,
 	Uint32 *buffer,
-	float *z_buffer
+	float *z_buffer,
+	Vec2f starting_x
 )
 {
 	#define START 0
@@ -23,9 +24,9 @@ void interpolate_lines(
 	Vec2f left_coeff_x, right_coeff_x;
 	coeffs(ident(plane.buffer[left[START]], 1), ident(plane.buffer[left[END]], 1), left_coeff_x);
 	coeffs(ident(plane.buffer[right[START]], 1), ident(plane.buffer[right[END]], 1), right_coeff_x);
-	if(abs(left_coeff_x.x) < 0.01 || abs(right_coeff_x.x) < 0.01) {
+	if((y_bounds.y - y_bounds.x) < 1) {
 		//If either of the slopes are near horizontal, we don't need to draw it
-		return;
+		return Vec2f{-1, -1};
 	}
 
 	//Extract out the formula for the z value based on y
@@ -94,17 +95,27 @@ void interpolate_lines(
 	//If the slope is infinite it will use this for the entire range
 	float x_left = left_coeff_x.y, x_right = right_coeff_x.y;
 
-	for(uint y=y_bounds.x; y<y_bounds.y; y++) {
+	uint initial_y = y_bounds.x;
+
+	for(uint y=initial_y; y<y_bounds.y; y++) {
 		uint yOffset = y * dimensions.x;
 
-		x_left = line(left_coeff_x, y);
+		if(y == initial_y && starting_x.x != -1) {
+			x_left = starting_x.x;
+		} else{
+			x_left = line(left_coeff_x, y);
+		}
 		if(std::isnan(x_left)) {
-			return;
+			return Vec2f{-1, -1};
 		}
 
-		x_right = line(right_coeff_x, y);
+		if(y == initial_y && starting_x.y != -1) {
+			x_right = starting_x.y;
+		} else{
+			x_right = line(right_coeff_x, y);
+		}
 		if(std::isnan(x_right)) {
-			return;
+			return Vec2f{-1, -1};
 		}
 
 		float z_left = line(left_coeff_z, y);
@@ -201,6 +212,7 @@ void interpolate_lines(
 			}
 		}
 	}
+	return Vec2f{ x_left, x_right };
 }
 
 
@@ -270,7 +282,7 @@ void rasterize(Plane &plane, Uint32 *buffer, const Vec2f &dimensions, float *z_b
 		right[0] = top;
 		right[1] = middle;
 	}
-	interpolate_lines(plane, left, right, y_bounds, dimensions, buffer, z_buffer);
+	Vec2f x_end = interpolate_lines(plane, left, right, y_bounds, dimensions, buffer, z_buffer, Vec2f{ -1, -1 });
 
 	y_bounds = Vec2f {
 		std::max(plane.buffer[middle].y, (float)0.0),
@@ -284,7 +296,7 @@ void rasterize(Plane &plane, Uint32 *buffer, const Vec2f &dimensions, float *z_b
 		right[0] = middle;
 		right[1] = bottom;
 	}
-	interpolate_lines(plane, left, right, y_bounds, dimensions, buffer, z_buffer);
+	interpolate_lines(plane, left, right, y_bounds, dimensions, buffer, z_buffer, x_end);
 
 }
 

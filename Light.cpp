@@ -17,7 +17,7 @@ void light_scene(std::vector<Plane> &scene, const std::vector<Light> lights)
 			//Vec3f lumos = Vec3f { AMBIENT_LIGHT, AMBIENT_LIGHT, AMBIENT_LIGHT };
 			float lumos = AMBIENT_LIGHT;
 			for(const Light &light : lights) {
-				lumos += std::max((light.luminosity / distance_squared(scene[i].points[p], light.pos)), (float)0);
+				lumos += std::max((light.luminosity / distance_cubed(scene[i].points[p], light.pos)), (float)0);
 	 			// lumos.x += intensity * light.color.x;
 	 			// lumos.y += intensity * light.color.y;
 	 			// lumos.z += intensity * light.color.z;
@@ -38,16 +38,16 @@ void some_lights(std::vector<Light> &lights)
 			.pos = Vec3f {
 				0, -8, 5
 			},
-			.luminosity = 8,
+			.luminosity = 70,
 		}
 	);
 
 	lights.push_back(
 		Light {
 			.pos = Vec3f {
-				-6, -8, 5
+				-6, -8, -20
 			},
-			.luminosity = 8,
+			.luminosity = 20,
 		}
 	);
 }

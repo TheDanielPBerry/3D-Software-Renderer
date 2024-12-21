@@ -4,9 +4,31 @@
 #include <string>
 #include <tuple>
 #include <cmath>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 #include "Plane.h"
-#include "scene.h"
+
+typedef struct Model {
+	std::vector<Vec3f> vertices;
+	std::vector<Vec3f> normals;
+	std::vector<Vec2f> texture_coords;
+	std::vector<std::vector<std::vector<int>>> planes;
+	uint texture;
+} Model;
+
+
+/**
+* @return identifier to texture
+*/
+std::pair<SDL_Surface *, uint> load_texture(const char *filePath, std::vector<SDL_Surface *> &texture_pool)
+{
+	SDL_Surface *texture = IMG_Load(filePath);
+	SDL_LockSurface(texture);
+	texture_pool.push_back(texture);
+	return std::make_pair(texture, texture_pool.size()-1);
+}
+
 
 std::pair<std::string, int> next_word(std::string line, char delimiter, uint offset)
 {
@@ -19,18 +41,20 @@ std::pair<std::string, int> next_word(std::string line, uint offset)
 	return next_word(line, ' ', offset);
 }
 
-void load_obj_model(std::string filePath, std::vector<Plane> &scene, Entity *entity, std::vector<SDL_Surface *> &texture_pool)
+int load_obj_model(
+	std::string filePath, 
+	std::vector<Plane> &scene, 
+	std::vector<SDL_Surface *> &texture_pool, 
+	std::vector<Model> &models
+)
 {
 	std::ifstream inputFile(filePath);
 	if(!inputFile.is_open()) {
 		std::cerr << "Cannot open: " << filePath << std::endl;
-		return;
+		return -1;
 	}
 
-	std::vector<Vec3f> vertices;
-	std::vector<Vec3f> normals;
-	std::vector<Vec2f> texture_coords;
-	std::vector<std::vector<std::vector<int>>> planes;
+	Model model;
 
 	std::string line;
 	while(std::getline(inputFile, line)) {
@@ -46,11 +70,11 @@ void load_obj_model(std::string filePath, std::vector<Plane> &scene, Entity *ent
 			while(true) {
 				float coord = std::stof(coordStr);
 				if(count == 0) {
-					v.x = -coord * scale;
+					v.x = -coord;
 				} else if(count == 1) {
-					v.y = -coord * scale;
+					v.y = -coord;
 				} else if(count == 2) {
-					v.z = coord * scale;
+					v.z = coord;
 				}
 				if(space < 0) {
 					break;
@@ -58,7 +82,7 @@ void load_obj_model(std::string filePath, std::vector<Plane> &scene, Entity *ent
 				tie(coordStr, space) = next_word(line, space+1);
 				count++;
 			}
-			vertices.push_back(v);
+			model.vertices.push_back(v);
 
 		} else if(firstWord == "vn") {
 			Vec3f vn;
@@ -80,7 +104,7 @@ void load_obj_model(std::string filePath, std::vector<Plane> &scene, Entity *ent
 				tie(coordStr, space) = next_word(line, space+1);
 				count++;
 			}
-			normals.push_back(vn);
+			model.normals.push_back(vn);
 		} else if(firstWord == "vt") {
 			Vec2f vt;
 			std::string coordStr;
@@ -99,7 +123,7 @@ void load_obj_model(std::string filePath, std::vector<Plane> &scene, Entity *ent
 				tie(coordStr, space) = next_word(line, space+1);
 				count++;
 			}
-			texture_coords.push_back(vt);
+			model.texture_coords.push_back(vt);
 
 		} else if(firstWord == "f") {
 			std::vector<int> verts;
@@ -136,45 +160,64 @@ void load_obj_model(std::string filePath, std::vector<Plane> &scene, Entity *ent
 			face.push_back(verts);
 			face.push_back(text);
 			face.push_back(norms);
-			std::cout << verts.size() << " " << norms.size() << " " << " " << text.size() << std::endl;
-			std::cout << face.size() << std::endl;
 
-			planes.push_back(face);
+			model.planes.push_back(face);
 		}
 	}
 
 
-	std::pair<SDL_Surface *, uint> shotgun = load_texture("assets/img/gun_metal.png", texture_pool);
-	for(int i=0; i<planes.size(); i++) {
-		scene.push_back(Plane{
+	std::pair<SDL_Surface *, uint> material = load_texture("assets/img/gun_metal.png", texture_pool);
+	model.texture = material.second;
+
+	models.push_back(model);
+	return models.size()-1;
+}
+
+void add_model_to_scene(Model &model, std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_pool, Vec3f pos, Vec3f rotation, Vec3f scale)
+{
+	for(int i=0; i<model.planes.size(); i++) {
+		Plane plane = Plane{
 			.points = {
-				vertices[planes[i][0][0]],
-				vertices[planes[i][0][1]],
-				vertices[planes[i][0][2]],
+				model.vertices[model.planes[i][0][0]],
+				model.vertices[model.planes[i][0][1]],
+				model.vertices[model.planes[i][0][2]],
 			},
 			.color = {{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0}},
 			.texture_coords = {
-				texture_coords[planes[i][1][0]],
-				texture_coords[planes[i][1][1]],
-				texture_coords[planes[i][1][2]],
+				model.texture_coords[model.planes[i][1][0]],
+				model.texture_coords[model.planes[i][1][1]],
+				model.texture_coords[model.planes[i][1][2]],
 			},
-			.texture = shotgun.first,
+			.texture = texture_pool[model.texture],
 			.orientation = 1,
-		});
+		};
+
+		Vec3f cosine = Vec3f{cos(rotation.x), cos(rotation.y), cos(rotation.z)};
+		Vec3f sine = Vec3f{sin(rotation.x), sin(rotation.y), sin(rotation.z)};
+		for(uint p=0; p<N_POINTS; p++) {
+			//Scale everything
+			plane.points[p].x = plane.points[p].x * scale.x;
+			plane.points[p].y = plane.points[p].y * scale.y;
+			plane.points[p].z = plane.points[p].z * scale.z;
+
+
+			//Rotate around the y-axis first
+			float x, y, z;
+			x = (plane.points[p].x * cosine.y) - (plane.points[p].z * sine.y);
+			z = (plane.points[p].z * cosine.y) + (plane.points[p].x * sine.y);
+
+			//Then the x-axis
+			y = (plane.points[p].y * cosine.x) - (z * sine.x);
+			z = (z * cosine.x) + (plane.points[p].y * sine.x);
+
+			//Lastly the z-axis
+			y = (y * cosine.z) - (x * sine.z);
+			x = (x * cosine.z) + (y * sine.z);
+
+			plane.points[p] = Vec3f{x, y, z} + pos;
+		}
+
+		scene.push_back(plane);
 	}
-/*
-	std::pair<SDL_Surface *, uint> brick = load_texture("assets/bricks.png", texture_pool);
-	float x = 0.0, z= 0.0, y  = 0.0;
-	scene.push_back(plane{
-		.points = {
-			{(float)(x + 0.5 - 0), (float)(y + 0.5), (float)(x + 0.5) + 2},
-			{(float)(x + 0.5 - 0), (float)(y - 0.5), (float)(x + 0.5) + 2},
-			{(float)(x - 0.5 - 0), (float)(y - 0.5), (float)(x - 0.5) + 2},
-		},
-		.color = {{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0}},
-		.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 } },
-		.texture = brick.first,
-		.orientation = 1,
-	});
-	*/
+
 }

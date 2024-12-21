@@ -63,6 +63,7 @@ void check_infinity(Vec2f &coeffs, const float target);
 void coeffs(const Vec2f &a, const Vec2f &b, Vec2f &dest);
 
 float distance_squared(const Vec3f &a, const Vec3f &b);
+float distance_cubed(const Vec3f &a, const Vec3f &b);
 
 void transform(Plane &plane, const Vec3f &translate, const Vec3f &rotate);
 

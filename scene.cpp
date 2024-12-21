@@ -2,25 +2,18 @@
 #include <SDL2/SDL_surface.h>
 #include <iostream>
 #include <vector>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 
 #include "Plane.h"
+#include "model.h"
 
-/**
-* @return identifier to texture
-*/
-std::pair<SDL_Surface *, uint> load_texture(const char *filePath, std::vector<SDL_Surface *> &texture_pool)
-{
-	SDL_Surface *texture = IMG_Load(filePath);
-	SDL_LockSurface(texture);
-	texture_pool.push_back(texture);
-	return std::make_pair(texture, texture_pool.size()-1);
-}
 
 
 void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_pool)
 {
+	std::vector<Model> models;
+	int shotgun = load_obj_model("assets/models/shotgun.obj", scene, texture_pool, models);
+	add_model_to_scene(models[shotgun], scene, texture_pool, Vec3f{ -1, 0, 1 }, Vec3f { 0, -3.14/2, 3.14/8 }, Vec3f{ 0.1, 0.1, 0.07 });
+
 	std::pair<SDL_Surface *, uint> brick = load_texture("assets/bricks.png", texture_pool);
 	float x = 0.0, z= 0.0, y  = 0.0;
 	scene.push_back(Plane{

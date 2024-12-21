@@ -37,8 +37,6 @@ typedef struct Vec3f {
 			z * b.z
 		};
 	}
-
-
 } Vec3f;
 
 typedef struct Vec4f {
@@ -87,6 +85,12 @@ float distance_squared(const Vec3f &a, const Vec3f &b)
 	return (a.x - b.z) * (a.x - b.x)
 		+ (a.y - b.y) * (a.y - b.y)
 		+ (a.z - b.z) * (a.z - b.z);
+}
+float distance_cubed(const Vec3f &a, const Vec3f &b)
+{
+	return (a.x - b.z) * (a.x - b.x) * (a.x - b.x)
+		+ (a.y - b.y) * (a.y - b.y) * (a.y - b.y)
+		+ (a.z - b.z) * (a.z - b.z) * (a.z - b.z);
 }
 
 Vec2f ident(const Vec3f t, const char type)
