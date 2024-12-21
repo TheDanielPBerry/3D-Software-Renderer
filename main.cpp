@@ -19,10 +19,10 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	uint SCREEN_WIDTH = 1024;
-	uint SCREEN_HEIGHT = 800;
+	SDL_Rect screen_rect = SDL_Rect{0, 0, 1024, 800};
+	Vec2f dimensions = Vec2f{ (float)floor(screen_rect.w/4), (float)floor(screen_rect.h/4) };
 
-	SDL_Window* window = SDL_CreateWindow("Pixel Buffer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	SDL_Window* window = SDL_CreateWindow("Pixel Buffer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_rect.w, screen_rect.h, SDL_WINDOW_SHOWN);
 	if (!window) {
 		std::cerr << "Window creation failed: " << SDL_GetError() << std::endl;
 		SDL_Quit();
@@ -39,12 +39,12 @@ int main(int argc, char* argv[]) {
 
 
 	// Create a pixel buffer
-	Uint32 *screen_buffer = new Uint32[SCREEN_WIDTH * SCREEN_HEIGHT];
-	float *z_buffer = new float[SCREEN_WIDTH * SCREEN_HEIGHT];
-	for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; ++i) {
+	uint buffer_size = (uint) (dimensions.x * dimensions.y);
+	Uint32 *screen_buffer = new Uint32[buffer_size];
+	float *z_buffer = new float[buffer_size];
+	for (int i = 0; i < buffer_size; ++i) {
 		screen_buffer[i] = 0xFF0000FF; // Red color
 	}
-	Vec2f dimensions = Vec2f{ (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT };
 
 
 	std::vector<Plane> scene;
@@ -60,8 +60,8 @@ int main(int argc, char* argv[]) {
 	draw_scene(scene, screen_buffer, dimensions, translate, rotate, z_buffer);
 
 	// Create a texture from the pixel buffer
-	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, SCREEN_WIDTH, SCREEN_HEIGHT);
-	SDL_UpdateTexture(texture, NULL, screen_buffer, SCREEN_WIDTH * sizeof(Uint32));
+	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, (int)dimensions.x, (int)dimensions.y);
+	SDL_UpdateTexture(texture, NULL, screen_buffer, ((uint)dimensions.x)  * sizeof(Uint32));
 
 	// Render the texture
 	SDL_RenderClear(renderer);
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
 	uint frameCount = 0;
 	auto timestamp = std::time(nullptr);
 	while (running) {
-		for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; ++i) {
+		for (int i = 0; i < dimensions.x * dimensions.y; ++i) {
 			screen_buffer[i] = 0x000000FF; // Red color
 			z_buffer[i] = INFINITY;
 		}
@@ -90,9 +90,9 @@ int main(int argc, char* argv[]) {
 			frameCount = 0;
 		}
 
-		SDL_UpdateTexture(texture, NULL, screen_buffer, SCREEN_WIDTH * sizeof(Uint32));
+		SDL_UpdateTexture(texture, NULL, screen_buffer, ((uint)dimensions.x) * sizeof(Uint32));
 		SDL_RenderClear(renderer);
-		SDL_RenderCopy(renderer, texture, NULL, NULL);
+		SDL_RenderCopy(renderer, texture, NULL, &screen_rect);
 		SDL_RenderPresent(renderer);
 		while(SDL_PollEvent(&event)) {
 			switch(event.type) {
