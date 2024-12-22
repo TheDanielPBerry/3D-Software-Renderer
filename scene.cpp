@@ -14,8 +14,8 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 	int shotgun = load_obj_model("assets/models/shotgun.obj", scene, texture_pool, models);
 	int chest = load_obj_model("assets/models/chest.obj", scene, texture_pool, models);
 	int chest_open = load_obj_model("assets/models/chest_open.obj", scene, texture_pool, models);
-	//int cube = load_obj_model("assets/models/cube.obj", scene, texture_pool, models);
-	//add_model_to_scene(models[cube], scene, texture_pool, Vec3f{ -1, 0.68, 1 }, Vec3f { 0, -3.14, 0 }, Vec3f{ 1, 1, 1 }, true);
+	int cube = load_obj_model("assets/models/cube.obj", scene, texture_pool, models);
+	add_model_to_scene(models[cube], scene, texture_pool, Vec3f{ 1, 0.68, -2 }, Vec3f { 0, -3.14, 0 }, Vec3f{ 0.1, 0.1, 0.1 }, true);
 	add_model_to_scene(models[chest], scene, texture_pool, Vec3f{ -1, 0.68, 1 }, Vec3f { 0, -3.14/2, 0 }, Vec3f{ 0.3, 0.3, 0.3 }, true);
 	add_model_to_scene(models[chest_open], scene, texture_pool, Vec3f{ -1, 0.68, -1 }, Vec3f { 0, -3.14/2, 0 }, Vec3f{ 0.3, 0.3, 0.3 }, true);
 

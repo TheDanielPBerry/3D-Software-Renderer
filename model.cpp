@@ -41,6 +41,32 @@ std::pair<std::string, int> next_word(std::string line, uint offset)
 	return next_word(line, ' ', offset);
 }
 
+
+SDL_Surface *load_mtl(std::string filePath, Model &model, std::vector<SDL_Surface *> &texture_pool)
+{
+	std::ifstream inputFile(filePath);
+	if(!inputFile.is_open()) {
+		std::cerr << "Cannot open: " << filePath << std::endl;
+		return NULL;
+	}
+
+	std::string line;
+	while(std::getline(inputFile, line)) {
+		int space = -1;
+		std::string firstWord;
+		tie(firstWord, space) = next_word(line, 0);
+		if(firstWord == "map_Kd") {
+			std::string imgPath = line.substr(space+1);
+			uint pos = imgPath.find("assets/");
+			std::string imgRelative = imgPath.substr(pos);
+			std::pair<SDL_Surface *, uint> material = load_texture(imgRelative.c_str(), texture_pool);
+			model.texture = material.second;
+			return material.first;
+		}
+	}
+	return NULL;
+}
+
 int load_obj_model(
 	std::string filePath, 
 	std::vector<Plane> &scene, 
@@ -162,12 +188,13 @@ int load_obj_model(
 			face.push_back(norms);
 
 			model.planes.push_back(face);
+		} else if(firstWord == "mtllib") {
+			int lastSeparator = filePath.find_last_of("/");
+			std::string fileRoute = filePath.substr(0, lastSeparator+1);
+			fileRoute += line.substr(space+1);
+			load_mtl(fileRoute, model, texture_pool);
 		}
 	}
-
-
-	std::pair<SDL_Surface *, uint> material = load_texture("assets/img/chest_texture.png", texture_pool);
-	model.texture = material.second;
 
 	models.push_back(model);
 	return models.size()-1;
