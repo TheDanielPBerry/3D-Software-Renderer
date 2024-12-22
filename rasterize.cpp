@@ -318,9 +318,6 @@ void draw_scene(std::vector<Plane> scene, Uint32 *buffer, const Vec2f &dimension
 		}
 		project_and_scale(scene[p], dimensions);
 		
-		Vec3f normal = scene[p].normal + translate;
-
-
 		rasterize(scene[p], buffer, dimensions, z_buffer);
 	}
 }

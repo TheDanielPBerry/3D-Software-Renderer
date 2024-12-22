@@ -190,6 +190,7 @@ void add_model_to_scene(
 				model.vertices[model.planes[i][0][1]],
 				model.vertices[model.planes[i][0][2]],
 			},
+			.normal = { 0, 0, 0 },
 			.color = {{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0}},
 			.texture_coords = {
 				model.texture_coords[model.planes[i][1][0]],
@@ -198,12 +199,10 @@ void add_model_to_scene(
 			},
 			.texture = texture_pool[model.texture],
 		};
-		Vec3f normal;
 
 		Vec3f cosine = Vec3f{cos(rotation.x), cos(rotation.y), cos(rotation.z)};
 		Vec3f sine = Vec3f{sin(rotation.x), sin(rotation.y), sin(rotation.z)};
 		for(uint p=0; p<N_POINTS; p++) {
-			normal = normal + model.normals[p];
 			//Scale everything
 			plane.points[p].x = plane.points[p].x * scale.x;
 			plane.points[p].y = plane.points[p].y * scale.y;
@@ -224,24 +223,28 @@ void add_model_to_scene(
 			x = (x * cosine.z) + (y * sine.z);
 
 			plane.points[p] = Vec3f{x, y, z} + pos;
+
+			plane.normals[p].x *= scale.x;
+			plane.normals[p].y *= scale.y;
+			plane.normals[p].z *= scale.z;
+			x = (model.normals[p].x * cosine.y) - (model.normals[p].z * sine.y);
+			z = (model.normals[p].z * cosine.y) + (model.normals[p].x * sine.y);
+
+			//Then the x-axis
+			y = (model.normals[p].y * cosine.x) - (z * sine.x);
+			z = (z * cosine.x) + (model.normals[p].y * sine.x);
+
+			//Lastly the z-axis
+			y = (y * cosine.z) - (x * sine.z);
+			x = (x * cosine.z) + (y * sine.z);
+
+			plane.normals[p] = Vec3f{x, y, z} + pos;
+			plane.normal = plane.normal + plane.normals[p];
 		}
+		plane.normal.x /= 3;
+		plane.normal.y /= 3;
+		plane.normal.z /= 3;
 
-		normal.x = (normal.x / 3) * scale.x;
-		normal.y = (normal.y / 3) * scale.y;
-		normal.z = (normal.z / 3) * scale.z;
-		float x, y, z;
-		x = (normal.x * cosine.y) - (normal.z * sine.y);
-		z = (normal.z * cosine.y) + (normal.x * sine.y);
-
-		//Then the x-axis
-		y = (normal.y * cosine.x) - (z * sine.x);
-		z = (z * cosine.x) + (normal.y * sine.x);
-
-		//Lastly the z-axis
-		y = (y * cosine.z) - (x * sine.z);
-		x = (x * cosine.z) + (y * sine.z);
-
-		plane.normal = Vec3f{x, y, z} + pos;
 		plane.cullable = cullable;
 
 		scene.push_back(plane);

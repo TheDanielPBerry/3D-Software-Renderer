@@ -57,6 +57,7 @@ typedef struct Entity {
 
 typedef struct Plane {
 	Vec3f points[N_POINTS];
+	Vec3f normals[N_POINTS];
 	Vec3f normal;
 	Vec3f buffer[N_POINTS];
 	Vec4f color[N_POINTS];
@@ -167,19 +168,19 @@ bool transform(Plane &plane, const Vec3f &translate, const Vec3f &rotate)
 		plane.buffer[p].z = z;
 	}
 
-	Vec3f normal = plane.normal + translate;
-	float x = (normal.x * cosine.y) - (normal.z * sine.y);
-	float z = (normal.z * cosine.y) + (normal.x * sine.y);
-	
-	float y = (normal.y * cosine.x) - (z * sine.x);
-	z = (z * cosine.x) + (normal.y * sine.x);
-	normal.x = x;
-	normal.y = y;
-	normal.z = z;
-
-	float dot = dot_product(plane.points[0], normal);
-	if(plane.cullable && dot < 0) {
-		return false;
+	if(plane.cullable) {
+		Vec3f normal = plane.normal + translate;
+		float x = (normal.x * cosine.y) - (normal.z * sine.y);
+		float z = (normal.z * cosine.y) + (normal.x * sine.y);
+		
+		float y = (normal.y * cosine.x) - (z * sine.x);
+		z = (z * cosine.x) + (normal.y * sine.x);
+		normal.x = x;
+		normal.y = y;
+		normal.z = z;
+		return dot_product(normal, plane.buffer[0]) > 0 
+		&& dot_product(normal, plane.buffer[1]) > 0
+		&& dot_product(normal, plane.buffer[2]) > 0;
 	}
 	return true;
 }

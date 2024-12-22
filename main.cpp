@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
 	SDL_GetCurrentDisplayMode(0, &DM);
 	SDL_Rect screen_rect = SDL_Rect{0, 0, int(DM.w*0.8), int(DM.h*0.8)};
 
-	Vec2f dimensions = Vec2f{ (float)floor(screen_rect.w/1.5), (float)floor(screen_rect.h/1.5) };
+	Vec2f dimensions = Vec2f{ (float)floor(screen_rect.w/3), (float)floor(screen_rect.h/3) };
 
 	SDL_Window* window = SDL_CreateWindow("Pixel Buffer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_rect.w, screen_rect.h, SDL_WINDOW_SHOWN);
 	if (!window) {
