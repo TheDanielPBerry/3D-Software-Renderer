@@ -222,6 +222,7 @@ Vec2f interpolate_lines(
 */
 void rasterize(Plane &plane, Uint32 *buffer, const Vec2f &dimensions, float *z_buffer)
 {
+
 	char top = 0, middle = 1, bottom = 2;
 	//Test if all the 2d points are under off of the buffer in one direction or the other
 	if(plane.buffer[top].x < 0.0 && plane.buffer[middle].x < 0.0 && plane.buffer[bottom].x < 0.0) {
@@ -303,7 +304,9 @@ void rasterize(Plane &plane, Uint32 *buffer, const Vec2f &dimensions, float *z_b
 void draw_scene(std::vector<Plane> scene, Uint32 *buffer, const Vec2f &dimensions, const Vec3f &translate, const Vec3f &rotate, float *z_buffer)
 {
 	for(uint p=0; p<scene.size(); p++) {
-		transform(scene[p], translate, rotate);
+		if(!transform(scene[p], translate, rotate)) {
+			continue;
+		}
 		//Perhaps a nice way to cull rearward faces
 		//If one point is behind the camera, make the z 0
 		//If 2 points are behind, hide the triangle
@@ -314,6 +317,10 @@ void draw_scene(std::vector<Plane> scene, Uint32 *buffer, const Vec2f &dimension
 			continue;
 		}
 		project_and_scale(scene[p], dimensions);
+		
+		Vec3f normal = scene[p].normal + translate;
+
+
 		rasterize(scene[p], buffer, dimensions, z_buffer);
 	}
 }

@@ -49,7 +49,7 @@ typedef struct Plane {
 	Vec4f color[N_POINTS];
 	Vec2f texture_coords[N_POINTS];
 	SDL_Surface *texture;
-	char orientation = 0;
+	bool cullable = false;
 	Entity *entity;
 } Plane;
 
@@ -65,7 +65,9 @@ void coeffs(const Vec2f &a, const Vec2f &b, Vec2f &dest);
 float distance_squared(const Vec3f &a, const Vec3f &b);
 float distance_cubed(const Vec3f &a, const Vec3f &b);
 
-void transform(Plane &plane, const Vec3f &translate, const Vec3f &rotate);
+float dot_product(const Vec3f v, const Vec3f &n);
+
+bool transform(Plane &plane, const Vec3f &translate, const Vec3f &rotate);
 
 /**
  * @param plane container with applicable data to store 3d points in space and their respective 2d points

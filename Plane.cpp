@@ -62,7 +62,7 @@ typedef struct Plane {
 	Vec4f color[N_POINTS];
 	Vec2f texture_coords[N_POINTS];
 	SDL_Surface *texture;
-	char orientation = 0;
+	bool cullable = false;
 	Entity *entity;
 } Plane;
 
@@ -146,7 +146,12 @@ void coeffs(const Vec2f &a, const Vec2f &b, Vec2f &dest)
 	}
 }
 
-void transform(Plane &plane, const Vec3f &translate, const Vec3f &rotate)
+float dot_product(const Vec3f v, const Vec3f &n)
+{
+	return v.x*n.x + v.y+n.y + v.z+n.z;
+}
+
+bool transform(Plane &plane, const Vec3f &translate, const Vec3f &rotate)
 {
 	Vec3f cosine = Vec3f { cos(rotate.x), cos(rotate.y), 0};
 	Vec3f sine = Vec3f { sin(rotate.x), sin(rotate.y), 0 };
@@ -161,6 +166,22 @@ void transform(Plane &plane, const Vec3f &translate, const Vec3f &rotate)
 		plane.buffer[p].y = y;
 		plane.buffer[p].z = z;
 	}
+
+	Vec3f normal = plane.normal + translate;
+	float x = (normal.x * cosine.y) - (normal.z * sine.y);
+	float z = (normal.z * cosine.y) + (normal.x * sine.y);
+	
+	float y = (normal.y * cosine.x) - (z * sine.x);
+	z = (z * cosine.x) + (normal.y * sine.x);
+	normal.x = x;
+	normal.y = y;
+	normal.z = z;
+
+	float dot = dot_product(plane.points[0], normal);
+	if(plane.cullable && dot < 0) {
+		return false;
+	}
+	return true;
 }
 
 /**

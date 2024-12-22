@@ -179,7 +179,8 @@ void add_model_to_scene(
 	std::vector<SDL_Surface *> &texture_pool,
 	Vec3f pos,
 	Vec3f rotation,
-	Vec3f scale
+	Vec3f scale,
+	bool cullable
 )
 {
 	for(int i=0; i<model.planes.size(); i++) {
@@ -196,7 +197,6 @@ void add_model_to_scene(
 				model.texture_coords[model.planes[i][1][2]],
 			},
 			.texture = texture_pool[model.texture],
-			.orientation = 1,
 		};
 		Vec3f normal;
 
@@ -226,9 +226,9 @@ void add_model_to_scene(
 			plane.points[p] = Vec3f{x, y, z} + pos;
 		}
 
-		normal.x = normal.x / 3;
-		normal.y = normal.y / 3;
-		normal.z = normal.z / 3;
+		normal.x = (normal.x / 3) * scale.x;
+		normal.y = (normal.y / 3) * scale.y;
+		normal.z = (normal.z / 3) * scale.z;
 		float x, y, z;
 		x = (normal.x * cosine.y) - (normal.z * sine.y);
 		z = (normal.z * cosine.y) + (normal.x * sine.y);
@@ -242,8 +242,7 @@ void add_model_to_scene(
 		x = (x * cosine.z) + (y * sine.z);
 
 		plane.normal = Vec3f{x, y, z} + pos;
-
-
+		plane.cullable = cullable;
 
 		scene.push_back(plane);
 	}
