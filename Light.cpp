@@ -36,18 +36,18 @@ void some_lights(std::vector<Light> &lights)
 	lights.push_back(
 		Light {
 			.pos = Vec3f {
-				0, -8, 5
+				0, -15, 5
 			},
-			.luminosity = 70,
+			.luminosity = 400,
 		}
 	);
 
 	lights.push_back(
 		Light {
 			.pos = Vec3f {
-				-6, -8, -20
+				-6, 15, -20
 			},
-			.luminosity = 20,
+			.luminosity = 100,
 		}
 	);
 }

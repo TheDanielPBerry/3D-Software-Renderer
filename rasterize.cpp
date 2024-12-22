@@ -187,7 +187,7 @@ Vec2f interpolate_lines(
 
 					int texture_coord_y = (line(texture_y_coeff, x) / (perspective));
 					texture_coord_y = std::max(texture_coord_y, 0);
-					texture_coord_y = std::min(texture_coord_y, plane.texture->h);
+					texture_coord_y %= plane.texture->h;
 
 					const u_char pixel_size = plane.texture->pitch / plane.texture->w;
 					red *= ((u_char *)plane.texture->pixels)[(plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size) + 0];

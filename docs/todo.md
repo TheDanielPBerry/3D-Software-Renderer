@@ -1,9 +1,11 @@
 ## Todo
-- [ ] Texture rasterization sampling
 - [ ] Framerate limiter
 - [ ] Cull faces
 - [ ] Luminosity per vertex and interpolate (white light only)
-- [ ] Load OBJ files
+- [ ] Load mtl files
 - [ ] Load scenes from file
+- [ ] 
 
 ## Done
+- [x] Texture rasterization sampling
+- [x] Load OBJ files

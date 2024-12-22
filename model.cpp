@@ -166,14 +166,21 @@ int load_obj_model(
 	}
 
 
-	std::pair<SDL_Surface *, uint> material = load_texture("assets/img/gun_metal.png", texture_pool);
+	std::pair<SDL_Surface *, uint> material = load_texture("assets/img/chest_texture.png", texture_pool);
 	model.texture = material.second;
 
 	models.push_back(model);
 	return models.size()-1;
 }
 
-void add_model_to_scene(Model &model, std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_pool, Vec3f pos, Vec3f rotation, Vec3f scale)
+void add_model_to_scene(
+	Model &model,
+	std::vector<Plane> &scene,
+	std::vector<SDL_Surface *> &texture_pool,
+	Vec3f pos,
+	Vec3f rotation,
+	Vec3f scale
+)
 {
 	for(int i=0; i<model.planes.size(); i++) {
 		Plane plane = Plane{
@@ -191,10 +198,12 @@ void add_model_to_scene(Model &model, std::vector<Plane> &scene, std::vector<SDL
 			.texture = texture_pool[model.texture],
 			.orientation = 1,
 		};
+		Vec3f normal;
 
 		Vec3f cosine = Vec3f{cos(rotation.x), cos(rotation.y), cos(rotation.z)};
 		Vec3f sine = Vec3f{sin(rotation.x), sin(rotation.y), sin(rotation.z)};
 		for(uint p=0; p<N_POINTS; p++) {
+			normal = normal + model.normals[p];
 			//Scale everything
 			plane.points[p].x = plane.points[p].x * scale.x;
 			plane.points[p].y = plane.points[p].y * scale.y;
@@ -216,6 +225,25 @@ void add_model_to_scene(Model &model, std::vector<Plane> &scene, std::vector<SDL
 
 			plane.points[p] = Vec3f{x, y, z} + pos;
 		}
+
+		normal.x = normal.x / 3;
+		normal.y = normal.y / 3;
+		normal.z = normal.z / 3;
+		float x, y, z;
+		x = (normal.x * cosine.y) - (normal.z * sine.y);
+		z = (normal.z * cosine.y) + (normal.x * sine.y);
+
+		//Then the x-axis
+		y = (normal.y * cosine.x) - (z * sine.x);
+		z = (z * cosine.x) + (normal.y * sine.x);
+
+		//Lastly the z-axis
+		y = (y * cosine.z) - (x * sine.z);
+		x = (x * cosine.z) + (y * sine.z);
+
+		plane.normal = Vec3f{x, y, z} + pos;
+
+
 
 		scene.push_back(plane);
 	}
