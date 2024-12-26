@@ -302,8 +302,12 @@ void rasterize(Plane &plane, Uint32 *buffer, const Vec2f &dimensions, float *z_b
 
 void draw_scene(std::vector<Plane> scene, Uint32 *buffer, const Vec2f &dimensions, const Vec3f &translate, const Vec3f &rotate, float *z_buffer)
 {
+	const Vec3f rotationTrig[2] = {
+		Vec3f{cos(rotate.x), cos(rotate.y), 0},
+		Vec3f{sin(rotate.x), sin(rotate.y), 0},
+	};
 	for(uint p=0; p<scene.size(); p++) {
-		if(!transform(scene[p], translate, rotate)) {
+		if(!transform(scene[p], translate, rotationTrig)) {
 			continue;
 		}
 		//Perhaps a nice way to cull rearward faces

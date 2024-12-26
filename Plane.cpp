@@ -23,10 +23,10 @@ typedef struct Plane {
 #define FRUSTUM_VIEWPOINT_DISTANCE 0.001
 
 
-bool transform(Plane &plane, const Vec3f &translate, const Vec3f &rotate)
+bool transform(Plane &plane, const Vec3f &translate, const Vec3f rotationTrig[2])
 {
-	Vec3f cosine = Vec3f { cos(rotate.x), cos(rotate.y), 0};
-	Vec3f sine = Vec3f { sin(rotate.x), sin(rotate.y), 0 };
+	const Vec3f cosine = rotationTrig[0];
+	const Vec3f sine = rotationTrig[1];
 	for(u_char p=0; p<N_POINTS; p++) {
 		plane.buffer[p] = plane.points[p] + translate;
 		float x = (plane.buffer[p].x * cosine.y) - (plane.buffer[p].z * sine.y);

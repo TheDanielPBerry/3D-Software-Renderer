@@ -22,7 +22,7 @@ typedef struct Plane {
 
 
 
-bool transform(Plane &plane, const Vec3f &translate, const Vec3f &rotate);
+bool transform(Plane &plane, const Vec3f &translate, const Vec3f rotationTrig[2]);
 
 /**
  * @param plane container with applicable data to store 3d points in space and their respective 2d points
