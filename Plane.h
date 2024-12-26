@@ -3,42 +3,8 @@
 
 #include <SDL2/SDL.h>
 
+#include "Physics.h"
 
-typedef struct Vec2f {
-	float x;
-	float y;
-
-	Vec2f operator+(const Vec2f &b)
-	{
-		return Vec2f {
-			x + b.x,
-			y + b.y
-		};
-	}
-} Vec2f;
-
-typedef struct Vec3f {
-	float x;
-	float y;
-	float z;
-
-	Vec3f operator+(const Vec3f &b);
-	Vec3f operator*(const Vec3f &b);
-
-} Vec3f;
-
-typedef struct Vec4f {
-	float x;
-	float y;
-	float z;
-	float w;
-} Vec4f;
-
-
-typedef struct Entity {
-	Vec3f pos;
-	Vec3f vel;
-} Entity;
 
 #define N_POINTS 3
 
@@ -55,18 +21,6 @@ typedef struct Plane {
 } Plane;
 
 
-Vec2f ident(const Vec3f t, const char type);
-
-float line(Vec2f &coeff, float x);
-
-void check_infinity(Vec2f &coeffs, const float target);
-
-void coeffs(const Vec2f &a, const Vec2f &b, Vec2f &dest);
-
-float distance_squared(const Vec3f &a, const Vec3f &b);
-float distance_cubed(const Vec3f &a, const Vec3f &b);
-
-float dot_product(const Vec3f v, const Vec3f &n);
 
 bool transform(Plane &plane, const Vec3f &translate, const Vec3f &rotate);
 

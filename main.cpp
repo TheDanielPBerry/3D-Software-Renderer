@@ -5,9 +5,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <vector>
-#include <chrono>
+#include <ctime>
 
-#include "model.h"
 #include "scene.h"
 #include "Light.h"
 #include "rasterize.h"
@@ -24,7 +23,7 @@ int main(int argc, char* argv[]) {
 	SDL_GetCurrentDisplayMode(0, &DM);
 	SDL_Rect screen_rect = SDL_Rect{0, 0, int(DM.w*0.8), int(DM.h*0.8)};
 
-	Vec2f dimensions = Vec2f{ (float)floor(screen_rect.w/3), (float)floor(screen_rect.h/3) };
+	Vec2f dimensions = Vec2f{ (float)floor(screen_rect.w/2), (float)floor(screen_rect.h/2) };
 
 	SDL_Window* window = SDL_CreateWindow("Pixel Buffer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_rect.w, screen_rect.h, SDL_WINDOW_SHOWN);
 	if (!window) {
@@ -105,7 +104,7 @@ int main(int argc, char* argv[]) {
 					running = false;
 					break;
 				case SDL_MOUSEWHEEL:
-					speed *= event.wheel.direction > 0 ? 2 : 0.5;
+					speed *= event.wheel.y > 0 ? 2 : 0.5;
 					break;
 				case SDL_MOUSEMOTION:
 					rotate.y += 0.05 * event.motion.xrel;
@@ -117,29 +116,29 @@ int main(int argc, char* argv[]) {
 					}
 					break;
 				case SDL_KEYDOWN:
-					if(event.key.keysym.scancode  == 5) {
+					if(event.key.keysym.scancode == 5) {
 						std::cout << "Debugger? I hardly know her.";
-					} else if(event.key.keysym.scancode  == 41) {
+					} else if(event.key.keysym.scancode == 41) {
 						running = false;
-					} else if(event.key.keysym.scancode  == 26 || event.key.keysym.scancode == 14) {
+					} else if(event.key.keysym.scancode == 26 || event.key.keysym.scancode == 14) {
 						translate.z -= cos(rotate.y) * speed;
 						translate.x -= sin(rotate.y) * speed;
-					} else if(event.key.keysym.scancode  == 22 || event.key.keysym.scancode == 13) {
+					} else if(event.key.keysym.scancode == 22 || event.key.keysym.scancode == 13) {
 						translate.z += cos(rotate.y) * speed;
 						translate.x += sin(rotate.y) * speed;
-					} else if(event.key.keysym.scancode  == 11 || event.key.keysym.scancode == 4) {
+					} else if(event.key.keysym.scancode == 11 || event.key.keysym.scancode == 4) {
 						translate.x += cos(rotate.y) * speed;
 						translate.z -= sin(rotate.y) * speed;
-					} else if(event.key.keysym.scancode  == 15 || event.key.keysym.scancode == 7) {
+					} else if(event.key.keysym.scancode == 15 || event.key.keysym.scancode == 7) {
 						translate.x -= cos(rotate.y) * speed;
 						translate.z += sin(rotate.y) * speed;
-					} else if(event.key.keysym.scancode  == 44) {
+					} else if(event.key.keysym.scancode == 44) {
 						translate.y += speed;
-					} else if(event.key.keysym.scancode  == 225) {
+					} else if(event.key.keysym.scancode == 225) {
 						translate.y -= speed;
-					} else if(event.key.keysym.scancode  == 79) {
+					} else if(event.key.keysym.scancode == 79) {
 						rotate.y += speed;
-					} else if(event.key.keysym.scancode  == 80) {
+					} else if(event.key.keysym.scancode == 80) {
 						rotate.y -= speed;
 					} else {
 						std::cout << event.key.keysym.scancode << std::endl;

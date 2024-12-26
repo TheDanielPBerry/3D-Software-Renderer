@@ -41,6 +41,10 @@ std::pair<std::string, int> next_word(std::string line, uint offset)
 	return next_word(line, ' ', offset);
 }
 
+void load_bounding_boxes()
+{
+
+}
 
 SDL_Surface *load_mtl(std::string filePath, Model &model, std::vector<SDL_Surface *> &texture_pool)
 {
@@ -96,9 +100,9 @@ int load_obj_model(
 			while(true) {
 				float coord = std::stof(coordStr);
 				if(count == 0) {
-					v.x = -coord;
+					v.x = coord;
 				} else if(count == 1) {
-					v.y = -coord;
+					v.y = coord;
 				} else if(count == 2) {
 					v.z = coord;
 				}
@@ -217,7 +221,12 @@ void add_model_to_scene(
 				model.vertices[model.planes[i][0][1]],
 				model.vertices[model.planes[i][0][2]],
 			},
-			.normal = { 0, 0, 0 },
+			.normals = {
+				model.normals[model.planes[i][2][0]],
+				model.normals[model.planes[i][2][1]],
+				model.normals[model.planes[i][2][2]],
+			},
+			.normal = model.normals[model.planes[i][2][0]],
 			.color = {{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0}},
 			.texture_coords = {
 				model.texture_coords[model.planes[i][1][0]],
@@ -230,47 +239,40 @@ void add_model_to_scene(
 		Vec3f cosine = Vec3f{cos(rotation.x), cos(rotation.y), cos(rotation.z)};
 		Vec3f sine = Vec3f{sin(rotation.x), sin(rotation.y), sin(rotation.z)};
 		for(uint p=0; p<N_POINTS; p++) {
+			float x, y, z, temp_y;
 			//Scale everything
-			plane.points[p].x = plane.points[p].x * scale.x;
-			plane.points[p].y = plane.points[p].y * scale.y;
-			plane.points[p].z = plane.points[p].z * scale.z;
-
+			plane.points[p] = plane.points[p] * scale;
 
 			//Rotate around the y-axis first
-			float x, y, z;
 			x = (plane.points[p].x * cosine.y) - (plane.points[p].z * sine.y);
 			z = (plane.points[p].z * cosine.y) + (plane.points[p].x * sine.y);
 
 			//Then the x-axis
-			y = (plane.points[p].y * cosine.x) - (z * sine.x);
+			temp_y = (plane.points[p].y * cosine.x) - (z * sine.x);
 			z = (z * cosine.x) + (plane.points[p].y * sine.x);
 
 			//Lastly the z-axis
-			y = (y * cosine.z) - (x * sine.z);
-			x = (x * cosine.z) + (y * sine.z);
+			y = (temp_y * cosine.z) - (x * sine.z);
+			x = (x * cosine.z) + (temp_y * sine.z);
 
 			plane.points[p] = Vec3f{x, y, z} + pos;
 
-			plane.normals[p].x *= scale.x;
-			plane.normals[p].y *= scale.y;
-			plane.normals[p].z *= scale.z;
-			x = (model.normals[p].x * cosine.y) - (model.normals[p].z * sine.y);
-			z = (model.normals[p].z * cosine.y) + (model.normals[p].x * sine.y);
+
+			// scale normals and make offset of point
+			plane.normals[p] = (plane.normals[p]) * scale;
+			x = (plane.normals[p].x * cosine.y) - (plane.normals[p].z * sine.y);
+			z = (plane.normals[p].z * cosine.y) + (plane.normals[p].x * sine.y);
 
 			//Then the x-axis
-			y = (model.normals[p].y * cosine.x) - (z * sine.x);
-			z = (z * cosine.x) + (model.normals[p].y * sine.x);
+			temp_y = (plane.normals[p].y * cosine.x) - (z * sine.x);
+			z = (z * cosine.x) + (plane.normals[p].y * sine.x);
 
 			//Lastly the z-axis
-			y = (y * cosine.z) - (x * sine.z);
-			x = (x * cosine.z) + (y * sine.z);
-
-			plane.normals[p] = Vec3f{x, y, z} + pos;
-			plane.normal = plane.normal + plane.normals[p];
+			y = (temp_y * cosine.z) - (x * sine.z);
+			x = (x * cosine.z) + (temp_y * sine.z);
+			plane.normals[p] = Vec3f{x, y, z} + plane.points[p];
 		}
-		plane.normal.x /= 3;
-		plane.normal.y /= 3;
-		plane.normal.z /= 3;
+		plane.normal = plane.normals[0];
 
 		plane.cullable = cullable;
 

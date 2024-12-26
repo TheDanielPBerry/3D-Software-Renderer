@@ -38,7 +38,7 @@ void some_lights(std::vector<Light> &lights)
 			.pos = Vec3f {
 				0, -15, 5
 			},
-			.luminosity = 400,
+			.luminosity = 800,
 		}
 	);
 

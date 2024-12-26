@@ -11,7 +11,7 @@ run: build
 debug: build
 	gdb ./$(output)
 
-dependencies = obj/Plane.o obj/rasterize.o obj/Light.o obj/scene.o obj/model.o
+dependencies = obj/Plane.o obj/rasterize.o obj/Light.o obj/scene.o obj/model.o obj/Vec.o obj/Physics.o
 
 build: $(dependencies)
 	$(cc) -o $(output) main.cpp $(dependencies) $(flags)
