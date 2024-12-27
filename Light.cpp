@@ -38,16 +38,18 @@ void some_lights(std::vector<Light> &lights)
 			.pos = Vec3f {
 				0, -15, 5
 			},
-			.luminosity = 800,
+			.luminosity = 2000,
 		}
 	);
 
-	lights.push_back(
-		Light {
-			.pos = Vec3f {
-				-6, 15, -20
-			},
-			.luminosity = 100,
-		}
-	);
+	for(int i = -10; i<10; i+=2) {
+		lights.push_back(
+			Light {
+				.pos = Vec3f {
+					(float)-i, 15, -20
+				},
+				.luminosity = 1000,
+			}
+		);
+	}
 }

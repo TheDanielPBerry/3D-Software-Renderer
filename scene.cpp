@@ -7,8 +7,15 @@
 #include "model.h"
 
 
+Entity get_chest()
+{
+	return Entity {
+		.pos = Vec3f{0, 0, 0},
+		.vel = Vec3f{-0.01, 0, 0},
+	};
+}
 
-void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_pool)
+void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_pool, std::vector<Entity> &entities)
 {
 	std::vector<Model> models;
 	int shotgun = load_obj_model("assets/models/shotgun.obj", scene, texture_pool, models);
@@ -16,8 +23,12 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 	int chest_open = load_obj_model("assets/models/chest_open.obj", scene, texture_pool, models);
 	int cube = load_obj_model("assets/models/cube.obj", scene, texture_pool, models);
 	int plane = load_obj_model("assets/models/plane.obj", scene, texture_pool, models);
-	add_model_to_scene(models[chest], scene, texture_pool, Vec3f{ -1, 0.68, 1 }, Vec3f { 3.141592, 0, 0 }, Vec3f{ 0.3, 0.3, 0.3 }, true);
-	add_model_to_scene(models[chest_open], scene, texture_pool, Vec3f{ 0.2, 0.68, 8 }, Vec3f { 3.141592, 0, 0 }, Vec3f{ 0.3, 0.3, 0.3 }, false);
+	int floor = load_obj_model("assets/models/floor.obj", scene, texture_pool, models);
+
+	add_model_to_scene(models[floor], scene, texture_pool, Vec3f{ 0, 2, 0 }, Vec3f { 0, 0, 0 }, Vec3f{ 1, 1, 1 }, true, nullptr);
+	Entity chestity = get_chest();
+	entities.push_back(chestity);
+	add_model_to_scene(models[chest], scene, texture_pool, Vec3f{ -1, 0.68, 1 }, Vec3f { 3.141592, 0, 0 }, Vec3f{ 0.3, 0.3, 0.3 }, true, &(entities[0]));
 	//add_model_to_scene(models[plane], scene, texture_pool, Vec3f{ 0, 0, 0 }, Vec3f { 0, 0, 0 }, Vec3f{ 1, 1, 1 }, true);
 	//add_model_to_scene(models[cube], scene, texture_pool, Vec3f{ 0, 0, 0 }, Vec3f { 0, 0, 0 }, Vec3f{ 1, 1, 1 }, true);
 
@@ -44,32 +55,32 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 		.texture = brick.first,
 	});
 
-	std::pair<SDL_Surface *, uint> floor = load_texture("assets/floor.png", texture_pool);
-	for(float x=-5; x<5; x+=1) {
-		for(float z=-5; z<20; z+=1) {
-			//Bottom Face
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5), 1, (float)(z - 0.5)},
-					{(float)(x + -0.5), 1, (float)(z - 0.5)},
-					{(float)(x + -0.5), 1, (float)(z + 0.5)},
-				},
-				.color = {{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0}},
-				.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 }},
-				.texture = floor.first,
-			});
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5), 1, (float)(z + -0.5)},
-					{(float)(x + 0.5), 1,  (float)(z + 0.5)},
-					{(float)(x + -0.5), 1,  (float)(z + 0.5)},
-				},
-				.color = {{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0}},
-				.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 }},
-				.texture = floor.first,
-			});
-		}
-	}
+	//std::pair<SDL_Surface *, uint> floor = load_texture("assets/floor.png", texture_pool);
+//	for(float x=-5; x<5; x+=1) {
+	//	for(float z=-5; z<20; z+=1) {
+	//		//Bottom Face
+	//		scene.push_back(Plane{
+	//			.points = {
+	//				{(float)(x + 0.5), 1, (float)(z - 0.5)},
+	//				{(float)(x + -0.5), 1, (float)(z - 0.5)},
+	//				{(float)(x + -0.5), 1, (float)(z + 0.5)},
+	//			},
+	//			.color = {{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0}},
+	//			.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 }},
+	//			.texture = floor.first,
+	//		});
+	//		scene.push_back(Plane{
+	//			.points = {
+	//				{(float)(x + 0.5), 1, (float)(z + -0.5)},
+	//				{(float)(x + 0.5), 1,  (float)(z + 0.5)},
+	//				{(float)(x + -0.5), 1,  (float)(z + 0.5)},
+	//			},
+	//			.color = {{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0}},
+	//			.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 }},
+	//			.texture = floor.first,
+	//		});
+	//	}
+	//}
 
 
 	for(float x=-2; x<2; x++) {

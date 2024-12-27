@@ -6,6 +6,6 @@
 
 #include "Plane.h"
 
-void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_pool);
+void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_pool, std::vector<Entity> &entities);
 
 #endif
