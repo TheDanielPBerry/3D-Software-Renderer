@@ -20,6 +20,6 @@ typedef struct Entity {
 	std::vector<Box> boxes;
 } Entity;
 
-
+void tick(std::vector<Entity> &entities);
 
 #endif

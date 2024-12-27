@@ -1,3 +1,4 @@
+#include <iostream>
 #include <vector>
 #include <cmath>
 
@@ -19,6 +20,7 @@ Vec2f interpolate_lines(
 {
 	#define START 0
 	#define END 1
+
 
 	Vec2f left_coeff_x, right_coeff_x;
 	coeffs(ident(plane.buffer[left[START]], 1), ident(plane.buffer[left[END]], 1), left_coeff_x);
@@ -84,7 +86,6 @@ Vec2f interpolate_lines(
 			plane.buffer[right[START]].y }, 
 		Vec2f { (plane.texture_coords[right[END]].y * plane.texture->h) / plane.buffer[right[END]].z, 
 		 	plane.buffer[right[END]].y}, right_coeff_texture_y);
-
 	}
 
 	y_bounds.x = std::min(y_bounds.x, dimensions.y);
@@ -119,6 +120,9 @@ Vec2f interpolate_lines(
 
 		float z_left = line(left_coeff_z, y);
 		float z_right = line(right_coeff_z, y);
+		if(z_left < 0.01 && z_right < 0.01) {
+			continue;
+		}
 		Vec2f z_coeff;
 		coeffs(Vec2f{z_right, x_right}, Vec2f{z_left, x_left}, z_coeff);
 
@@ -170,7 +174,11 @@ Vec2f interpolate_lines(
 		for(uint x=x_left; x<x_right; x++) {
 			float z = line(z_coeff, x);
 			float luminosity = 1.0;
-			if(z_buffer[yOffset + x] > z) {
+
+			if(z < 0.01) {
+				continue;
+			}
+			if(z_buffer[yOffset + x] > z && z > 0.01) {
 				float red = line(red_coeff, x);
 				float green = line(green_coeff, x);
 				float blue = line(blue_coeff, x);
@@ -181,11 +189,15 @@ Vec2f interpolate_lines(
 				if(plane.texture != nullptr) {
 					float perspective = line(perspective_coeff, x);
 					int texture_coord_x = (line(texture_x_coeff, x) / (perspective));
-					texture_coord_x = std::max(texture_coord_x, 0);
+					if(texture_coord_x < 0) {
+						texture_coord_x = 1-texture_coord_x;
+					}
 					texture_coord_x %= plane.texture->w;
 
 					int texture_coord_y = (line(texture_y_coeff, x) / (perspective));
-					texture_coord_y = std::max(texture_coord_y, 0);
+					if(texture_coord_x < 0) {
+						texture_coord_y = 1-texture_coord_y;
+					}
 					texture_coord_y %= plane.texture->h;
 
 					const u_char pixel_size = plane.texture->pitch / plane.texture->w;
@@ -306,6 +318,9 @@ void draw_scene(std::vector<Plane> scene, Uint32 *buffer, const Vec2f &dimension
 		Vec3f{cos(rotate.x), cos(rotate.y), 0},
 		Vec3f{sin(rotate.x), sin(rotate.y), 0},
 	};
+
+	Plane splits[2];
+
 	for(uint p=0; p<scene.size(); p++) {
 		if(!transform(scene[p], translate, rotationTrig)) {
 			continue;
@@ -319,8 +334,11 @@ void draw_scene(std::vector<Plane> scene, Uint32 *buffer, const Vec2f &dimension
 			//Don't bother with triangles behind the camera
 			continue;
 		}
-		project_and_scale(scene[p], dimensions);
-		
-		rasterize(scene[p], buffer, dimensions, z_buffer);
+		u_char split_plane_count = clip_plane(scene[p], splits);
+		for(u_char s=0; s<split_plane_count; s++) {
+			project_and_scale(splits[s], dimensions);
+			
+			rasterize(splits[s], buffer, dimensions, z_buffer);
+		}
 	}
 }

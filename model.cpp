@@ -211,7 +211,8 @@ void add_model_to_scene(
 	Vec3f pos,
 	Vec3f rotation,
 	Vec3f scale,
-	bool cullable
+	bool cullable,
+	Entity *entity
 )
 {
 	for(int i=0; i<model.planes.size(); i++) {
@@ -275,6 +276,8 @@ void add_model_to_scene(
 		plane.normal = plane.normals[0];
 
 		plane.cullable = cullable;
+
+		plane.entity = entity;
 
 		scene.push_back(plane);
 	}

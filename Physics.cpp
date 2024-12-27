@@ -59,9 +59,16 @@ Box *intersects_tree(Box *root, Box *box)
 	return intersects_tree(root->branches[branch], box);
 }
 
-void tick(std::vector<Entity> entities)
+void tick(std::vector<Entity> &entities)
 {
-	for(auto entity : entities) {
+	for(auto &entity : entities) {
 		entity.pos = entity.pos + entity.vel;
+		if(entity.pos.x > 5) {
+			entity.vel.x *= -1;
+		} else if(entity.pos.x < -5) {
+			entity.vel.x *= -1;
+		}
+
+
 	}
 }

@@ -44,6 +44,15 @@ typedef struct Vec3f {
 		};
 	}
 
+	Vec3f operator/(const Vec3f &b)
+	{
+		return Vec3f {
+			x / b.x,
+			y / b.y,
+			z / b.z
+		};
+	}
+
 	float operator[](const int dim)
 	{
 		if(dim == 0) {

@@ -4,6 +4,7 @@
 #include <SDL2/SDL_video.h>
 #include <iostream>
 #include <cstdlib>
+#include <chrono>
 #include <vector>
 #include <ctime>
 
@@ -11,7 +12,12 @@
 #include "Light.h"
 #include "rasterize.h"
 
-
+long long getCurrentMilliseconds() {
+	using namespace std::chrono;
+	auto now = system_clock::now();                 // Get current time as system clock
+	auto duration = now.time_since_epoch();         // Get duration since epoch
+	return duration_cast<milliseconds>(duration).count(); // Convert to milliseconds
+}
 
 int main(int argc, char* argv[]) {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -31,6 +37,7 @@ int main(int argc, char* argv[]) {
 		SDL_Quit();
 		return 1;
 	}
+	////SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	if (!renderer) {
@@ -52,7 +59,8 @@ int main(int argc, char* argv[]) {
 
 	std::vector<Plane> scene;
 	std::vector<SDL_Surface *> texture_pool;
-	build_scene(scene, texture_pool);
+	std::vector<Entity> entities;
+	build_scene(scene, texture_pool, entities);
 
 	std::vector<Light> lights;
 	some_lights(lights);
@@ -78,6 +86,7 @@ int main(int argc, char* argv[]) {
 	uint frameCount = 0;
 	float speed = 0.2;
 	auto timestamp = std::time(nullptr);
+	auto millisecond = getCurrentMilliseconds();
 	while (running) {
 		for (int i = 0; i < dimensions.x * dimensions.y; ++i) {
 			screen_buffer[i] = 0x000000FF; // Red color
@@ -92,6 +101,13 @@ int main(int argc, char* argv[]) {
 			//std::cout << "Y: " << rotate.y << std::endl;
 			timestamp = std::time(nullptr);
 			frameCount = 0;
+		}
+		if(frameCount % 3 == 0) {
+			auto currentFrameMillis = getCurrentMilliseconds();
+			if(currentFrameMillis - millisecond > 10) {
+				tick(entities);
+				millisecond = currentFrameMillis;
+			}
 		}
 
 		SDL_UpdateTexture(texture, NULL, screen_buffer, ((uint)dimensions.x) * sizeof(Uint32));

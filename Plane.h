@@ -12,6 +12,7 @@ typedef struct Plane {
 	Vec3f points[N_POINTS];
 	Vec3f normals[N_POINTS];
 	Vec3f normal;
+	Vec3f screen_space[N_POINTS];
 	Vec3f buffer[N_POINTS];
 	Vec4f color[N_POINTS];
 	Vec2f texture_coords[N_POINTS];
@@ -24,6 +25,7 @@ typedef struct Plane {
 
 bool transform(Plane &plane, const Vec3f &translate, const Vec3f rotationTrig[2]);
 
+uint clip_plane(Plane plane, Plane (&planes)[2]);
 /**
  * @param plane container with applicable data to store 3d points in space and their respective 2d points
  * @param transform tranforms that move the camera
