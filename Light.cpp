@@ -23,9 +23,9 @@ void light_scene(std::vector<Plane> &scene, const std::vector<Light> lights)
 	 			// lumos.z += intensity * light.color.z;
 			}
 
-			scene[i].color[p].x = std::min(scene[i].color[p].x * lumos, scene[i].color[p].x);
-			scene[i].color[p].y = std::min(scene[i].color[p].y * lumos, scene[i].color[p].y);
-			scene[i].color[p].z = std::min(scene[i].color[p].z * lumos, scene[i].color[p].z);
+			//scene[i].color[p].x = std::min(scene[i].color[p].x * lumos, scene[i].color[p].x);
+			//scene[i].color[p].y = std::min(scene[i].color[p].y * lumos, scene[i].color[p].y);
+			//scene[i].color[p].z = std::min(scene[i].color[p].z * lumos, scene[i].color[p].z);
 		}
 	}
 }
@@ -42,11 +42,11 @@ void some_lights(std::vector<Light> &lights)
 		}
 	);
 
-	for(int i = -10; i<10; i+=2) {
+	for(int i = -20; i<0; i+=2) {
 		lights.push_back(
 			Light {
 				.pos = Vec3f {
-					(float)-i, 15, -20
+					(float)-i, 15, (float) i
 				},
 				.luminosity = 1000,
 			}

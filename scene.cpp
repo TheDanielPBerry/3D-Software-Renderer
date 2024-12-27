@@ -25,11 +25,12 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 	int plane = load_obj_model("assets/models/plane.obj", scene, texture_pool, models);
 	int floor = load_obj_model("assets/models/floor.obj", scene, texture_pool, models);
 
-	add_model_to_scene(models[floor], scene, texture_pool, Vec3f{ 0, 2, 0 }, Vec3f { 0, 0, 0 }, Vec3f{ 1, 1, 1 }, true, nullptr);
+	//add_model_to_scene(models[plane], scene, texture_pool, Vec3f{ 0, 0, 2 }, Vec3f { 0, 0, 0 }, Vec3f{ 1, 1, 1 }, false, nullptr);
+	//return;
+	add_model_to_scene(models[floor], scene, texture_pool, Vec3f{ 0, 0.8, 0 }, Vec3f { 0, 0, 0 }, Vec3f{ 0.5, 1, 0.5 }, false, nullptr);
 	Entity chestity = get_chest();
 	entities.push_back(chestity);
 	add_model_to_scene(models[chest], scene, texture_pool, Vec3f{ -1, 0.68, 1 }, Vec3f { 3.141592, 0, 0 }, Vec3f{ 0.3, 0.3, 0.3 }, true, &(entities[0]));
-	//add_model_to_scene(models[plane], scene, texture_pool, Vec3f{ 0, 0, 0 }, Vec3f { 0, 0, 0 }, Vec3f{ 1, 1, 1 }, true);
 	//add_model_to_scene(models[cube], scene, texture_pool, Vec3f{ 0, 0, 0 }, Vec3f { 0, 0, 0 }, Vec3f{ 1, 1, 1 }, true);
 
 	std::pair<SDL_Surface *, uint> brick = load_texture("assets/bricks.png", texture_pool);

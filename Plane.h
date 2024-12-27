@@ -12,7 +12,6 @@ typedef struct Plane {
 	Vec3f points[N_POINTS];
 	Vec3f normals[N_POINTS];
 	Vec3f normal;
-	Vec3f screen_space[N_POINTS];
 	Vec3f buffer[N_POINTS];
 	Vec4f color[N_POINTS];
 	Vec2f texture_coords[N_POINTS];

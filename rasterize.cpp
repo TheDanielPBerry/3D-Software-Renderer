@@ -34,9 +34,6 @@ Vec2f interpolate_lines(
 	//Interpolate the 3d x,y,z based on the y-2d & x-2d
 	//Use those interpolations to calculate distance to viewpoint based on all three interpolations
 	////Maybe interpolate on 3d x,y,z and do distance calculation per pixel
-	Vec2f left_coeff_z, right_coeff_z;
-	coeffs(ident(plane.buffer[left[START]], -2), ident(plane.buffer[left[END]], -2), left_coeff_z);
-	coeffs(ident(plane.buffer[right[START]], -2), ident(plane.buffer[right[END]], -2), right_coeff_z);
 
 	
 	Vec2f left_coeff_perspective, right_coeff_perspective;
@@ -118,13 +115,6 @@ Vec2f interpolate_lines(
 			return Vec2f{-1, -1};
 		}
 
-		float z_left = line(left_coeff_z, y);
-		float z_right = line(right_coeff_z, y);
-		if(z_left < 0.01 && z_right < 0.01) {
-			continue;
-		}
-		Vec2f z_coeff;
-		coeffs(Vec2f{z_right, x_right}, Vec2f{z_left, x_left}, z_coeff);
 
 
 		//Color Interpolations
@@ -172,13 +162,10 @@ Vec2f interpolate_lines(
 		x_right = std::min(x_right, dimensions.x);
 
 		for(uint x=x_left; x<x_right; x++) {
-			float z = line(z_coeff, x);
+			float perspective = line(perspective_coeff, x);
 			float luminosity = 1.0;
 
-			if(z < 0.01) {
-				continue;
-			}
-			if(z_buffer[yOffset + x] > z && z > 0.01) {
+			if(z_buffer[yOffset + x] < perspective) {
 				float red = line(red_coeff, x);
 				float green = line(green_coeff, x);
 				float blue = line(blue_coeff, x);
@@ -187,7 +174,6 @@ Vec2f interpolate_lines(
 
 				Uint32 pixel;
 				if(plane.texture != nullptr) {
-					float perspective = line(perspective_coeff, x);
 					int texture_coord_x = (line(texture_x_coeff, x) / (perspective));
 					if(texture_coord_x < 0) {
 						texture_coord_x = 1-texture_coord_x;
@@ -219,7 +205,7 @@ Vec2f interpolate_lines(
 
 
 				buffer[yOffset + x] = pixel;
-				z_buffer[yOffset + x] = z;
+				z_buffer[yOffset + x] = perspective;
 			}
 		}
 	}
@@ -309,7 +295,6 @@ void rasterize(Plane &plane, Uint32 *buffer, const Vec2f &dimensions, float *z_b
 		right[1] = bottom;
 	}
 	interpolate_lines(plane, left, right, y_bounds, dimensions, buffer, z_buffer, x_end);
-
 }
 
 void draw_scene(std::vector<Plane> scene, Uint32 *buffer, const Vec2f &dimensions, const Vec3f &translate, const Vec3f &rotate, float *z_buffer)
@@ -328,16 +313,9 @@ void draw_scene(std::vector<Plane> scene, Uint32 *buffer, const Vec2f &dimension
 		//Perhaps a nice way to cull rearward faces
 		//If one point is behind the camera, make the z 0
 		//If 2 points are behind, hide the triangle
-		if((scene[p].buffer[0].z < 0)
-			&& (scene[p].buffer[1].z  < 0)
-			&& (scene[p].buffer[2].z   < 0)) {
-			//Don't bother with triangles behind the camera
-			continue;
-		}
 		u_char split_plane_count = clip_plane(scene[p], splits);
 		for(u_char s=0; s<split_plane_count; s++) {
 			project_and_scale(splits[s], dimensions);
-			
 			rasterize(splits[s], buffer, dimensions, z_buffer);
 		}
 	}

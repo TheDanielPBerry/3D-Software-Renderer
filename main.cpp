@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
 	while (running) {
 		for (int i = 0; i < dimensions.x * dimensions.y; ++i) {
 			screen_buffer[i] = 0x000000FF; // Red color
-			z_buffer[i] = INFINITY;
+			z_buffer[i] = 0.0;
 		}
 		draw_scene(scene, screen_buffer, dimensions, translate, rotate, z_buffer);
 		if(std::time(nullptr) == timestamp) {
