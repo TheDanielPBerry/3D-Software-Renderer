@@ -12,7 +12,8 @@ typedef struct Model {
 	std::vector<Vec3f> normals;
 	std::vector<Vec2f> texture_coords;
 	std::vector<std::vector<std::vector<int>>> planes;
-	int texture;
+	std::vector<Box> boxes;
+	uint texture;
 } Model;
 
 

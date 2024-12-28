@@ -18,6 +18,7 @@ Vec2f interpolate_lines(
 	Vec2f starting_x
 )
 {
+	const u_char pixel_size = plane.texture->pitch / plane.texture->w;
 	#define START 0
 	#define END 1
 
@@ -30,12 +31,6 @@ Vec2f interpolate_lines(
 		return Vec2f{-1, -1};
 	}
 
-	//Extract out the formula for the z value based on y
-	//Interpolate the 3d x,y,z based on the y-2d & x-2d
-	//Use those interpolations to calculate distance to viewpoint based on all three interpolations
-	////Maybe interpolate on 3d x,y,z and do distance calculation per pixel
-
-	
 	Vec2f left_coeff_perspective, right_coeff_perspective;
 	coeffs(Vec2f { 1 / plane.buffer[left[START]].z, plane.buffer[left[START]].y }, 
 		Vec2f { 1 / plane.buffer[left[END]].z, plane.buffer[left[END]].y }, left_coeff_perspective);
@@ -55,10 +50,6 @@ Vec2f interpolate_lines(
 	Vec2f left_coeff_blue, right_coeff_blue;
 	coeffs(Vec2f { plane.color[left[START]].z, plane.buffer[left[START]].y }, Vec2f { plane.color[left[END]].z, plane.buffer[left[END]].y }, left_coeff_blue);
 	coeffs(Vec2f { plane.color[right[START]].z, plane.buffer[right[START]].y }, Vec2f { plane.color[right[END]].z, plane.buffer[right[END]].y }, right_coeff_blue);
-
-	Vec2f left_coeff_alpha, right_coeff_alpha;
-	coeffs(Vec2f { plane.color[left[START]].w, plane.buffer[left[START]].y }, Vec2f { plane.color[left[END]].w, plane.buffer[left[END]].y }, left_coeff_alpha);
-	coeffs(Vec2f { plane.color[right[START]].w, plane.buffer[right[START]].y }, Vec2f { plane.color[right[END]].w, plane.buffer[right[END]].y }, right_coeff_alpha);
 
 
 	Vec2f left_coeff_texture_x, right_coeff_texture_x;
@@ -116,6 +107,10 @@ Vec2f interpolate_lines(
 		}
 
 
+		Vec2f perspective_coeff;
+		float left_perspective = line(left_coeff_perspective, y);
+		float right_perspective = line(right_coeff_perspective, y);
+		coeffs(Vec2f{right_perspective, x_right}, Vec2f{left_perspective, x_left}, perspective_coeff);
 
 		//Color Interpolations
 		float red_left = line(left_coeff_red, y);
@@ -133,20 +128,9 @@ Vec2f interpolate_lines(
 		Vec2f blue_coeff;
 		coeffs(Vec2f{blue_right, x_right}, Vec2f{blue_left, x_left}, blue_coeff);
 
-		float alpha_left = line(left_coeff_alpha, y);
-		float alpha_right = line(right_coeff_alpha, y);
-		Vec2f alpha_coeff;
-		coeffs(Vec2f{alpha_right, x_right}, Vec2f{alpha_left, x_left}, alpha_coeff);
-
-
 		Vec2f texture_x_coeff;
 		Vec2f texture_y_coeff;
-		Vec2f perspective_coeff;
 		if(plane.texture != nullptr) {
-			float left_perspective = line(left_coeff_perspective, y);
-			float right_perspective = line(right_coeff_perspective, y);
-			coeffs(Vec2f{right_perspective, x_right}, Vec2f{left_perspective, x_left}, perspective_coeff);
-
 			float texture_x_left = line(left_coeff_texture_x, y);
 			float texture_x_right = line(right_coeff_texture_x, y);
 			coeffs(Vec2f{texture_x_right, x_right}, Vec2f{texture_x_left, x_left}, texture_x_coeff);
@@ -169,7 +153,6 @@ Vec2f interpolate_lines(
 				float red = line(red_coeff, x);
 				float green = line(green_coeff, x);
 				float blue = line(blue_coeff, x);
-				float alpha = line(alpha_coeff, x);
 
 
 				Uint32 pixel;
@@ -181,26 +164,27 @@ Vec2f interpolate_lines(
 					texture_coord_x %= plane.texture->w;
 
 					int texture_coord_y = (line(texture_y_coeff, x) / (perspective));
-					if(texture_coord_x < 0) {
+					if(texture_coord_y < 0) {
 						texture_coord_y = 1-texture_coord_y;
 					}
 					texture_coord_y %= plane.texture->h;
 
-					const u_char pixel_size = plane.texture->pitch / plane.texture->w;
+					if(((u_char *)plane.texture->pixels)[(plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size) + 3] == 0.0) {
+						continue;
+					}
 					red *= ((u_char *)plane.texture->pixels)[(plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size) + 0];
 					green *= ((u_char *)plane.texture->pixels)[(plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size) + 1];
 					blue *= ((u_char *)plane.texture->pixels)[(plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size) + 2];
-					alpha *= ((u_char *)plane.texture->pixels)[(plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size) + 3];
 
 					pixel = ((uint)(std::min((red * luminosity),red)) << 24);
 					pixel += ((uint)(std::min((green * luminosity), green)) << 16);
 					pixel += ((uint)(std::min((blue * luminosity), blue)) << 8);
-					pixel += alpha;
+					pixel += 255;
 				} else {
 					pixel = ((uint)(std::min((red * luminosity),red) * 255) << 24);
 					pixel += ((uint)(std::min((green * luminosity), green) * 255) << 16);
 					pixel += ((uint)(std::min((blue * luminosity), blue) * 255) << 8);
-					pixel += alpha * 255;
+					pixel += 255;
 				}
 
 
@@ -310,9 +294,7 @@ void draw_scene(std::vector<Plane> scene, Uint32 *buffer, const Vec2f &dimension
 		if(!transform(scene[p], translate, rotationTrig)) {
 			continue;
 		}
-		//Perhaps a nice way to cull rearward faces
-		//If one point is behind the camera, make the z 0
-		//If 2 points are behind, hide the triangle
+
 		u_char split_plane_count = clip_plane(scene[p], splits);
 		for(u_char s=0; s<split_plane_count; s++) {
 			project_and_scale(splits[s], dimensions);

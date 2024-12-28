@@ -14,6 +14,7 @@ typedef struct Model {
 	std::vector<Vec3f> normals;
 	std::vector<Vec2f> texture_coords;
 	std::vector<std::vector<std::vector<int>>> planes;
+	std::vector<Box> boxes;
 	uint texture;
 } Model;
 
@@ -197,6 +198,40 @@ int load_obj_model(
 			std::string fileRoute = filePath.substr(0, lastSeparator+1);
 			fileRoute += line.substr(space+1);
 			load_mtl(fileRoute, model, texture_pool);
+		} else if(firstWord == "b") {
+			Box box;
+
+			std::string vertexStr;
+			tie(vertexStr, space) = next_word(line, space+1);
+			uint slash = space;
+			std::string index;
+
+			tie(index, slash) = next_word(vertexStr, '/', 0);
+			float d = std::stof(index);
+			box.pos.x = d;
+
+			tie(index, slash) = next_word(vertexStr, '/', slash+1);
+			d = std::stof(index);
+			box.pos.y = d;
+
+			tie(index, slash) = next_word(vertexStr, '/', slash+1);
+			d = std::stof(index);
+			box.pos.z = d;
+
+			tie(vertexStr, space) = next_word(line, space+1);
+			tie(index, slash) = next_word(vertexStr, '/', 0);
+			d = std::stof(index);
+			box.dim.x = d;
+
+			tie(index, slash) = next_word(vertexStr, '/', slash+1);
+			d = std::stof(index);
+			box.dim.y = d;
+
+			tie(index, slash) = next_word(vertexStr, '/', slash+1);
+			d = std::stof(index);
+			box.dim.z = d;
+
+			model.boxes.push_back(box);
 		}
 	}
 
@@ -244,6 +279,7 @@ void add_model_to_scene(
 			//Scale everything
 			plane.points[p] = plane.points[p] * scale;
 
+
 			//Rotate around the y-axis first
 			x = (plane.points[p].x * cosine.y) - (plane.points[p].z * sine.y);
 			z = (plane.points[p].z * cosine.y) + (plane.points[p].x * sine.y);
@@ -259,6 +295,7 @@ void add_model_to_scene(
 			plane.points[p] = Vec3f{x, y, z} + pos;
 
 
+
 			// scale normals and make offset of point
 			plane.normals[p] = (plane.normals[p]) * scale;
 			x = (plane.normals[p].x * cosine.y) - (plane.normals[p].z * sine.y);
@@ -272,6 +309,15 @@ void add_model_to_scene(
 			y = (temp_y * cosine.z) - (x * sine.z);
 			x = (x * cosine.z) + (temp_y * sine.z);
 			plane.normals[p] = Vec3f{x, y, z} + plane.points[p];
+
+		}
+
+		if(entity != nullptr) {
+			for(Box box : model.boxes) {
+				box.pos = box.pos * scale;
+				box.dim = box.dim * scale;
+				entity->boxes.push_back(box);
+			}
 		}
 		plane.normal = plane.normals[0];
 

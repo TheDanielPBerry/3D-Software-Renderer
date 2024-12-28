@@ -1,7 +1,10 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_stdinc.h>
 #include <SDL2/SDL_video.h>
+#include <algorithm>
 #include <iostream>
 #include <cstdlib>
 #include <chrono>
@@ -9,6 +12,7 @@
 #include <ctime>
 
 #include "scene.h"
+#include "Physics.h"
 #include "Light.h"
 #include "rasterize.h"
 
@@ -37,10 +41,11 @@ int main(int argc, char* argv[]) {
 		SDL_Quit();
 		return 1;
 	}
-	////SDL_SetRelativeMouseMode(SDL_TRUE);
+	SDL_bool mouse_mode = SDL_TRUE;
+	SDL_SetRelativeMouseMode(mouse_mode);
 
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	if (!renderer) {
+	if(!renderer) {
 		std::cerr << "Renderer creation failed: " << SDL_GetError() << std::endl;
 		SDL_DestroyWindow(window);
 		SDL_Quit();
@@ -52,21 +57,29 @@ int main(int argc, char* argv[]) {
 	uint buffer_size = (uint) (dimensions.x * dimensions.y);
 	Uint32 *screen_buffer = new Uint32[buffer_size];
 	float *z_buffer = new float[buffer_size];
-	for (int i = 0; i < buffer_size; ++i) {
-		screen_buffer[i] = 0xFF0000FF; // Red color
+	for(int i = 0; i < buffer_size; ++i) {
+		screen_buffer[i] = 0xFF0000FF; // Black background color
 	}
 
 
 	std::vector<Plane> scene;
 	std::vector<SDL_Surface *> texture_pool;
 	std::vector<Entity> entities;
-	build_scene(scene, texture_pool, entities);
+	std::vector<Box> staticBoxes;
+	build_scene(scene, texture_pool, entities, staticBoxes);
+
+	std::random_shuffle(staticBoxes.begin(), staticBoxes.end());
+	Box *staticTree;
+	for(Box &box : staticBoxes) {
+		staticTree = insert_box(staticTree, box);
+	}
 
 	std::vector<Light> lights;
 	some_lights(lights);
 	light_scene(scene, lights);
 
-	Vec3f translate = Vec3f{0,0,0};
+	Entity *camera = &(entities[2]);
+	Vec3f translate = Vec3f{};
 	Vec3f rotate = Vec3f{0,0,0};
 	draw_scene(scene, screen_buffer, dimensions, translate, rotate, z_buffer);
 
@@ -89,7 +102,7 @@ int main(int argc, char* argv[]) {
 	auto millisecond = getCurrentMilliseconds();
 	while (running) {
 		for (int i = 0; i < dimensions.x * dimensions.y; ++i) {
-			screen_buffer[i] = 0x000000FF; // Red color
+			screen_buffer[i] = 0x000000FF; // Bleck color
 			z_buffer[i] = 0.0;
 		}
 		draw_scene(scene, screen_buffer, dimensions, translate, rotate, z_buffer);
@@ -105,7 +118,7 @@ int main(int argc, char* argv[]) {
 		if(frameCount % 3 == 0) {
 			auto currentFrameMillis = getCurrentMilliseconds();
 			if(currentFrameMillis - millisecond > 10) {
-				tick(entities);
+				tick(entities, staticTree);
 				millisecond = currentFrameMillis;
 			}
 		}
@@ -114,52 +127,56 @@ int main(int argc, char* argv[]) {
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, texture, NULL, &screen_rect);
 		SDL_RenderPresent(renderer);
+		translate = camera->pos * Vec3f{ -1, -1, -1 };
 		while(SDL_PollEvent(&event)) {
 			switch(event.type) {
-				case SDL_QUIT:
+			case SDL_QUIT:
+				running = false;
+				break;
+			case SDL_MOUSEWHEEL:
+				speed *= event.wheel.y > 0 ? 2 : 0.5;
+				break;
+			case SDL_MOUSEMOTION:
+				rotate.y += 0.05 * event.motion.xrel;
+				#define PI_OVER_TWO 1.4
+				if(event.motion.yrel > 0 && rotate.x < PI_OVER_TWO) {
+					rotate.x += 0.05 * event.motion.yrel;
+				} else if(event.motion.yrel < 0 && rotate.x > -PI_OVER_TWO) {
+					rotate.x += 0.05 * event.motion.yrel;
+				}
+				break;
+			case SDL_KEYDOWN:
+				if(event.key.keysym.scancode == 5) {
+					std::cout << "Debugger? I hardly know her.";
+				} else if(event.key.keysym.scancode == 41) {
 					running = false;
-					break;
-				case SDL_MOUSEWHEEL:
-					speed *= event.wheel.y > 0 ? 2 : 0.5;
-					break;
-				case SDL_MOUSEMOTION:
-					rotate.y += 0.05 * event.motion.xrel;
-					#define PI_OVER_TWO 1.4
-					if(event.motion.yrel > 0 && rotate.x < PI_OVER_TWO) {
-						rotate.x += 0.05 * event.motion.yrel;
-					} else if(event.motion.yrel < 0 && rotate.x > -PI_OVER_TWO) {
-						rotate.x += 0.05 * event.motion.yrel;
-					}
-					break;
-				case SDL_KEYDOWN:
-					if(event.key.keysym.scancode == 5) {
-						std::cout << "Debugger? I hardly know her.";
-					} else if(event.key.keysym.scancode == 41) {
-						running = false;
-					} else if(event.key.keysym.scancode == 26 || event.key.keysym.scancode == 14) {
-						translate.z -= cos(rotate.y) * speed;
-						translate.x -= sin(rotate.y) * speed;
-					} else if(event.key.keysym.scancode == 22 || event.key.keysym.scancode == 13) {
-						translate.z += cos(rotate.y) * speed;
-						translate.x += sin(rotate.y) * speed;
-					} else if(event.key.keysym.scancode == 11 || event.key.keysym.scancode == 4) {
-						translate.x += cos(rotate.y) * speed;
-						translate.z -= sin(rotate.y) * speed;
-					} else if(event.key.keysym.scancode == 15 || event.key.keysym.scancode == 7) {
-						translate.x -= cos(rotate.y) * speed;
-						translate.z += sin(rotate.y) * speed;
-					} else if(event.key.keysym.scancode == 44) {
-						translate.y += speed;
-					} else if(event.key.keysym.scancode == 225) {
-						translate.y -= speed;
-					} else if(event.key.keysym.scancode == 79) {
-						rotate.y += speed;
-					} else if(event.key.keysym.scancode == 80) {
-						rotate.y -= speed;
-					} else {
-						std::cout << event.key.keysym.scancode << std::endl;
-					}
-					break;
+				} else if(event.key.keysym.scancode == 24) {
+					mouse_mode = mouse_mode == SDL_TRUE ? SDL_FALSE : SDL_TRUE;
+					SDL_SetRelativeMouseMode(mouse_mode);
+				} else if(event.key.keysym.scancode == 26 || event.key.keysym.scancode == 14) {
+					camera->vel.z += cos(rotate.y) * speed;
+					camera->vel.x += sin(rotate.y) * speed;
+				} else if(event.key.keysym.scancode == 22 || event.key.keysym.scancode == 13) {
+					camera->vel.z -= cos(rotate.y) * speed;
+					camera->vel.x -= sin(rotate.y) * speed;
+				} else if(event.key.keysym.scancode == 11 || event.key.keysym.scancode == 4) {
+					camera->vel.x -= cos(rotate.y) * speed;
+					camera->vel.z += sin(rotate.y) * speed;
+				} else if(event.key.keysym.scancode == 15 || event.key.keysym.scancode == 7) {
+					camera->vel.x += cos(rotate.y) * speed;
+					camera->vel.z -= sin(rotate.y) * speed;
+				} else if(event.key.keysym.scancode == 44) {
+					camera->vel.y = -1;
+				} else if(event.key.keysym.scancode == 225) {
+					camera->vel.y = -1;
+				} else if(event.key.keysym.scancode == 79) {
+					//rotate.y += speed;
+				} else if(event.key.keysym.scancode == 80) {
+					rotate.y -= speed;
+				} else {
+					std::cout << event.key.keysym.scancode << std::endl;
+				}
+				break;
 			}
 		}
 	}
