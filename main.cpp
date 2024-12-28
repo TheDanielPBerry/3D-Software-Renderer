@@ -67,6 +67,9 @@ int main(int argc, char* argv[]) {
 	std::vector<Entity> entities;
 	std::vector<Box> staticBoxes;
 	build_scene(scene, texture_pool, entities, staticBoxes);
+	for(Entity &entity : entities) {
+		setRotationMatrix(entity, true);	//Initialize rotation matrices
+	}
 
 	std::random_shuffle(staticBoxes.begin(), staticBoxes.end());
 	Box *staticTree;
@@ -78,9 +81,13 @@ int main(int argc, char* argv[]) {
 	some_lights(lights);
 	light_scene(scene, lights);
 
-	Entity *camera = &(entities[2]);
-	Vec3f translate = Vec3f{};
-	Vec3f rotate = Vec3f{0,0,0};
+	Entity *camera = &(entities[0]);
+	camera->boxes[0].pos = camera->boxes[0].pos * Vec3f{10, 10, 10};
+	camera->boxes[0].dim = camera->boxes[0].dim * Vec3f{10, 10, 10};
+	camera->boxes[0].dim.y *= 1.4;
+
+	Vec3f translate = camera->pos;
+	Vec3f rotate = camera->rotation;
 	draw_scene(scene, screen_buffer, dimensions, translate, rotate, z_buffer);
 
 	// Create a texture from the pixel buffer
@@ -119,6 +126,7 @@ int main(int argc, char* argv[]) {
 			auto currentFrameMillis = getCurrentMilliseconds();
 			if(currentFrameMillis - millisecond > 10) {
 				tick(entities, staticTree);
+				camera->rotational_velocity = camera->rotational_velocity * Vec3f{ 0.1, 0.1, 0.1 };
 				millisecond = currentFrameMillis;
 			}
 		}
@@ -128,6 +136,7 @@ int main(int argc, char* argv[]) {
 		SDL_RenderCopy(renderer, texture, NULL, &screen_rect);
 		SDL_RenderPresent(renderer);
 		translate = camera->pos * Vec3f{ -1, -1, -1 };
+		rotate = camera->rotation;
 		while(SDL_PollEvent(&event)) {
 			switch(event.type) {
 			case SDL_QUIT:
@@ -137,12 +146,12 @@ int main(int argc, char* argv[]) {
 				speed *= event.wheel.y > 0 ? 2 : 0.5;
 				break;
 			case SDL_MOUSEMOTION:
-				rotate.y += 0.05 * event.motion.xrel;
-				#define PI_OVER_TWO 1.4
-				if(event.motion.yrel > 0 && rotate.x < PI_OVER_TWO) {
-					rotate.x += 0.05 * event.motion.yrel;
-				} else if(event.motion.yrel < 0 && rotate.x > -PI_OVER_TWO) {
-					rotate.x += 0.05 * event.motion.yrel;
+				camera->rotational_velocity.y += 0.05 * event.motion.xrel;
+				#define PI_OVER_TWO 1.41
+				if(event.motion.yrel > 0 && camera->rotation.x < PI_OVER_TWO) {
+					camera->rotational_velocity.x += 0.05 * event.motion.yrel;
+				} else if(event.motion.yrel < 0 && camera->rotation.x > -PI_OVER_TWO) {
+					camera->rotational_velocity.x += 0.05 * event.motion.yrel;
 				}
 				break;
 			case SDL_KEYDOWN:

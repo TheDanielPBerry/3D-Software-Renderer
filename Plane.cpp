@@ -16,6 +16,7 @@ typedef struct Plane {
 	Vec2f texture_coords[N_POINTS];
 	SDL_Surface *texture;
 	bool cullable = false;
+	bool cameraStatic = false;
 	Entity *entity;
 } Plane;
 
@@ -25,35 +26,33 @@ typedef struct Plane {
 
 bool transform(Plane &plane, const Vec3f &translate, const Vec3f rotationTrig[2])
 {
-	const Vec3f cosine = rotationTrig[0];
-	const Vec3f sine = rotationTrig[1];
+	#define COSINE 0
+	#define SINE 1
+
 	for(u_char p=0; p<N_POINTS; p++) {
 		plane.buffer[p] = plane.points[p];
+		if(plane.cameraStatic) {
+			continue;
+		}
 		float x, y, z, temp_y;
 		if(plane.entity != nullptr) {
-			x = (plane.buffer[p].x * plane.entity->rotationMatrix[0].y) - (plane.buffer[p].z * plane.entity->rotationMatrix[1].y);
-			z = (plane.buffer[p].z * plane.entity->rotationMatrix[0].y) + (plane.buffer[p].x * plane.entity->rotationMatrix[1].y);
-			
-			temp_y = (plane.buffer[p].y * plane.entity->rotationMatrix[0].x) - (z * plane.entity->rotationMatrix[1].x);
-			z = (z * plane.entity->rotationMatrix[0].x) + (plane.buffer[p].y * plane.entity->rotationMatrix[1].x);
-
-			//Lastly the z-axis
-			y = (temp_y * plane.entity->rotationMatrix[0].z) - (x * plane.entity->rotationMatrix[1].z);
-			x = (x * plane.entity->rotationMatrix[0].z) + (temp_y * plane.entity->rotationMatrix[1].z);
-			plane.buffer[p] = Vec3f{x, y, z};
+			rotate(plane.buffer[p], plane.entity->rotationMatrix);
 		}
 		plane.buffer[p] = plane.buffer[p] + translate;
 		if(plane.entity != nullptr) {
 			plane.buffer[p] = plane.buffer[p] + plane.entity->pos;
 		}
-		x = (plane.buffer[p].x * cosine.y) - (plane.buffer[p].z * sine.y);
-		z = (plane.buffer[p].z * cosine.y) + (plane.buffer[p].x * sine.y);
+
+		x = (plane.buffer[p].x * rotationTrig[COSINE].y) - (plane.buffer[p].z * rotationTrig[SINE].y);
+		z = (plane.buffer[p].z * rotationTrig[COSINE].y) + (plane.buffer[p].x * rotationTrig[SINE].y);
 		
-		y = (plane.buffer[p].y * cosine.x) - (z * sine.x);
-		z = (z * cosine.x) + (plane.buffer[p].y * sine.x);
+		y = (plane.buffer[p].y * rotationTrig[COSINE].x) - (z * rotationTrig[SINE].x);
+		z = (z * rotationTrig[COSINE].x) + (plane.buffer[p].y * rotationTrig[SINE].x);
+
 		plane.buffer[p].x = x;
 		plane.buffer[p].y = y;
 		plane.buffer[p].z = z;
+
 	}
 
 	if(plane.cullable) {

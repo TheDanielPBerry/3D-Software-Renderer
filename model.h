@@ -29,6 +29,18 @@ void add_model_to_scene(
 	Vec3f rotation,
 	Vec3f scale,
 	bool cullable,
+	Entity *entity,
+	bool cameraStatic
+);
+
+void add_model_to_scene(
+	Model &model,
+	std::vector<Plane> &scene,
+	std::vector<SDL_Surface *> &texture_pool,
+	Vec3f pos,
+	Vec3f rotation,
+	Vec3f scale,
+	bool cullable,
 	Entity *entity
 );
 

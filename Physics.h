@@ -17,6 +17,7 @@ typedef struct Box {
 typedef struct Entity {
 	Vec3f pos;
 	Vec3f vel;
+	Vec3f drag;
 	Vec3f rotation;
 	Vec3f rotational_velocity;
 	std::vector<Box> boxes;
@@ -26,6 +27,7 @@ typedef struct Entity {
 
 Box *insert_box(Box *root, Box &box);
 
+void setRotationMatrix(Entity &entity, bool initialize);
 void tick(std::vector<Entity> &entities, Box *staticTree);
 
 #endif

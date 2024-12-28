@@ -17,6 +17,7 @@ typedef struct Plane {
 	Vec2f texture_coords[N_POINTS];
 	SDL_Surface *texture;
 	bool cullable = false;
+	bool cameraStatic = false;
 	Entity *entity;
 } Plane;
 

@@ -13,9 +13,9 @@ typedef struct Vec2f {
 } Vec2f;
 
 typedef struct Vec3f {
-	float x;
-	float y;
-	float z;
+	float x = 0.0;
+	float y = 0.0;
+	float z = 0.0;
 
 	Vec3f operator+(const Vec3f &b)
 	{
@@ -53,7 +53,7 @@ typedef struct Vec3f {
 		};
 	}
 
-	float operator[](const int dim)
+	float &operator[](const int dim)
 	{
 		if(dim == 0) {
 			return x;
@@ -79,8 +79,11 @@ void check_infinity(Vec2f &coeffs, const float target);
 
 void coeffs(const Vec2f &a, const Vec2f &b, Vec2f &dest);
 
+Vec3f cross_product(const Vec3f a, const Vec3f& b);
+float dot_product(const Vec3f v, const Vec3f &n);
+
 float distance_squared(const Vec3f &a, const Vec3f &b);
 float distance_cubed(const Vec3f &a, const Vec3f &b);
 
-Vec3f cross_product(const Vec3f a, const Vec3f& b);
-float dot_product(const Vec3f v, const Vec3f &n);
+
+void rotate(Vec3f &v, Vec3f (&trig)[2]);

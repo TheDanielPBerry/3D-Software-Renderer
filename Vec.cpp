@@ -14,9 +14,9 @@ typedef struct Vec2f {
 } Vec2f;
 
 typedef struct Vec3f {
-	float x;
-	float y;
-	float z;
+	float x = 0.0;
+	float y = 0.0;
+	float z = 0.0;
 
 	Vec3f operator-(const Vec3f &b)
 	{
@@ -54,7 +54,7 @@ typedef struct Vec3f {
 		};
 	}
 
-	float operator[](const int dim)
+	float &operator[](const int dim)
 	{
 		if(dim == 0) {
 			return x;
@@ -64,6 +64,7 @@ typedef struct Vec3f {
 		return z;
 	}
 } Vec3f;
+
 
 typedef struct Vec4f {
 	float x;
@@ -160,4 +161,23 @@ float distance_cubed(const Vec3f &a, const Vec3f &b)
 	return (a.x - b.z) * (a.x - b.x) * (a.x - b.x)
 		+ (a.y - b.y) * (a.y - b.y) * (a.y - b.y)
 		+ (a.z - b.z) * (a.z - b.z) * (a.z - b.z);
+}
+
+void rotate(Vec3f &v, Vec3f (&trig)[2])
+{
+	#define COSINE 0
+	#define SINE 1
+	float x, y, temp_y, z;
+	//Y-axis
+	x = (v.x * trig[COSINE].y) - (v.z * trig[SINE].y);
+	z = (v.z * trig[COSINE].y) + (v.x * trig[SINE].y);
+
+	//Then the x-axis
+	temp_y = (v.y * trig[COSINE].x) - (z * trig[SINE].x);
+	z = (z * trig[COSINE].x) + (v.y * trig[SINE].x);
+
+	//Lastly the z-axis
+	y = (temp_y * trig[COSINE].z) - (x * trig[SINE].z);
+	x = (x * trig[COSINE].z) + (temp_y * trig[SINE].z);
+	v = Vec3f{x, y, z};
 }

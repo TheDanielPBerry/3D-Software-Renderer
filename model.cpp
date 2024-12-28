@@ -247,9 +247,27 @@ void add_model_to_scene(
 	Vec3f rotation,
 	Vec3f scale,
 	bool cullable,
-	Entity *entity
+	Entity *entity,
+	bool cameraStatic
 )
 {
+	Vec3f trig[2] = {
+		Vec3f{cos(rotation.x), cos(rotation.y), cos(rotation.z)},
+		Vec3f{sin(rotation.x), sin(rotation.y), sin(rotation.z)},
+	};
+
+	for(Box box : model.boxes) {
+		box.pos = box.pos * scale;
+		box.dim = box.dim * scale;
+		box.entity = entity;
+		if(entity != nullptr) {
+			std::cout << model.boxes.size() << std::endl;
+			entity->boxes.push_back(box);
+		} else {
+
+		}
+	}
+
 	for(int i=0; i<model.planes.size(); i++) {
 		Plane plane = Plane{
 			.points = {
@@ -270,55 +288,24 @@ void add_model_to_scene(
 				model.texture_coords[model.planes[i][1][2]],
 			},
 			.texture = texture_pool[model.texture],
+			.cameraStatic = cameraStatic,
 		};
 
-		Vec3f cosine = Vec3f{cos(rotation.x), cos(rotation.y), cos(rotation.z)};
-		Vec3f sine = Vec3f{sin(rotation.x), sin(rotation.y), sin(rotation.z)};
+
 		for(uint p=0; p<N_POINTS; p++) {
 			float x, y, z, temp_y;
-			//Scale everything
 			plane.points[p] = plane.points[p] * scale;
-
-
-			//Rotate around the y-axis first
-			x = (plane.points[p].x * cosine.y) - (plane.points[p].z * sine.y);
-			z = (plane.points[p].z * cosine.y) + (plane.points[p].x * sine.y);
-
-			//Then the x-axis
-			temp_y = (plane.points[p].y * cosine.x) - (z * sine.x);
-			z = (z * cosine.x) + (plane.points[p].y * sine.x);
-
-			//Lastly the z-axis
-			y = (temp_y * cosine.z) - (x * sine.z);
-			x = (x * cosine.z) + (temp_y * sine.z);
-
-			plane.points[p] = Vec3f{x, y, z} + pos;
-
+			rotate(plane.points[p], trig);
+			plane.points[p] = plane.points[p] + pos;
 
 
 			// scale normals and make offset of point
 			plane.normals[p] = (plane.normals[p]) * scale;
-			x = (plane.normals[p].x * cosine.y) - (plane.normals[p].z * sine.y);
-			z = (plane.normals[p].z * cosine.y) + (plane.normals[p].x * sine.y);
-
-			//Then the x-axis
-			temp_y = (plane.normals[p].y * cosine.x) - (z * sine.x);
-			z = (z * cosine.x) + (plane.normals[p].y * sine.x);
-
-			//Lastly the z-axis
-			y = (temp_y * cosine.z) - (x * sine.z);
-			x = (x * cosine.z) + (temp_y * sine.z);
-			plane.normals[p] = Vec3f{x, y, z} + plane.points[p];
-
+			rotate(plane.normals[p], trig);
+			plane.normals[p] = plane.normals[p] + plane.points[p];
 		}
 
-		if(entity != nullptr) {
-			for(Box box : model.boxes) {
-				box.pos = box.pos * scale;
-				box.dim = box.dim * scale;
-				entity->boxes.push_back(box);
-			}
-		}
+
 		plane.normal = plane.normals[0];
 
 		plane.cullable = cullable;
@@ -328,4 +315,18 @@ void add_model_to_scene(
 		scene.push_back(plane);
 	}
 
+}
+
+void add_model_to_scene(
+	Model &model,
+	std::vector<Plane> &scene,
+	std::vector<SDL_Surface *> &texture_pool,
+	Vec3f pos,
+	Vec3f rotation,
+	Vec3f scale,
+	bool cullable,
+	Entity *entity
+)
+{
+	add_model_to_scene(model, scene, texture_pool, pos, rotation, scale, cullable, entity, false);
 }
