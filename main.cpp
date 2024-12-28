@@ -197,6 +197,10 @@ int main(int argc, char* argv[]) {
 		//SDL_DestroyTexture(texture_pool[i]);
 		//SDL_DestroyWindowSurface(window);
 	}
+
+	entities.clear();
+	staticBoxes.clear();
+
 	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);

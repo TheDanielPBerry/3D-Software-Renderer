@@ -64,7 +64,7 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 	add_model_to_scene(models[shotgun], scene, texture_pool, Vec3f{ 0.2, 0.2, 0.3}, Vec3f{ 0, 3.14/2, 3.18 }, Vec3f{ 0.1, 0.1, 0.08 }, true, &(entities[0]), true);
 	//add_model_to_scene(models[rpg], scene, texture_pool, Vec3f{ 0.0, 0.22, 0.0}, Vec3f{ -0.15, 3.141592, 3.141592 }, Vec3f{ 0.1, 0.1, 0.1 }, true, &(entities[0]), true);
 	add_model_to_scene(models[chest], scene, texture_pool, Vec3f{}, Vec3f{}, Vec3f{ 0.3, 0.3, 0.3 }, true, &(entities[1]));
-	add_model_to_scene(models[rpg], scene, texture_pool, Vec3f{}, Vec3f{}, Vec3f{ 0.06, 0.06, 0.06 }, true, &(entities[2]));
+	add_model_to_scene(models[rpg], scene, texture_pool, Vec3f{ 0, 0, -0.4 }, Vec3f{}, Vec3f{ 0.05, 0.05, 0.05 }, true, &(entities[2]));
 
 	add_model_to_scene(models[crate], scene, texture_pool, Vec3f{ }, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, &(entities[3]));
 
