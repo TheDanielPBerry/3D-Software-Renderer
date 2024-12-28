@@ -99,8 +99,8 @@ void tick(std::vector<Entity> &entities, Box *staticTree)
 				} else {
 					Box *target = intersects_entities(box, entities);
 					if(target != nullptr) {
-						target->entity->vel.x += velocity.x;
-						velocity.x = 0.0;
+						target->entity->vel.x += velocity.x / 2;
+						velocity.x /= 2;
 					}
 				}
 				box.pos.x = tempCoordinate;
@@ -114,8 +114,8 @@ void tick(std::vector<Entity> &entities, Box *staticTree)
 				} else {
 					Box *target = intersects_entities(box, entities);
 					if(target != nullptr) {
-						target->entity->vel.y += velocity.y;
-						velocity.y = 0.0;
+						target->entity->vel.y += velocity.y / 2;
+						velocity.y /= 2;
 					}
 				}
 				box.pos.y = tempCoordinate;
@@ -129,8 +129,8 @@ void tick(std::vector<Entity> &entities, Box *staticTree)
 				} else {
 					Box *target = intersects_entities(box, entities);
 					if(target != nullptr) {
-						target->entity->vel.z += velocity.z;
-						velocity.z = 0.0;
+						target->entity->vel.z += velocity.z / 2;
+						velocity.z /= 2;
 					}
 				}
 				box.pos.z = tempCoordinate;

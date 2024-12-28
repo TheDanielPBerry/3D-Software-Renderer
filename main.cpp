@@ -175,9 +175,9 @@ int main(int argc, char* argv[]) {
 					camera->vel.x += cos(rotate.y) * speed;
 					camera->vel.z -= sin(rotate.y) * speed;
 				} else if(event.key.keysym.scancode == 44) {
-					camera->vel.y = -1;
+					camera->vel.y = -1.5;
 				} else if(event.key.keysym.scancode == 225) {
-					camera->vel.y = -1;
+					camera->vel.y = -1.5;
 				} else if(event.key.keysym.scancode == 79) {
 					//rotate.y += speed;
 				} else if(event.key.keysym.scancode == 80) {
