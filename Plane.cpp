@@ -28,14 +28,28 @@ bool transform(Plane &plane, const Vec3f &translate, const Vec3f rotationTrig[2]
 	const Vec3f cosine = rotationTrig[0];
 	const Vec3f sine = rotationTrig[1];
 	for(u_char p=0; p<N_POINTS; p++) {
-		plane.buffer[p] = plane.points[p] + translate;
+		plane.buffer[p] = plane.points[p];
+		float x, y, z, temp_y;
+		if(plane.entity != nullptr) {
+			x = (plane.buffer[p].x * plane.entity->rotationMatrix[0].y) - (plane.buffer[p].z * plane.entity->rotationMatrix[1].y);
+			z = (plane.buffer[p].z * plane.entity->rotationMatrix[0].y) + (plane.buffer[p].x * plane.entity->rotationMatrix[1].y);
+			
+			temp_y = (plane.buffer[p].y * plane.entity->rotationMatrix[0].x) - (z * plane.entity->rotationMatrix[1].x);
+			z = (z * plane.entity->rotationMatrix[0].x) + (plane.buffer[p].y * plane.entity->rotationMatrix[1].x);
+
+			//Lastly the z-axis
+			y = (temp_y * plane.entity->rotationMatrix[0].z) - (x * plane.entity->rotationMatrix[1].z);
+			x = (x * plane.entity->rotationMatrix[0].z) + (temp_y * plane.entity->rotationMatrix[1].z);
+			plane.buffer[p] = Vec3f{x, y, z};
+		}
+		plane.buffer[p] = plane.buffer[p] + translate;
 		if(plane.entity != nullptr) {
 			plane.buffer[p] = plane.buffer[p] + plane.entity->pos;
 		}
-		float x = (plane.buffer[p].x * cosine.y) - (plane.buffer[p].z * sine.y);
-		float z = (plane.buffer[p].z * cosine.y) + (plane.buffer[p].x * sine.y);
+		x = (plane.buffer[p].x * cosine.y) - (plane.buffer[p].z * sine.y);
+		z = (plane.buffer[p].z * cosine.y) + (plane.buffer[p].x * sine.y);
 		
-		float y = (plane.buffer[p].y * cosine.x) - (z * sine.x);
+		y = (plane.buffer[p].y * cosine.x) - (z * sine.x);
 		z = (z * cosine.x) + (plane.buffer[p].y * sine.x);
 		plane.buffer[p].x = x;
 		plane.buffer[p].y = y;
@@ -83,39 +97,35 @@ uint clip_plane(Plane plane, Plane (&planes)[2])
 		Vec4f colors[2];
 		for(u_char p=0; p<in_front_z; p++) {
 			coeffs(Vec2f{ plane.buffer[behind[0]].x, plane.buffer[behind[0]].z }, 
-			 Vec2f{ plane.buffer[in_front[p]].x, plane.buffer[in_front[p]].z }, coefficients);
+				Vec2f{ plane.buffer[in_front[p]].x, plane.buffer[in_front[p]].z }, coefficients);
 			buffers[p].x = line(coefficients, FRUSTUM_VIEWPOINT_DISTANCE);
 
 			coeffs(Vec2f{ plane.buffer[behind[0]].y, plane.buffer[behind[0]].z }, 
-			 Vec2f{ plane.buffer[in_front[p]].y, plane.buffer[in_front[p]].z }, coefficients);
+				Vec2f{ plane.buffer[in_front[p]].y, plane.buffer[in_front[p]].z }, coefficients);
 			buffers[p].y = line(coefficients, FRUSTUM_VIEWPOINT_DISTANCE);
 
 			buffers[p].z = FRUSTUM_VIEWPOINT_DISTANCE;
 
 			//Colors
 			coeffs(Vec2f{ plane.color[behind[0]].x, plane.buffer[behind[0]].z }, 
-			 Vec2f{ plane.color[in_front[p]].x, plane.buffer[in_front[p]].z }, coefficients);
+				Vec2f{ plane.color[in_front[p]].x, plane.buffer[in_front[p]].z }, coefficients);
 			colors[p].x = line(coefficients, FRUSTUM_VIEWPOINT_DISTANCE);
 
 			coeffs(Vec2f{ plane.color[behind[0]].y, plane.buffer[behind[0]].z }, 
-			 Vec2f{ plane.color[in_front[p]].y, plane.buffer[in_front[p]].z }, coefficients);
+				Vec2f{ plane.color[in_front[p]].y, plane.buffer[in_front[p]].z }, coefficients);
 			colors[p].y = line(coefficients, FRUSTUM_VIEWPOINT_DISTANCE);
 
 			coeffs(Vec2f{ plane.color[behind[0]].z, plane.buffer[behind[0]].z }, 
-			 Vec2f{ plane.color[in_front[p]].z, plane.buffer[in_front[p]].z }, coefficients);
+				Vec2f{ plane.color[in_front[p]].z, plane.buffer[in_front[p]].z }, coefficients);
 			colors[p].z = line(coefficients, FRUSTUM_VIEWPOINT_DISTANCE);
-
-			coeffs(Vec2f{ plane.color[behind[0]].w, plane.buffer[behind[0]].z }, 
-			 Vec2f{ plane.color[in_front[p]].w, plane.buffer[in_front[p]].z }, coefficients);
-			colors[p].w = line(coefficients, FRUSTUM_VIEWPOINT_DISTANCE);
 
 			//Textures
 			coeffs(Vec2f{ plane.texture_coords[behind[0]].x, plane.buffer[behind[0]].z }, 
-			 Vec2f{ plane.texture_coords[in_front[p]].x, plane.buffer[in_front[p]].z }, coefficients);
+				Vec2f{ plane.texture_coords[in_front[p]].x, plane.buffer[in_front[p]].z }, coefficients);
 			texture_coords[p].x = line(coefficients, FRUSTUM_VIEWPOINT_DISTANCE);
 
 			coeffs(Vec2f{ plane.texture_coords[behind[0]].y, plane.buffer[behind[0]].z }, 
-			 Vec2f{ plane.texture_coords[in_front[p]].y, plane.buffer[in_front[p]].z }, coefficients);
+				Vec2f{ plane.texture_coords[in_front[p]].y, plane.buffer[in_front[p]].z }, coefficients);
 			texture_coords[p].y = line(coefficients, FRUSTUM_VIEWPOINT_DISTANCE);
 		}
 		planes[0].buffer[0] = plane.buffer[in_front[0]];
@@ -151,39 +161,35 @@ uint clip_plane(Plane plane, Plane (&planes)[2])
 		Vec2f coefficients;
 		for(u_char p=0; p<behind_z; p++) {
 			coeffs(Vec2f{ plane.buffer[behind[p]].x, plane.buffer[behind[p]].z }, 
-			 Vec2f{ plane.buffer[in_front[0]].x, plane.buffer[in_front[0]].z }, coefficients);
+				Vec2f{ plane.buffer[in_front[0]].x, plane.buffer[in_front[0]].z }, coefficients);
 			planes[0].buffer[behind[p]].x = line(coefficients, FRUSTUM_VIEWPOINT_DISTANCE);
 
 			coeffs(Vec2f{ plane.buffer[behind[p]].y, plane.buffer[behind[p]].z }, 
-			 Vec2f{ plane.buffer[in_front[0]].y, plane.buffer[in_front[0]].z }, coefficients);
+				Vec2f{ plane.buffer[in_front[0]].y, plane.buffer[in_front[0]].z }, coefficients);
 			planes[0].buffer[behind[p]].y = line(coefficients, FRUSTUM_VIEWPOINT_DISTANCE);
 
 			planes[0].buffer[behind[p]].z = FRUSTUM_VIEWPOINT_DISTANCE;
 
 			//Colors
 			coeffs(Vec2f{ plane.color[behind[p]].x, plane.buffer[behind[p]].z }, 
-			 Vec2f{ plane.color[in_front[0]].x, plane.buffer[in_front[0]].z }, coefficients);
+				Vec2f{ plane.color[in_front[0]].x, plane.buffer[in_front[0]].z }, coefficients);
 			planes[0].color[behind[p]].x = line(coefficients, FRUSTUM_VIEWPOINT_DISTANCE);
 
 			coeffs(Vec2f{ plane.color[behind[p]].y, plane.buffer[behind[p]].z }, 
-			 Vec2f{ plane.color[in_front[0]].y, plane.buffer[in_front[0]].z }, coefficients);
+				Vec2f{ plane.color[in_front[0]].y, plane.buffer[in_front[0]].z }, coefficients);
 			planes[0].color[behind[p]].y = line(coefficients, FRUSTUM_VIEWPOINT_DISTANCE);
 
 			coeffs(Vec2f{ plane.color[behind[p]].z, plane.buffer[behind[p]].z }, 
-			 Vec2f{ plane.color[in_front[0]].z, plane.buffer[in_front[0]].z }, coefficients);
+				Vec2f{ plane.color[in_front[0]].z, plane.buffer[in_front[0]].z }, coefficients);
 			planes[0].color[behind[p]].z = line(coefficients, FRUSTUM_VIEWPOINT_DISTANCE);
-
-			coeffs(Vec2f{ plane.color[behind[p]].w, plane.buffer[behind[p]].z }, 
-		  Vec2f{ plane.color[in_front[0]].w, plane.buffer[in_front[0]].z }, coefficients);
-			planes[0].color[behind[p]].w = line(coefficients, FRUSTUM_VIEWPOINT_DISTANCE);
 
 
 			coeffs(Vec2f{ plane.texture_coords[behind[p]].x, plane.buffer[behind[p]].z }, 
-			 Vec2f{ plane.texture_coords[in_front[0]].x, plane.buffer[in_front[0]].z }, coefficients);
+				Vec2f{ plane.texture_coords[in_front[0]].x, plane.buffer[in_front[0]].z }, coefficients);
 			planes[0].texture_coords[behind[p]].x = line(coefficients, FRUSTUM_VIEWPOINT_DISTANCE);
 
 			coeffs(Vec2f{ plane.texture_coords[behind[p]].y, plane.buffer[behind[p]].z }, 
-			 Vec2f{ plane.texture_coords[in_front[0]].y, plane.buffer[in_front[0]].z }, coefficients);
+				Vec2f{ plane.texture_coords[in_front[0]].y, plane.buffer[in_front[0]].z }, coefficients);
 			planes[0].texture_coords[behind[p]].y = line(coefficients, FRUSTUM_VIEWPOINT_DISTANCE);
 		}
 		
