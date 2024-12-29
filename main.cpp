@@ -3,6 +3,7 @@
 #include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_stdinc.h>
+#include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_video.h>
 #include <algorithm>
 #include <iostream>
@@ -12,6 +13,8 @@
 #include <ctime>
 
 #include "scene.h"
+#include "game.h"
+#include "player.h"
 #include "Physics.h"
 #include "Light.h"
 #include "rasterize.h"
@@ -22,6 +25,7 @@ long long getCurrentMilliseconds() {
 	auto duration = now.time_since_epoch();         // Get duration since epoch
 	return duration_cast<milliseconds>(duration).count(); // Convert to milliseconds
 }
+
 
 int main(int argc, char* argv[]) {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -82,112 +86,63 @@ int main(int argc, char* argv[]) {
 	light_scene(scene, lights);
 
 	Entity *camera = &(entities[0]);
-	camera->boxes[0].pos = camera->boxes[0].pos * Vec3f{10, 10, 10};
-	camera->boxes[0].dim = camera->boxes[0].dim * Vec3f{10, 10, 10};
-	camera->boxes[0].dim.y *= 1.4;
 
 	Vec3f translate = camera->pos;
 	Vec3f rotate = camera->rotation;
-	draw_scene(scene, screen_buffer, dimensions, translate, rotate, z_buffer);
 
 	// Create a texture from the pixel buffer
 	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, (int)dimensions.x, (int)dimensions.y);
-	SDL_UpdateTexture(texture, NULL, screen_buffer, ((uint)dimensions.x)  * sizeof(Uint32));
 
-	// Render the texture
-	SDL_RenderClear(renderer);
-	SDL_RenderCopy(renderer, texture, NULL, NULL);
-	SDL_RenderPresent(renderer);
 
-	// Event loop
-	SDL_Event event;
 	bool running = true;
 
 	uint frameCount = 0;
-	float speed = 0.2;
-	auto timestamp = std::time(nullptr);
 	auto millisecond = getCurrentMilliseconds();
-	while (running) {
-		for (int i = 0; i < dimensions.x * dimensions.y; ++i) {
+	auto frameStamp = millisecond;
+	Signals signals;
+
+
+	while(signals.running) {
+
+		//Clear the buffer
+		for(int i = 0; i < dimensions.x * dimensions.y; ++i) {
 			screen_buffer[i] = 0x000000FF; // Bleck color
 			z_buffer[i] = 0.0;
 		}
 		draw_scene(scene, screen_buffer, dimensions, translate, rotate, z_buffer);
-		if(std::time(nullptr) == timestamp) {
+		draw_bounding_boxes(staticBoxes, entities, translate, rotate, dimensions, screen_buffer, z_buffer);
+
+
+		auto currentFrameMillis = getCurrentMilliseconds();
+		if(currentFrameMillis - frameStamp < 1000) {
 			frameCount ++;
 		} else {
-			std::cout << frameCount <<" fps" << std::endl;
+			std::cout << frameCount << " fps" << std::endl;
 			//std::cout << "X: " << rotate.x << std::endl;
 			//std::cout << "Y: " << rotate.y << std::endl;
-			timestamp = std::time(nullptr);
+			frameStamp = currentFrameMillis;
 			frameCount = 0;
 		}
-		if(frameCount % 3 == 0) {
-			auto currentFrameMillis = getCurrentMilliseconds();
-			if(currentFrameMillis - millisecond > 10) {
-				tick(entities, staticTree);
-				camera->rotational_velocity = camera->rotational_velocity * Vec3f{ 0.1, 0.1, 0.1 };
-				millisecond = currentFrameMillis;
-			}
+
+		uint diffMillis = currentFrameMillis - millisecond;
+		player_tick(camera, signals);
+		tick(entities, staticTree, diffMillis);
+		camera->rotational_velocity = camera->rotational_velocity * 0.1;
+		millisecond = currentFrameMillis;
+		if((1000 / diffMillis) > 100) {
+			//SDL_Delay(1000/100);
 		}
 
+		//Render buffer to the screen
 		SDL_UpdateTexture(texture, NULL, screen_buffer, ((uint)dimensions.x) * sizeof(Uint32));
-		SDL_RenderClear(renderer);
+		//SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, texture, NULL, &screen_rect);
 		SDL_RenderPresent(renderer);
-		translate = camera->pos * Vec3f{ -1, -1, -1 };
+
+		translate = camera->pos * -1;
 		rotate = camera->rotation;
-		while(SDL_PollEvent(&event)) {
-			switch(event.type) {
-			case SDL_QUIT:
-				running = false;
-				break;
-			case SDL_MOUSEWHEEL:
-				speed *= event.wheel.y > 0 ? 2 : 0.5;
-				break;
-			case SDL_MOUSEMOTION:
-				camera->rotational_velocity.y += 0.05 * event.motion.xrel;
-				#define PI_OVER_TWO 1.41
-				if(event.motion.yrel > 0 && camera->rotation.x < PI_OVER_TWO) {
-					camera->rotational_velocity.x += 0.05 * event.motion.yrel;
-				} else if(event.motion.yrel < 0 && camera->rotation.x > -PI_OVER_TWO) {
-					camera->rotational_velocity.x += 0.05 * event.motion.yrel;
-				}
-				break;
-			case SDL_KEYDOWN:
-				if(event.key.keysym.scancode == 5) {
-					std::cout << "Debugger? I hardly know her.";
-				} else if(event.key.keysym.scancode == 41) {
-					running = false;
-				} else if(event.key.keysym.scancode == 24) {
-					mouse_mode = mouse_mode == SDL_TRUE ? SDL_FALSE : SDL_TRUE;
-					SDL_SetRelativeMouseMode(mouse_mode);
-				} else if(event.key.keysym.scancode == 26 || event.key.keysym.scancode == 14) {
-					camera->vel.z += cos(rotate.y) * speed;
-					camera->vel.x += sin(rotate.y) * speed;
-				} else if(event.key.keysym.scancode == 22 || event.key.keysym.scancode == 13) {
-					camera->vel.z -= cos(rotate.y) * speed;
-					camera->vel.x -= sin(rotate.y) * speed;
-				} else if(event.key.keysym.scancode == 11 || event.key.keysym.scancode == 4) {
-					camera->vel.x -= cos(rotate.y) * speed;
-					camera->vel.z += sin(rotate.y) * speed;
-				} else if(event.key.keysym.scancode == 15 || event.key.keysym.scancode == 7) {
-					camera->vel.x += cos(rotate.y) * speed;
-					camera->vel.z -= sin(rotate.y) * speed;
-				} else if(event.key.keysym.scancode == 44) {
-					camera->vel.y = -1.5;
-				} else if(event.key.keysym.scancode == 225) {
-					camera->vel.y = -1.5;
-				} else if(event.key.keysym.scancode == 79) {
-					//rotate.y += speed;
-				} else if(event.key.keysym.scancode == 80) {
-					rotate.y -= speed;
-				} else {
-					std::cout << event.key.keysym.scancode << std::endl;
-				}
-				break;
-			}
-		}
+
+		poll_controls(camera, signals);
 	}
 
 	scene.clear();

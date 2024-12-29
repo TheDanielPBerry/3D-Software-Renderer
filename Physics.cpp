@@ -78,13 +78,18 @@ Box *intersects_entities(Box &box, std::vector<Entity> &entities)
 	return b;
 }
 
-void tick(std::vector<Entity> &entities, Box *staticTree)
+void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 {
+	const float proportion = milliseconds / 1000.0;
+	//const float proportion = 1;
 	for(auto &entity : entities) {
+		//Forces
 		Vec3f velocity = entity.vel;
-		velocity.y += 0.08;
+		velocity.y += 0.8;	//Gravity
 		velocity = velocity * entity.drag;
 
+
+		velocity = velocity * proportion;
 		//Check each axis individually
 		//x axis
 		for(auto box : entity.boxes) {
@@ -99,23 +104,28 @@ void tick(std::vector<Entity> &entities, Box *staticTree)
 				} else {
 					Box *target = intersects_entities(box, entities);
 					if(target != nullptr) {
-						target->entity->vel.x += velocity.x / 2;
-						velocity.x /= 2;
+						velocity.x = 0;
 					}
 				}
 				box.pos.x = tempCoordinate;
 			}
 
 			if(velocity.y != 0.0) {
+				entity.grounded = false;
 				tempCoordinate = box.pos.y;
 				box.pos.y += velocity.y;
 				if(intersects_tree(staticTree, box) != nullptr) {
+					if(velocity.y > 0) {
+						entity.grounded = true;
+					}
 					velocity.y = 0.0;
 				} else {
 					Box *target = intersects_entities(box, entities);
 					if(target != nullptr) {
-						target->entity->vel.y += velocity.y / 2;
-						velocity.y /= 2;
+						if(velocity.y > 0) {
+							entity.grounded = true;
+						}
+						velocity.y = 0;
 					}
 				}
 				box.pos.y = tempCoordinate;
@@ -129,16 +139,16 @@ void tick(std::vector<Entity> &entities, Box *staticTree)
 				} else {
 					Box *target = intersects_entities(box, entities);
 					if(target != nullptr) {
-						target->entity->vel.z += velocity.z / 2;
-						velocity.z /= 2;
+						velocity.z = 0;
 					}
 				}
 				box.pos.z = tempCoordinate;
 			}
 		}
 
-		entity.vel = velocity;
 		entity.pos = entity.pos + velocity;
+
+		entity.vel = velocity / proportion;
 		entity.rotation = entity.rotation + entity.rotational_velocity;
 
 		setRotationMatrix(entity, false);

@@ -4,6 +4,7 @@
 
 #include "Plane.h"
 #include "model.h"
+#include "game.h"
 
 void player_model(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_pool, std::vector<Entity> &entities, std::vector<Box> &staticBoxes)
 {
@@ -14,11 +15,49 @@ void player_model(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture
 	//models[rpg].boxes.push_back(models[crate].boxes[0]);
 
 	//ADS RPG
-	add_model_to_scene(models[rpg], scene, texture_pool, Vec3f{ 0.0, 0.22, 0.0}, Vec3f{ -0.15, 3.141592, 3.141592 }, Vec3f{ 0.1, 0.1, 0.1 }, true, &(entities[0]), true);
+	add_model_to_scene(models[rpg], scene, texture_pool, staticBoxes, Vec3f{ 0.0, 0.22, 0.0}, Vec3f{ -0.15, 3.141592, 3.141592 }, Vec3f{ 0.1, 0.1, 0.1 }, true, &(entities[0]), true);
 	//Hip Fire RPG
-	add_model_to_scene(models[rpg], scene, texture_pool, Vec3f{ 0.2, 0.2, 0.3}, Vec3f{ 0, 3.14, 3.18 }, Vec3f{ 0.1, 0.1, 0.1 }, true, &(entities[0]), true);
+	add_model_to_scene(models[rpg], scene, texture_pool, staticBoxes, Vec3f{ 0.2, 0.2, 0.3}, Vec3f{ 0, 3.14, 3.18 }, Vec3f{ 0.1, 0.1, 0.1 }, true, &(entities[0]), true);
 
 	//Hip fire shotgun
-	add_model_to_scene(models[shotgun], scene, texture_pool, Vec3f{ 0.2, 0.2, 0.3}, Vec3f{ 0, 3.14/2, 3.18 }, Vec3f{ 0.1, 0.1, 0.08 }, true, &(entities[0]), true);
+	add_model_to_scene(models[shotgun], scene, texture_pool, staticBoxes, Vec3f{ 0.2, 0.2, 0.3}, Vec3f{ 0, 3.14/2, 3.18 }, Vec3f{ 0.1, 0.1, 0.08 }, true, &(entities[0]), true);
 
+}
+
+void player_tick(Entity *camera, Signals &signals)
+{
+	#define PLAYER_ACCELERATION 4.0
+	#define JUMP_HEIGHT -80.0
+	#define GOD_MODE false
+
+	if(signals.forward) {
+		camera->vel.z += cos(camera->rotation.y) * PLAYER_ACCELERATION;
+		camera->vel.x += sin(camera->rotation.y) * PLAYER_ACCELERATION;
+	}
+	if(signals.back) {
+		camera->vel.z -= cos(camera->rotation.y) * PLAYER_ACCELERATION;
+		camera->vel.x -= sin(camera->rotation.y) * PLAYER_ACCELERATION;
+	}
+	if(signals.left) {
+		camera->vel.x -= cos(camera->rotation.y) * PLAYER_ACCELERATION;
+		camera->vel.z += sin(camera->rotation.y) * PLAYER_ACCELERATION;
+	}
+	if(signals.right) {
+		camera->vel.x += cos(camera->rotation.y) * PLAYER_ACCELERATION;
+		camera->vel.z -= sin(camera->rotation.y) * PLAYER_ACCELERATION;
+	}
+	if(GOD_MODE) {
+		if(signals.jump) {
+			camera->vel.y = -4;
+		}
+		if(signals.crouch) {
+			camera->vel.y = 4;
+		}
+	} else {
+		if(signals.jump) {
+			if(camera->grounded) {
+				camera->vel.y = JUMP_HEIGHT;
+			}
+		}
+	}
 }

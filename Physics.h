@@ -22,12 +22,13 @@ typedef struct Entity {
 	Vec3f rotational_velocity;
 	std::vector<Box> boxes;
 	Vec3f rotationMatrix[2];
+	bool grounded;
 	std::string name;
 } Entity;
 
 Box *insert_box(Box *root, Box &box);
 
 void setRotationMatrix(Entity &entity, bool initialize);
-void tick(std::vector<Entity> &entities, Box *staticTree);
+void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds);
 
 #endif

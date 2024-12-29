@@ -45,12 +45,30 @@ typedef struct Vec3f {
 		};
 	}
 
+	Vec3f operator*(const float &b)
+	{
+		return Vec3f {
+			x * b,
+			y * b,
+			z * b
+		};
+	}
+
 	Vec3f operator/(const Vec3f &b)
 	{
 		return Vec3f {
 			x / b.x,
 			y / b.y,
 			z / b.z
+		};
+	}
+
+	Vec3f operator/(const float &b)
+	{
+		return Vec3f {
+			x / b,
+			y / b,
+			z / b
 		};
 	}
 

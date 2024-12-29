@@ -209,7 +209,7 @@ void project_and_scale(Plane &plane, const Vec2f &dimensions)
 		float z = plane.buffer[p].z;
 		plane.buffer[p].x = ((plane.buffer[p].x
 			* (1 / (z))) + 0.5) * dimensions.x;
-		
+
 		plane.buffer[p].y = ((plane.buffer[p].y 
 			* (1 / (z))) + 0.5) * dimensions.y;
 	}

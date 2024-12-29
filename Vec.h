@@ -1,3 +1,5 @@
+#ifndef VEC_H
+#define VEC_H
 
 typedef struct Vec2f {
 	float x;
@@ -44,12 +46,30 @@ typedef struct Vec3f {
 		};
 	}
 
+	Vec3f operator*(const float &b)
+	{
+		return Vec3f {
+			x * b,
+			y * b,
+			z * b
+		};
+	}
+
 	Vec3f operator/(const Vec3f &b)
 	{
 		return Vec3f {
 			x / b.x,
 			y / b.y,
 			z / b.z
+		};
+	}
+	
+	Vec3f operator/(const float &b)
+	{
+		return Vec3f {
+			x / b,
+			y / b,
+			z / b
 		};
 	}
 
@@ -87,3 +107,5 @@ float distance_cubed(const Vec3f &a, const Vec3f &b);
 
 
 void rotate(Vec3f &v, Vec3f (&trig)[2]);
+
+#endif

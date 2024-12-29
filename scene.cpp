@@ -21,16 +21,15 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 	int rpg = load_obj_model("assets/models/rpg.obj", scene, texture_pool, models);
 	int globe = load_obj_model("assets/models/globe.obj", scene, texture_pool, models);
 
-	models[shotgun].boxes.push_back(models[crate].boxes[0]);
 	models[chest].boxes.push_back(models[crate].boxes[0]);
 	models[rpg].boxes.push_back(models[crate].boxes[0]);
 	//add_model_to_scene(models[plane], scene, texture_pool, Vec3f{ 0, 0, 2 }, Vec3f { 0, 0, 0 }, Vec3f{ 1, 1, 1 }, false, nullptr);
 	//return;
 	entities.reserve(8);
 	entities.push_back(Entity {
-		.pos = Vec3f{},
-		.vel = Vec3f{0,-5,0},
-		.drag = Vec3f{0.7, 0.8, 0.7},
+		.pos = Vec3f{ 0, -4, 0},
+		.vel = Vec3f{},
+		.drag = Vec3f{0.7, 0.92, 0.7},
 		.rotation = Vec3f{},
 		.rotational_velocity = Vec3f{},
 		.name = "player",
@@ -48,7 +47,7 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 		.vel = Vec3f{0, 0, 0},
 		.drag = Vec3f{0.9, 0.9, 0.9},
 		.rotation = Vec3f{ 3.14192, 0, 0 },
-		.rotational_velocity = Vec3f{ 0, 0.02, 0},
+		.rotational_velocity = Vec3f{ 0, 0.01, 0},
 		.name = "shotgun",
 	});
 	entities.push_back(Entity {
@@ -61,30 +60,27 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 	});
 
 
-	add_model_to_scene(models[shotgun], scene, texture_pool, Vec3f{ 0.2, 0.2, 0.3}, Vec3f{ 0, 3.14/2, 3.18 }, Vec3f{ 0.1, 0.1, 0.08 }, true, &(entities[0]), true);
-	//add_model_to_scene(models[rpg], scene, texture_pool, Vec3f{ 0.0, 0.22, 0.0}, Vec3f{ -0.15, 3.141592, 3.141592 }, Vec3f{ 0.1, 0.1, 0.1 }, true, &(entities[0]), true);
-	add_model_to_scene(models[chest], scene, texture_pool, Vec3f{}, Vec3f{}, Vec3f{ 0.3, 0.3, 0.3 }, true, &(entities[1]));
-	add_model_to_scene(models[rpg], scene, texture_pool, Vec3f{ 0, 0, -0.4 }, Vec3f{}, Vec3f{ 0.05, 0.05, 0.05 }, true, &(entities[2]));
+	add_model_to_scene(models[shotgun], scene, texture_pool, staticBoxes, Vec3f{ 0.2, 0.2, 0.3 }, Vec3f{ 0, 3.14/2, 3.18 }, Vec3f{ 0.1, 0.1, 0.08 }, true, &(entities[0]), true);
+	entities[0].boxes[0].pos = Vec3f{ -0.25, -0.25, -0.25 };
+	entities[0].boxes[0].dim = Vec3f{ 0.5, 1.8, 0.5 };
 
-	add_model_to_scene(models[crate], scene, texture_pool, Vec3f{ }, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, &(entities[3]));
+	//add_model_to_scene(models[rpg], scene, texture_pool, staticBoxes, Vec3f{ 0.0, 0.22, 0.0}, Vec3f{ -0.15, 3.141592, 3.141592 }, Vec3f{ 0.1, 0.1, 0.1 }, true, &(entities[0]), true);
+	add_model_to_scene(models[chest], scene, texture_pool, staticBoxes, Vec3f{}, Vec3f{}, Vec3f{ 0.3, 0.3, 0.3 }, true, &(entities[1]));
+	add_model_to_scene(models[shotgun], scene, texture_pool, staticBoxes, Vec3f{}, Vec3f{}, Vec3f{0.1,0.1,0.07}, true, &(entities[2]));
 
-	Vec3f crateStatic = entities[2].pos;
+	add_model_to_scene(models[crate], scene, texture_pool, staticBoxes, Vec3f{ }, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, &(entities[3]));
+
+	Vec3f crateStatic;
 	crateStatic.y = 1.2;
 	for(int z = -10; z<10; z++) {
 		for(int x = -10; x<10; x++) {
 			crateStatic.x = x;
 			crateStatic.z = z;
-			for(Box b : models[crate].boxes) {
-				b.pos = b.pos * Vec3f{ 0.5, 0.5, 0.5 };
-				b.pos = b.pos + crateStatic;
-				b.dim = b.dim * Vec3f{ 0.5, 0.5, 0.5 };
-				staticBoxes.push_back(b);
-			}
-			//add_model_to_scene(models[crate], scene, texture_pool, crateStatic, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, nullptr);
+			add_model_to_scene(models[crate], scene, texture_pool, staticBoxes, crateStatic, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, nullptr);
 		}
 	}
-	add_model_to_scene(models[globe], scene, texture_pool, Vec3f{5, -2, -10}, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, nullptr);
-	add_model_to_scene(models[floor], scene, texture_pool, Vec3f{0, 1, 0}, Vec3f{}, Vec3f{ 0.5, 1.0, 0.5 }, true, nullptr);
+	add_model_to_scene(models[globe], scene, texture_pool, staticBoxes, Vec3f{5, -2, -10}, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, nullptr);
+	add_model_to_scene(models[floor], scene, texture_pool, staticBoxes, Vec3f{0, 1, 0}, Vec3f{}, Vec3f{ 0.5, 1.0, 0.5 }, true, nullptr);
 	//return;
 
 	std::pair<SDL_Surface *, uint> brick = load_texture("assets/bricks.png", texture_pool);
@@ -112,7 +108,7 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 
 	for(float x=-5; x<5; x+=1) {
 		for(float z=-5; z<5; z+=1) {
-			//add_model_to_scene(models[floor], scene, texture_pool, Vec3f{ float(x*6.59), 1.0, float(z*6.59) }, Vec3f { 0, 0, 0 }, Vec3f{ 0.1, 1, 0.1 }, true, nullptr);
+			//add_model_to_scene(models[floor], scene, texture_pool, staticBoxes, Vec3f{ float(x*6.59), 1.0, float(z*6.59) }, Vec3f { 0, 0, 0 }, Vec3f{ 0.1, 1, 0.1 }, true, nullptr);
 		}
 	}
 	//std::pair<SDL_Surface *, uint> floor = load_texture("assets/floor.png", texture_pool);

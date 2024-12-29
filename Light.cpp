@@ -23,9 +23,9 @@ void light_scene(std::vector<Plane> &scene, const std::vector<Light> lights)
 	 			// lumos.z += intensity * light.color.z;
 			}
 
-			scene[i].color[p].x = std::min(scene[i].color[p].x * lumos, scene[i].color[p].x);
-			scene[i].color[p].y = std::min(scene[i].color[p].y * lumos, scene[i].color[p].y);
-			scene[i].color[p].z = std::min(scene[i].color[p].z * lumos, scene[i].color[p].z);
+			//scene[i].color[p].x = std::min(scene[i].color[p].x * lumos, scene[i].color[p].x);
+			//scene[i].color[p].y = std::min(scene[i].color[p].y * lumos, scene[i].color[p].y);
+			//scene[i].color[p].z = std::min(scene[i].color[p].z * lumos, scene[i].color[p].z);
 		}
 	}
 }

@@ -42,10 +42,6 @@ std::pair<std::string, int> next_word(std::string line, uint offset)
 	return next_word(line, ' ', offset);
 }
 
-void load_bounding_boxes()
-{
-
-}
 
 SDL_Surface *load_mtl(std::string filePath, Model &model, std::vector<SDL_Surface *> &texture_pool)
 {
@@ -236,6 +232,8 @@ int load_obj_model(
 	}
 
 	models.push_back(model);
+
+	inputFile.close();
 	return models.size()-1;
 }
 
@@ -243,6 +241,7 @@ void add_model_to_scene(
 	Model &model,
 	std::vector<Plane> &scene,
 	std::vector<SDL_Surface *> &texture_pool,
+	std::vector<Box> &staticBoxes,
 	Vec3f pos,
 	Vec3f rotation,
 	Vec3f scale,
@@ -258,13 +257,20 @@ void add_model_to_scene(
 
 	for(Box box : model.boxes) {
 		box.pos = box.pos * scale;
+		rotate(box.pos, trig);
+		box.pos = box.pos + pos;
+
 		box.dim = box.dim * scale;
+		rotate(box.dim, trig);
+		box.dim = box.dim;
+
 		box.entity = entity;
+
+		//Either associate all the boxes with an entity or add them into the oct tree world space
 		if(entity != nullptr) {
-			std::cout << model.boxes.size() << std::endl;
 			entity->boxes.push_back(box);
 		} else {
-
+			staticBoxes.push_back(box);
 		}
 	}
 
@@ -321,6 +327,7 @@ void add_model_to_scene(
 	Model &model,
 	std::vector<Plane> &scene,
 	std::vector<SDL_Surface *> &texture_pool,
+	std::vector<Box> &staticBoxes,
 	Vec3f pos,
 	Vec3f rotation,
 	Vec3f scale,
@@ -328,5 +335,5 @@ void add_model_to_scene(
 	Entity *entity
 )
 {
-	add_model_to_scene(model, scene, texture_pool, pos, rotation, scale, cullable, entity, false);
+	add_model_to_scene(model, scene, texture_pool, staticBoxes, pos, rotation, scale, cullable, entity, false);
 }
