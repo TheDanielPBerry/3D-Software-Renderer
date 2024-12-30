@@ -23,7 +23,6 @@
 #include "rasterize.h"
 
 
-#include <tracy/Tracy.hpp>
 
 
 long long getCurrentMilliseconds() {
@@ -115,7 +114,7 @@ int main(int argc, char* argv[]) {
 	Vec3f translate = camera->pos;
 	Vec3f rotate = camera->rotation;
 
-	// Create a texture from the pixel buffer
+	// Create a texture from the pixel buffemain
 	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, (int)dimensions.x, (int)dimensions.y);
 
 
@@ -184,7 +183,6 @@ int main(int argc, char* argv[]) {
 		poll_controls(camera, signals);
 		box_signals(signals, staticBoxes, camera, staticTree);
 
-		FrameMark;
 	}
 
 	scene.clear();
@@ -192,7 +190,7 @@ int main(int argc, char* argv[]) {
 	delete[] screen_buffer;
 	for(uint i=0; i<texture_pool.size(); i++) {
 		//SDL_DestroyTexture(texture_pool[i]);
-		//SDL_Des4475troyWindowSurface(window);
+		//SDL_DestroyWindowSurface(window);
 	}
 
 	entities.clear();

@@ -1,6 +1,6 @@
 cc = g++
 
-flags = -g -rdynamic -DTRACY_ENABLE `sdl2-config --cflags --libs` -lSDL2_image -ITracyClient -lTracyClient
+flags = -g -rdynamic `sdl2-config --cflags --libs` -lSDL2_image
 
 output = render
 
@@ -11,7 +11,6 @@ run: build
 
 debug: build
 	gdb ./$(output)
-
 
 dependencies = obj/Plane.o obj/rasterize.o obj/Light.o obj/scene.o obj/model.o obj/Vec.o obj/Physics.o obj/game.o obj/player.o obj/lines.o obj/boxedit.o
 

@@ -3,7 +3,6 @@
 #include <cmath>
 
 #include "Plane.h"
-#include "Physics.h"
 
 
 
@@ -99,7 +98,7 @@ Vec2f interpolate_lines(
 
 		if(y == initial_y && starting_x.y != -1) {
 			x_right = starting_x.y;
-		} else{
+		} else {
 			x_right = line(right_coeff_x, y);
 		}
 		if(std::isnan(x_right)) {
@@ -169,7 +168,7 @@ Vec2f interpolate_lines(
 					}
 					texture_coord_y %= plane.texture->h;
 
-					uint texture_offset = (plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size);
+					int texture_offset = (plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size);
 					if(((u_char *)plane.texture->pixels)[texture_offset + 3] == 0.0) {
 						continue;
 					}
@@ -282,7 +281,7 @@ void rasterize(Plane &plane, Uint32 *buffer, const Vec2f &dimensions, float *z_b
 	interpolate_lines(plane, left, right, y_bounds, dimensions, buffer, z_buffer, x_end);
 }
 
-void draw_scene(std::vector<Plane> scene, Uint32 *buffer, const Vec2f &dimensions, const Vec3f &translate, const Vec3f &rotate, float *z_buffer)
+void draw_scene(std::vector<Plane> &scene, Uint32 *buffer, const Vec2f &dimensions, const Vec3f &translate, const Vec3f &rotate, float *z_buffer)
 {
 	const Vec3f rotationTrig[2] = {
 		Vec3f{cos(rotate.x), cos(rotate.y), 0},
@@ -296,8 +295,8 @@ void draw_scene(std::vector<Plane> scene, Uint32 *buffer, const Vec2f &dimension
 			continue;
 		}
 
-		u_char split_plane_count = clip_plane(scene[p], splits);
-		for(u_char s=0; s<split_plane_count; s++) {
+		int split_plane_count = clip_plane(scene[p], splits);
+		for(int s=0; s<split_plane_count; s++) {
 			project_and_scale(splits[s], dimensions);
 			rasterize(splits[s], buffer, dimensions, z_buffer);
 		}
