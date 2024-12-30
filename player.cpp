@@ -6,6 +6,7 @@
 #include "model.h"
 #include "game.h"
 
+
 void player_model(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_pool, std::vector<Entity> &entities, std::vector<Box> &staticBoxes)
 {
 	std::vector<Model> models;
@@ -26,8 +27,8 @@ void player_model(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture
 
 void player_tick(Entity *camera, Signals &signals)
 {
-	#define PLAYER_ACCELERATION 2.0
-	#define JUMP_HEIGHT -80.0
+	#define PLAYER_ACCELERATION 4.0
+	#define JUMP_HEIGHT -50.0
 	#define GOD_MODE true
 
 	if(signals.forward) {
@@ -57,6 +58,7 @@ void player_tick(Entity *camera, Signals &signals)
 		if(signals.jump) {
 			if(camera->grounded) {
 				camera->vel.y = JUMP_HEIGHT;
+				camera->grounded = false;
 			}
 		}
 	}

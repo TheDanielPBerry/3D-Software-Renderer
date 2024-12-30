@@ -1,4 +1,6 @@
 #include <SDL2/SDL.h>
+#include <execinfo.h>
+#include <signal.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_render.h>
@@ -20,6 +22,10 @@
 #include "Light.h"
 #include "rasterize.h"
 
+
+#include <tracy/Tracy.hpp>
+
+
 long long getCurrentMilliseconds() {
 	using namespace std::chrono;
 	auto now = system_clock::now();                 // Get current time as system clock
@@ -28,8 +34,23 @@ long long getCurrentMilliseconds() {
 }
 
 
+void handler(int sig) {
+	void *array[10];
+	size_t size;
+	
+	// get void*'s for all entries on the stack
+	size = backtrace(array, 10);
+	
+	// print out all the frames to stderr
+	fprintf(stderr, "Error: signal %d:\n", sig);
+	backtrace_symbols_fd(array, size, STDERR_FILENO);
+	exit(1);
+}
+
 int main(int argc, char* argv[]) {
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+	signal(SIGSEGV, handler);
+
+	if(SDL_Init(SDL_INIT_VIDEO) < 0) {
 		std::cerr << "SDL initialization failed: " << SDL_GetError() << std::endl;
 		return 1;
 	}
@@ -71,14 +92,16 @@ int main(int argc, char* argv[]) {
 	std::vector<SDL_Surface *> texture_pool;
 	std::vector<Entity> entities;
 	std::vector<Box> staticBoxes;
-	staticBoxes.reserve(1000);
+	scene.reserve(8192);
+	texture_pool.reserve(32);
+	staticBoxes.reserve(1024);
 	build_scene(scene, texture_pool, entities, staticBoxes);
 	for(Entity &entity : entities) {
 		setRotationMatrix(entity, true);	//Initialize rotation matrices
 	}
 
 	//std::random_shuffle(staticBoxes.begin(), staticBoxes.end());
-	Box *staticTree;
+	Box *staticTree = nullptr;
 	for(Box &box : staticBoxes) {
 		staticTree = insert_box(staticTree, box);
 	}
@@ -141,11 +164,27 @@ int main(int argc, char* argv[]) {
 		SDL_RenderCopy(renderer, texture, NULL, &screen_rect);
 		SDL_RenderPresent(renderer);
 
-		translate = camera->pos * -1;
 		rotate = camera->rotation;
+		//translate = camera->pos * -1;
+		//translate.z += cos(rotate.y) * 1.8;
+		//translate.x += sin(rotate.y) * 1.8;
+		//translate.y += 0.3;
+		//translate.x -= cos(rotate.y) * 0.5;
+		//translate.z += sin(rotate.y) * 0.5;
+
+		//translate.x += cos(camera->rotation.y) * 3;
+		//translate.z -= sin(camera->rotation.y) * 3;
+
+
+		translate = camera->pos * -1;
+		//Fixed Camera Angles
+		//translate = Vec3f{6, 8, -7};
+		//rotate = Vec3f{ 0.6, 2.5, 0};
 
 		poll_controls(camera, signals);
 		box_signals(signals, staticBoxes, camera, staticTree);
+
+		FrameMark;
 	}
 
 	scene.clear();
@@ -153,7 +192,7 @@ int main(int argc, char* argv[]) {
 	delete[] screen_buffer;
 	for(uint i=0; i<texture_pool.size(); i++) {
 		//SDL_DestroyTexture(texture_pool[i]);
-		//SDL_DestroyWindowSurface(window);
+		//SDL_Des4475troyWindowSurface(window);
 	}
 
 	entities.clear();

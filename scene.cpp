@@ -28,7 +28,7 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 	models[rpg].boxes.push_back(models[crate].boxes[0]);
 	//add_model_to_scene(models[plane], scene, texture_pool, Vec3f{ 0, 0, 2 }, Vec3f { 0, 0, 0 }, Vec3f{ 1, 1, 1 }, false, nullptr);
 	//return;
-	entities.reserve(8);
+	entities.reserve(32);
 	entities.push_back(Entity {
 		.pos = Vec3f{ -3, -4, 0},
 		.vel = Vec3f{},

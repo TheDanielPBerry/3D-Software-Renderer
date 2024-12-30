@@ -1,6 +1,6 @@
 cc = g++
 
-flags = -g `sdl2-config --cflags --libs` -lSDL2_image
+flags = -g -rdynamic -DTRACY_ENABLE `sdl2-config --cflags --libs` -lSDL2_image -ITracyClient -lTracyClient
 
 output = render
 
@@ -22,7 +22,6 @@ build: $(dependencies)
 obj/%.o: %.cpp
 	$(cc) -c $< -o $@ $(flags)
 
-	
 clean:
 	rm obj/*
 

@@ -4,6 +4,7 @@
 #include "Physics.h"
 
 
+
 bool intersects(Box *a, Box *b)
 {
 	return a->pos.x <= b->pos.x + b->dim.x
@@ -38,7 +39,7 @@ Box *insert_box(Box *root, Box &box)
 uint number_of_checks = 0;
 Box *intersects_tree(Box *root, Box box)
 {
-	if(root == nullptr || intersects(root, &box)) {
+	if(root == NULL || intersects(root, &box)) {
 		return root;
 	}
 	uint branch = 0;
@@ -85,7 +86,7 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 	for(auto &entity : entities) {
 		//Forces
 		Vec3f velocity = entity.vel;
-		//velocity.y += 0.8;	//Gravity
+		//velocity.y += 0.7;	//Gravity
 		velocity = velocity * entity.drag;
 
 

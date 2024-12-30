@@ -169,12 +169,13 @@ Vec2f interpolate_lines(
 					}
 					texture_coord_y %= plane.texture->h;
 
-					if(((u_char *)plane.texture->pixels)[(plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size) + 3] == 0.0) {
+					uint texture_offset = (plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size);
+					if(((u_char *)plane.texture->pixels)[texture_offset + 3] == 0.0) {
 						continue;
 					}
-					red *= ((u_char *)plane.texture->pixels)[(plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size) + 0];
-					green *= ((u_char *)plane.texture->pixels)[(plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size) + 1];
-					blue *= ((u_char *)plane.texture->pixels)[(plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size) + 2];
+					red *= ((u_char *)plane.texture->pixels)[texture_offset + 0];
+					green *= ((u_char *)plane.texture->pixels)[texture_offset + 1];
+					blue *= ((u_char *)plane.texture->pixels)[texture_offset + 2];
 
 					pixel = ((uint)(std::min((red * luminosity),red)) << 24);
 					pixel += ((uint)(std::min((green * luminosity), green)) << 16);

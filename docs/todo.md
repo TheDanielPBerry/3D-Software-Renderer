@@ -9,3 +9,10 @@
 ## Done
 - [x] Texture rasterization sampling
 - [x] Load OBJ files
+
+
+## Tracy files
+- usr/local/lib/libTracyClient.a
+- Installing: /usr/local/include/tracy/TracyC.h
+- Installing: /usr/local/include/tracy/Tracy.hpp
+

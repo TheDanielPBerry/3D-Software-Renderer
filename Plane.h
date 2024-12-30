@@ -15,7 +15,7 @@ typedef struct Plane {
 	Vec3f buffer[N_POINTS];
 	Vec4f color[N_POINTS];
 	Vec2f texture_coords[N_POINTS];
-	SDL_Surface *texture;
+	SDL_Surface *texture = nullptr;
 	bool cullable = false;
 	bool cameraStatic = false;
 	Entity *entity;
