@@ -5,7 +5,7 @@
 
 #include "Physics.h"
 
-typedef struct Sinals {
+typedef struct Signals {
 	bool running = true;
 	bool forward = false;
 	bool back = false;
@@ -13,18 +13,14 @@ typedef struct Sinals {
 	bool right = false;
 	bool jump = false;
 	bool crouch = false;
+
+	bool addBox = false;
+	bool deleteBox = false;
+	bool nextBox = false;
+	bool prevBox = false;
 } Signals;
 
 void poll_controls(Entity *camera, Signals &signals);
 
-void draw_bounding_boxes(
-	std::vector<Box> &boxes,
-	std::vector<Entity> &entities,
-	const Vec3f &translate,
-	const Vec3f &rotate,
-	const Vec2f &dimensions,
-	Uint32 *screen_buffer,
-	float *z_buffer
-);
 
 #endif

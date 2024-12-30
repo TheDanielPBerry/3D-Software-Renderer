@@ -2,9 +2,11 @@
 #include <SDL2/SDL_surface.h>
 #include <iostream>
 #include <vector>
+#include <random>
 
 #include "Plane.h"
 #include "model.h"
+
 
 
 
@@ -19,7 +21,7 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 	int floor = load_obj_model("assets/models/floor.obj", scene, texture_pool, models);
 	int crate = load_obj_model("assets/models/crate.obj", scene, texture_pool, models);
 	int rpg = load_obj_model("assets/models/rpg.obj", scene, texture_pool, models);
-	int globe = load_obj_model("assets/models/globe.obj", scene, texture_pool, models);
+	int level_one = load_obj_model("assets/models/level_one.obj", scene, texture_pool, models);
 
 	models[chest].boxes.push_back(models[crate].boxes[0]);
 	models[rpg].boxes.push_back(models[crate].boxes[0]);
@@ -70,17 +72,22 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 
 	add_model_to_scene(models[crate], scene, texture_pool, staticBoxes, Vec3f{ }, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, &(entities[3]));
 
+	/*
 	Vec3f crateStatic;
 	crateStatic.y = 1.2;
+	#define HI -5
+	#define LO 15
 	for(int z = -10; z<10; z++) {
 		for(int x = -10; x<10; x++) {
 			crateStatic.x = x;
 			crateStatic.z = z;
+			crateStatic.y = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
+
 			add_model_to_scene(models[crate], scene, texture_pool, staticBoxes, crateStatic, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, nullptr);
 		}
-	}
-	add_model_to_scene(models[globe], scene, texture_pool, staticBoxes, Vec3f{5, -2, -10}, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, nullptr);
-	add_model_to_scene(models[floor], scene, texture_pool, staticBoxes, Vec3f{0, 1, 0}, Vec3f{}, Vec3f{ 0.5, 1.0, 0.5 }, true, nullptr);
+	}*/
+	add_model_to_scene(models[level_one], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
+	//add_model_to_scene(models[floor], scene, texture_pool, staticBoxes, Vec3f{0, 1, 0}, Vec3f{}, Vec3f{ 0.5, 1.0, 0.5 }, true, nullptr);
 	//return;
 
 	std::pair<SDL_Surface *, uint> brick = load_texture("assets/bricks.png", texture_pool);

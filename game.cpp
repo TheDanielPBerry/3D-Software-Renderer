@@ -1,7 +1,6 @@
 
 #include <SDL2/SDL_scancode.h>
 #include <iostream>
-#include <vector>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
@@ -9,17 +8,8 @@
 
 
 #include "Physics.h"
-#include "lines.h"
+#include "boxedit.h"
 
-typedef struct Sinals {
-	bool running = true;
-	bool forward = false;
-	bool back = false;
-	bool left = false;
-	bool right = false;
-	bool jump = false;
-	bool crouch = false;
-} Signals;
 
 void poll_controls(Entity *camera, Signals &signals)
 {
@@ -32,7 +22,7 @@ void poll_controls(Entity *camera, Signals &signals)
 			}
 
 			case SDL_MOUSEMOTION: {
-				#define MOUSE_SPEED 0.03
+				#define MOUSE_SPEED 0.01
 				camera->rotational_velocity.y += MOUSE_SPEED * event.motion.xrel;
 				const float targetVelocity = MOUSE_SPEED * event.motion.yrel;
 				const float targetRotation = camera->rotation.x + targetVelocity;
@@ -84,9 +74,6 @@ void poll_controls(Entity *camera, Signals &signals)
 			}
 
 			case SDL_KEYDOWN: {
-				if(event.key.keysym.scancode == 5) {
-					std::cout << "Debugger? I hardly know her.";
-				} 
 				switch(event.key.keysym.scancode) {
 					case SDL_SCANCODE_ESCAPE: {
 						signals.running = false;
@@ -121,6 +108,7 @@ void poll_controls(Entity *camera, Signals &signals)
 						break;
 					}
 					default: {
+						check_boxedit_keys(event, signals);
 						std::cout << event.key.keysym.scancode << std::endl;
 						break;
 					}
@@ -132,27 +120,3 @@ void poll_controls(Entity *camera, Signals &signals)
 }
 
 
-void draw_bounding_boxes(
-	std::vector<Box> &boxes,
-	std::vector<Entity> &entities,
-	const Vec3f &translate,
-	const Vec3f &rotate,
-	const Vec2f &dimensions,
-	Uint32 *screen_buffer,
-	float *z_buffer
-)
-{
-	Vec3f rotationTrig[2] = {
-		Vec3f{cos(rotate.x), cos(rotate.y), 1},
-		Vec3f{sin(rotate.x), sin(rotate.y), 0},
-	};
-
-	for(Box &box : boxes) {
-		draw_box(box, translate, rotationTrig, dimensions, screen_buffer, z_buffer);
-	}
-	for(Entity &entity : entities) {
-		for(Box &box : entity.boxes) {
-			draw_box(box, translate, rotationTrig, dimensions, screen_buffer, z_buffer);
-		}
-	}
-}

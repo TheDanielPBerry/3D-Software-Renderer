@@ -14,6 +14,7 @@
 
 #include "scene.h"
 #include "game.h"
+#include "boxedit.h"
 #include "player.h"
 #include "Physics.h"
 #include "Light.h"
@@ -70,6 +71,7 @@ int main(int argc, char* argv[]) {
 	std::vector<SDL_Surface *> texture_pool;
 	std::vector<Entity> entities;
 	std::vector<Box> staticBoxes;
+	staticBoxes.reserve(1000);
 	build_scene(scene, texture_pool, entities, staticBoxes);
 	for(Entity &entity : entities) {
 		setRotationMatrix(entity, true);	//Initialize rotation matrices
@@ -127,7 +129,7 @@ int main(int argc, char* argv[]) {
 		uint diffMillis = currentFrameMillis - millisecond;
 		player_tick(camera, signals);
 		tick(entities, staticTree, diffMillis);
-		camera->rotational_velocity = camera->rotational_velocity * 0.1;
+		camera->rotational_velocity = camera->rotational_velocity * 0.6;
 		millisecond = currentFrameMillis;
 		if((1000 / diffMillis) > 100) {
 			//SDL_Delay(1000/100);
@@ -143,6 +145,7 @@ int main(int argc, char* argv[]) {
 		rotate = camera->rotation;
 
 		poll_controls(camera, signals);
+		box_signals(signals, staticBoxes, camera, staticTree);
 	}
 
 	scene.clear();

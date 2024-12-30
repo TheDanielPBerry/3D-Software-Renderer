@@ -18,14 +18,5 @@ void project_line(Line &line, const Vec2f &dimensions);
 
 bool transform_line(Line &subject, const Vec3f &translate, Vec3f (&rotationTrig)[2]);
 
-void draw_box(
-	Box &box,
-	const Vec3f &translate,
-	Vec3f (&rotationTrig)[2],
-	const Vec2f &dimensions,
-	Uint32 *buffer,
-	float *z_buffer
-);
-
 
 #endif
