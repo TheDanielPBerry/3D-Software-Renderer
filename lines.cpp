@@ -3,6 +3,7 @@
 #include <iostream>
 
 
+#include "boxedit.h"
 #include "Physics.h"
 #include "Vec.h"
 
@@ -53,8 +54,11 @@ void draw_line(Line &subject, const Vec2f &dimensions, Uint32 *buffer, float *z_
 		float z = line(z_coeffs, y);
 
 		if(z_buffer[yOffset + x] < z) {
-			buffer[yOffset + x] = 0xFF000000;
-			buffer[yOffset + x] = 0xFF000000;
+			if(subject.box == get_box_of_interest()) {
+				buffer[yOffset + x] = 0x0000FF00;
+			} else {
+				buffer[yOffset + x] = 0xFF000000;
+			}
 			z_buffer[yOffset + x] = z;
 		}
 	}

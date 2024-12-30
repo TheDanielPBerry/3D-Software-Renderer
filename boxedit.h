@@ -19,6 +19,7 @@ void draw_box(
 );
 
 void set_box_of_interest(Box *box);
+Box *get_box_of_interest();
 
 void draw_bounding_boxes(
 	std::vector<Box> &boxes,

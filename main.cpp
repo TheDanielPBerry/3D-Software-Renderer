@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
 		setRotationMatrix(entity, true);	//Initialize rotation matrices
 	}
 
-	std::random_shuffle(staticBoxes.begin(), staticBoxes.end());
+	//std::random_shuffle(staticBoxes.begin(), staticBoxes.end());
 	Box *staticTree;
 	for(Box &box : staticBoxes) {
 		staticTree = insert_box(staticTree, box);
@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
 
 		//Clear the buffer
 		for(int i = 0; i < dimensions.x * dimensions.y; ++i) {
-			screen_buffer[i] = 0x000000FF; // Bleck color
+			//screen_buffer[i] = 0x000000FF; // Bleck color
 			z_buffer[i] = 0.0;
 		}
 		draw_scene(scene, screen_buffer, dimensions, translate, rotate, z_buffer);

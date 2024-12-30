@@ -151,6 +151,7 @@ void draw_bounding_boxes(
 }
 
 Box *box_of_interest;
+uint box_index = 0;
 bool pos_mode = true;
 int box_axis = 0;
 float box_edit_granularity = 0.5;
@@ -158,6 +159,10 @@ float box_edit_granularity = 0.5;
 void set_box_of_interest(Box *box)
 {
 	box_of_interest = box;
+}
+Box *get_box_of_interest()
+{
+	return box_of_interest;
 }
 
 void check_boxedit_keys(SDL_Event &event, Signals &signals)
@@ -200,13 +205,18 @@ void check_boxedit_keys(SDL_Event &event, Signals &signals)
 		box_edit_granularity *= 2;
 	} else if(event.key.keysym.scancode == SDL_SCANCODE_B) {
 		signals.addBox = true;
+	} else if(event.key.keysym.scancode == SDL_SCANCODE_T) {
+		signals.nextBox = true;
+	} else if(event.key.keysym.scancode == SDL_SCANCODE_R) {
+		signals.prevBox = true;
 	}
 }
 
 void box_signals(Signals &signals, std::vector<Box> &staticBoxes, Entity *camera, Box *staticTree)
 {
 	if(box_of_interest == nullptr) {
-		box_of_interest = &staticBoxes[staticBoxes.size()-1];
+		box_index = staticBoxes.size()-1;
+		box_of_interest = &staticBoxes[box_index];
 	}
 	if(signals.addBox) {
 		signals.addBox = false;
@@ -217,6 +227,20 @@ void box_signals(Signals &signals, std::vector<Box> &staticBoxes, Entity *camera
 		});
 		box_of_interest = &staticBoxes[staticBoxes.size()-1];
 		//insert_box(staticTree, *box_of_interest);
+	}
+	if(signals.prevBox) {
+		signals.prevBox = false;
+		if(box_index > 0) {
+			box_index--;
+		}
+		box_of_interest = &staticBoxes[box_index];
+	}
+	if(signals.nextBox) {
+		signals.nextBox = false;
+		if(box_index < staticBoxes.size()-1) {
+			box_index++;
+		}
+		box_of_interest = &staticBoxes[box_index];
 	}
 
 }

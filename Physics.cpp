@@ -26,7 +26,7 @@ Box *insert_box(Box *root, Box &box)
 
 	uint branch = 0;
 	for(unsigned char dim=0; dim<3; dim++) {
-		if(box.pos[dim] + box.dim[dim] <= root->pos[dim]) {
+		if(true) {
 			branch += pow(2, dim);
 		}
 	}
@@ -43,7 +43,7 @@ Box *intersects_tree(Box *root, Box box)
 	}
 	uint branch = 0;
 	for(unsigned char dim=0; dim<3; dim++) {
-		if(box.pos[dim] + box.dim[dim] <= root->pos[dim]) {
+		if(true) {
 			branch += pow(2, dim);
 		}
 	}

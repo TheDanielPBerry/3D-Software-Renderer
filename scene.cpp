@@ -22,6 +22,7 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 	int crate = load_obj_model("assets/models/crate.obj", scene, texture_pool, models);
 	int rpg = load_obj_model("assets/models/rpg.obj", scene, texture_pool, models);
 	int level_one = load_obj_model("assets/models/level_one.obj", scene, texture_pool, models);
+	int skybox = load_obj_model("assets/models/skybox.obj", scene, texture_pool, models);
 
 	models[chest].boxes.push_back(models[crate].boxes[0]);
 	models[rpg].boxes.push_back(models[crate].boxes[0]);
@@ -29,7 +30,7 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 	//return;
 	entities.reserve(8);
 	entities.push_back(Entity {
-		.pos = Vec3f{ 0, -4, 0},
+		.pos = Vec3f{ -3, -4, 0},
 		.vel = Vec3f{},
 		.drag = Vec3f{0.7, 0.92, 0.7},
 		.rotation = Vec3f{},
@@ -72,186 +73,10 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 
 	add_model_to_scene(models[crate], scene, texture_pool, staticBoxes, Vec3f{ }, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, &(entities[3]));
 
-	/*
-	Vec3f crateStatic;
-	crateStatic.y = 1.2;
-	#define HI -5
-	#define LO 15
-	for(int z = -10; z<10; z++) {
-		for(int x = -10; x<10; x++) {
-			crateStatic.x = x;
-			crateStatic.z = z;
-			crateStatic.y = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
-
-			add_model_to_scene(models[crate], scene, texture_pool, staticBoxes, crateStatic, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, nullptr);
-		}
-	}*/
 	add_model_to_scene(models[level_one], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
 	//add_model_to_scene(models[floor], scene, texture_pool, staticBoxes, Vec3f{0, 1, 0}, Vec3f{}, Vec3f{ 0.5, 1.0, 0.5 }, true, nullptr);
 	//return;
+	add_model_to_scene(models[skybox], scene, texture_pool, staticBoxes, Vec3f{}, Vec3f{2,0,0}, Vec3f{ 8, 8, 8 }, true, nullptr);
 
-	std::pair<SDL_Surface *, uint> brick = load_texture("assets/bricks.png", texture_pool);
-	float x = 0.0, z= 0.0, y  = 0.0;
-	scene.push_back(Plane{
-		.points = {
-			{(float)(x + 0.5 - 0), (float)(y + 0.5),  2},
-			{(float)(x - 0.5 - 0), (float)(y + 0.5),  2},
-			{(float)(x - 0.5 - 0), (float)(y - 0.5),  2},
-		},
-		.color = {{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0}},
-		.texture_coords = {{ 1, 1 }, { 0, 1 }, { 0 , 0 } },
-		.texture = brick.first,
-	});
-	scene.push_back(Plane{
-		.points = {
-			{(float)(x + 0.5 - 0), (float)(y + 0.5), (float)(x + 0.5) + 2},
-			{(float)(x + 0.5 - 0), (float)(y - 0.5), (float)(x + 0.5) + 2},
-			{(float)(x - 0.5 - 0), (float)(y - 0.5), (float)(x - 0.5) + 2},
-		},
-		.color = {{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0}},
-		.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 } },
-		.texture = brick.first,
-	});
-
-	for(float x=-5; x<5; x+=1) {
-		for(float z=-5; z<5; z+=1) {
-			//add_model_to_scene(models[floor], scene, texture_pool, staticBoxes, Vec3f{ float(x*6.59), 1.0, float(z*6.59) }, Vec3f { 0, 0, 0 }, Vec3f{ 0.1, 1, 0.1 }, true, nullptr);
-		}
-	}
-	//std::pair<SDL_Surface *, uint> floor = load_texture("assets/floor.png", texture_pool);
-	//		//Bottom Face
-	//		scene.push_back(Plane{
-	//			.points = {
-	//				{(float)(x + 0.5), 1, (float)(z - 0.5)},
-	//				{(float)(x + -0.5), 1, (float)(z - 0.5)},
-	//				{(float)(x + -0.5), 1, (float)(z + 0.5)},
-	//			},
-	//			.color = {{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0}},
-	//			.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 }},
-	//			.texture = floor.first,
-	//		});
-	//		scene.push_back(Plane{
-	//			.points = {
-	//				{(float)(x + 0.5), 1, (float)(z + -0.5)},
-	//				{(float)(x + 0.5), 1,  (float)(z + 0.5)},
-	//				{(float)(x + -0.5), 1,  (float)(z + 0.5)},
-	//			},
-	//			.color = {{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0},{0.0, 1.0, 1.0, 1.0}},
-	//			.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 }},
-	//			.texture = floor.first,
-	//		});
-	//	}
-	//}
-
-
-	for(float x=-2; x<2; x++) {
-		for(float y=-2; y<2; y++) {
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5), (float)(y + 0.5), 9},
-					{(float)(x + 0.5), (float)(y - 0.5), 9},
-					{(float)(x - 0.5), (float)(y - 0.5), 9},
-				},
-				.color = {{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0}},
-				.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 } },
-				.texture = brick.first,
-			});
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5), (float)(y + 0.5), 9},
-					{(float)(x - 0.5), (float)(y + 0.5), 9},
-					{(float)(x - 0.5), (float)(y - 0.5), 9},
-				},
-				.color = {{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0}},
-				.texture_coords = {{ 1, 1 }, { 0, 1 }, { 0 , 0 } },
-				.texture = brick.first,
-			});
-
-
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5 + 2), (float)(y + 0.5), 11},
-					{(float)(x + 0.5 + 2), (float)(y - 0.5), 11},
-					{(float)(x - 0.5 + 2), (float)(y - 0.5), 11},
-				},
-				.color = {{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0}},
-				.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 } },
-				.texture = brick.first,
-			});
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5 + 2), (float)(y + 0.5), 11},
-					{(float)(x - 0.5 + 2), (float)(y + 0.5), 11},
-					{(float)(x - 0.5 + 2), (float)(y - 0.5), 11},
-				},
-				.color = {{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0}},
-				.texture_coords = {{ 1, 1 }, { 0, 1 }, { 0 , 0 } },
-				.texture = brick.first,
-			});
-
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5 - 2), (float)(y + 0.5), 13},
-					{(float)(x + 0.5 - 2), (float)(y - 0.5), 13},
-					{(float)(x - 0.5 - 2), (float)(y - 0.5), 13},
-				},
-				.color = {{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0}},
-				.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 } },
-				.texture = brick.first,
-			});
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5 - 2), (float)(y + 0.5), 13},
-					{(float)(x - 0.5 - 2), (float)(y + 0.5), 13},
-					{(float)(x - 0.5 - 2), (float)(y - 0.5), 13},
-				},
-				.color = {{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0},{1.0, 1.0, 0.0, 1.0}},
-				.texture_coords = {{ 1, 1 }, { 0, 1 }, { 0 , 0 } },
-				.texture = brick.first,
-			});
-
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5 + 5), (float)(y + 0.5), (float)(x + 0.5) + 7},
-					{(float)(x + 0.5 + 5), (float)(y - 0.5), (float)(x + 0.5) + 7},
-					{(float)(x - 0.5 + 5), (float)(y - 0.5), (float)(x - 0.5) + 7},
-				},
-				.color = {{0.0, 1.0, 0.0, 1.0},{0.0, 1.0, 0.0, 1.0},{0.0, 1.0, 0.0, 1.0}},
-				.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 } },
-				.texture = brick.first,
-			});
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5 + 5), (float)(y + 0.5), (float)(x + 0.5) + 7},
-					{(float)(x - 0.5 + 5), (float)(y + 0.5), (float)(x - 0.5) + 7},
-					{(float)(x - 0.5 + 5), (float)(y - 0.5), (float)(x - 0.5) + 7},
-				},
-				.color = {{0.0, 1.0, 0.0, 1.0},{0.0, 1.0, 0.0, 1.0},{0.0, 1.0, 0.0, 1.0}},
-				.texture_coords = {{ 1, 1 }, { 0, 1 }, { 0 , 0 } },
-				.texture = brick.first,
-			});
-
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5 - 4), (float)(y + 0.5), (float)(x + 0.5) + 13},
-					{(float)(x + 0.5 - 4), (float)(y - 0.5), (float)(x + 0.5) + 13},
-					{(float)(x - 0.5 - 4), (float)(y - 0.5), (float)(x - 0.5) + 13},
-				},
-				.color = {{0.0, 1.0, 0.0, 1.0},{0.0, 1.0, 0.0, 1.0},{0.0, 1.0, 0.0, 1.0}},
-				.texture_coords = {{ 1, 1 }, { 1, 0 }, { 0 , 0 } },
-				.texture = brick.first,
-			});
-			scene.push_back(Plane{
-				.points = {
-					{(float)(x + 0.5 - 4), (float)(y + 0.5), (float)(x + 0.5) + 13},
-					{(float)(x - 0.5 - 4), (float)(y + 0.5), (float)(x - 0.5) + 13},
-					{(float)(x - 0.5 - 4), (float)(y - 0.5), (float)(x - 0.5) + 13},
-				},
-				.color = {{0.0, 1.0, 0.0, 1.0},{0.0, 1.0, 0.0, 1.0},{0.0, 1.0, 0.0, 1.0}},
-				.texture_coords = {{ 1, 1 }, { 0, 1 }, { 0 , 0 } },
-				.texture = brick.first,
-			});
-	 	}
-	}
 	std::cout << "Scene triangle count: " << scene.size() << std::endl;
 }

@@ -12,6 +12,7 @@ typedef struct Light {
 #define AMBIENT_LIGHT 0.03
 void light_scene(std::vector<Plane> &scene, const std::vector<Light> lights)
 {
+	return;
 	for(uint i=0; i<scene.size(); i++) {
 		for(uint p=0; p<N_POINTS; p++) {
 			//Vec3f lumos = Vec3f { AMBIENT_LIGHT, AMBIENT_LIGHT, AMBIENT_LIGHT };
