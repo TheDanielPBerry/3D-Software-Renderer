@@ -45,7 +45,7 @@ void draw_line(Line &subject, const Vec2f &dimensions, Uint32 *buffer, float *z_
 	start = std::min((float) dimensions.y, std::max((float) 0, start));
 	end = std::min((float) dimensions.y, std::max((float) 0, end));
 
-	for(uint y=start; y<=end; y++) {
+	for(uint y=start; y<end; y++) {
 		uint yOffset = y * dimensions.x;
 
 		int x = line(x_coeffs, y);

@@ -7,7 +7,7 @@
 #include "game.h"
 
 
-void player_model(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_pool, std::vector<Entity> &entities, std::vector<Box> &staticBoxes)
+void player_model(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_Surface *> &texture_pool, std::vector<Entity> &entities, std::vector<Box> &staticBoxes)
 {
 	std::vector<Model> models;
 	int shotgun = load_obj_model("assets/models/shotgun.obj", scene, texture_pool, models);
@@ -28,7 +28,7 @@ void player_model(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture
 void player_tick(Entity *camera, Signals &signals)
 {
 	#define PLAYER_ACCELERATION 4.0
-	#define JUMP_HEIGHT -50.0
+	#define JUMP_HEIGHT -60.0
 	#define GOD_MODE false
 
 	if(signals.forward) {

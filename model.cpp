@@ -1,33 +1,37 @@
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <vector>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <tuple>
 #include <cmath>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <unordered_map>
 
 #include "Plane.h"
+
+typedef struct Face {
+	SDL_Surface *texture;
+	std::vector<std::vector<int>> points;
+} Face;
 
 typedef struct Model {
 	std::vector<Vec3f> vertices;
 	std::vector<Vec3f> normals;
 	std::vector<Vec2f> texture_coords;
-	std::vector<std::vector<std::vector<int>>> planes;
+	struct std::vector<Face> faces;
 	std::vector<Box> boxes;
-	uint texture;
 } Model;
 
 
 /**
 * @return identifier to texture
 */
-std::pair<SDL_Surface *, uint> load_texture(const char *filePath, std::vector<SDL_Surface *> &texture_pool)
+SDL_Surface *load_texture(const char *filePath)
 {
 	SDL_Surface *texture = IMG_Load(filePath);
 	SDL_LockSurface(texture);
-	texture_pool.push_back(texture);
-	return std::make_pair(texture, texture_pool.size()-1);
+	return texture;
 }
 
 
@@ -43,26 +47,27 @@ std::pair<std::string, int> next_word(std::string line, uint offset)
 }
 
 
-SDL_Surface *load_mtl(std::string filePath, Model &model, std::vector<SDL_Surface *> &texture_pool)
+void *load_mtl(std::string filePath, Model &model, std::unordered_map<std::string, SDL_Surface *> &texture_pool)
 {
 	std::ifstream inputFile(filePath);
 	if(!inputFile.is_open()) {
 		std::cerr << "Cannot open: " << filePath << std::endl;
 		return NULL;
 	}
-
+	std::string materialName;
 	std::string line;
 	while(std::getline(inputFile, line)) {
 		int space = -1;
 		std::string firstWord;
 		tie(firstWord, space) = next_word(line, 0);
-		if(firstWord == "map_Kd") {
+		if(firstWord == "newmtl") {
+			materialName = line.substr(space+1);
+		} else if(firstWord == "map_Kd") {
 			std::string imgPath = line.substr(space+1);
 			uint pos = imgPath.find("assets/");
 			std::string imgRelative = imgPath.substr(pos);
-			std::pair<SDL_Surface *, uint> material = load_texture(imgRelative.c_str(), texture_pool);
-			model.texture = material.second;
-			return material.first;
+			SDL_Surface *material = load_texture(imgRelative.c_str());
+			texture_pool[materialName] = material;
 		}
 	}
 	return NULL;
@@ -71,7 +76,7 @@ SDL_Surface *load_mtl(std::string filePath, Model &model, std::vector<SDL_Surfac
 int load_obj_model(
 	std::string filePath, 
 	std::vector<Plane> &scene, 
-	std::vector<SDL_Surface *> &texture_pool, 
+	std::unordered_map<std::string, SDL_Surface *> &texture_pool, 
 	std::vector<Model> &models
 )
 {
@@ -82,6 +87,7 @@ int load_obj_model(
 	}
 
 	Model model;
+	SDL_Surface *currentMaterial = nullptr;
 
 	std::string line;
 	while(std::getline(inputFile, line)) {
@@ -188,12 +194,21 @@ int load_obj_model(
 			face.push_back(text);
 			face.push_back(norms);
 
-			model.planes.push_back(face);
+			model.faces.push_back(Face {
+				.texture = currentMaterial,
+				.points = face,
+			});
 		} else if(firstWord == "mtllib") {
 			int lastSeparator = filePath.find_last_of("/");
 			std::string fileRoute = filePath.substr(0, lastSeparator+1);
 			fileRoute += line.substr(space+1);
 			load_mtl(fileRoute, model, texture_pool);
+		} else if(firstWord == "usemtl") {
+			std::string materialName;
+			tie(materialName, space) = next_word(line, space+1);
+			if(texture_pool.find(materialName) != texture_pool.end()) {
+				currentMaterial = texture_pool[materialName];
+			}
 		} else if(firstWord == "b") {
 			Box box;
 
@@ -240,7 +255,7 @@ int load_obj_model(
 void add_model_to_scene(
 	Model &model,
 	std::vector<Plane> &scene,
-	std::vector<SDL_Surface *> &texture_pool,
+	std::unordered_map<std::string, SDL_Surface *> &texture_pool,
 	std::vector<Box> &staticBoxes,
 	Vec3f pos,
 	Vec3f rotation,
@@ -274,28 +289,29 @@ void add_model_to_scene(
 		}
 	}
 
-	for(int i=0; i<model.planes.size(); i++) {
+	for(int i=0; i<model.faces.size(); i++) {
 		Plane plane = Plane{
 			.points = {
-				model.vertices[model.planes[i][0][0]],
-				model.vertices[model.planes[i][0][1]],
-				model.vertices[model.planes[i][0][2]],
+				model.vertices[model.faces[i].points[0][0]],
+				model.vertices[model.faces[i].points[0][1]],
+				model.vertices[model.faces[i].points[0][2]],
 			},
 			.normals = {
-				model.normals[model.planes[i][2][0]],
-				model.normals[model.planes[i][2][1]],
-				model.normals[model.planes[i][2][2]],
+				model.normals[model.faces[i].points[2][0]],
+				model.normals[model.faces[i].points[2][1]],
+				model.normals[model.faces[i].points[2][2]],
 			},
-			.normal = model.normals[model.planes[i][2][0]],
+			.normal = model.normals[model.faces[i].points[2][0]],
 			.color = {{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0},{1.0, 1.0, 1.0, 1.0}},
 			.texture_coords = {
-				model.texture_coords[model.planes[i][1][0]],
-				model.texture_coords[model.planes[i][1][1]],
-				model.texture_coords[model.planes[i][1][2]],
+				model.texture_coords[model.faces[i].points[1][0]],
+				model.texture_coords[model.faces[i].points[1][1]],
+				model.texture_coords[model.faces[i].points[1][2]],
 			},
-			.texture = texture_pool[model.texture],
+			.texture = model.faces[i].texture,
 			.cameraStatic = cameraStatic,
 		};
+
 
 
 		for(uint p=0; p<N_POINTS; p++) {
@@ -326,7 +342,7 @@ void add_model_to_scene(
 void add_model_to_scene(
 	Model &model,
 	std::vector<Plane> &scene,
-	std::vector<SDL_Surface *> &texture_pool,
+	std::unordered_map<std::string, SDL_Surface *> &texture_pool,
 	std::vector<Box> &staticBoxes,
 	Vec3f pos,
 	Vec3f rotation,
@@ -335,5 +351,5 @@ void add_model_to_scene(
 	Entity *entity
 )
 {
-	add_model_to_scene(model, scene, texture_pool, staticBoxes, pos, rotation, scale, cullable, entity, false);
+	return add_model_to_scene(model, scene, texture_pool, staticBoxes, pos, rotation, scale, cullable, entity, false);
 }

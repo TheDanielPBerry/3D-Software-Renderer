@@ -22,7 +22,7 @@ void poll_controls(Entity *camera, Signals &signals)
 			}
 
 			case SDL_MOUSEMOTION: {
-				#define MOUSE_SPEED 0.01
+				#define MOUSE_SPEED 0.1
 				camera->rotational_velocity.y += MOUSE_SPEED * event.motion.xrel;
 				const float targetVelocity = MOUSE_SPEED * event.motion.yrel;
 				const float targetRotation = camera->rotation.x + targetVelocity;

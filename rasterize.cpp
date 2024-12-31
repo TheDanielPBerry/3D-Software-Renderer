@@ -1,3 +1,4 @@
+#include <SDL2/SDL.h>
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -17,7 +18,11 @@ Vec2f interpolate_lines(
 	Vec2f starting_x
 )
 {
-	const u_char pixel_size = plane.texture->pitch / plane.texture->w;
+	uint pixel_size;
+	if(plane.texture != nullptr) {
+		pixel_size = ((float)plane.texture->pitch) / ((float)plane.texture->w);
+	}
+
 	#define START 0
 	#define END 1
 
@@ -146,6 +151,9 @@ Vec2f interpolate_lines(
 
 		for(uint x=x_left; x<x_right; x++) {
 			float perspective = line(perspective_coeff, x);
+			if(perspective == INFINITY || perspective == -INFINITY) {
+				continue;
+			}
 			float luminosity = 1.0;
 
 			if(z_buffer[yOffset + x] < perspective) {
@@ -169,12 +177,12 @@ Vec2f interpolate_lines(
 					texture_coord_y %= plane.texture->h;
 
 					int texture_offset = (plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size);
-					if(((u_char *)plane.texture->pixels)[texture_offset + 3] == 0.0) {
+					if(pixel_size > 3 && ((char *)plane.texture->pixels)[texture_offset + 3] == 0) {
 						continue;
 					}
-					red *= ((u_char *)plane.texture->pixels)[texture_offset + 0];
-					green *= ((u_char *)plane.texture->pixels)[texture_offset + 1];
-					blue *= ((u_char *)plane.texture->pixels)[texture_offset + 2];
+					red *= ((char *)plane.texture->pixels)[texture_offset + 0];
+					green *= ((char *)plane.texture->pixels)[texture_offset + 1];
+					blue *= ((char *)plane.texture->pixels)[texture_offset + 2];
 
 					pixel = ((uint)(std::min((red * luminosity),red)) << 24);
 					pixel += ((uint)(std::min((green * luminosity), green)) << 16);

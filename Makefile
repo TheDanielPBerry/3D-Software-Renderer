@@ -19,7 +19,7 @@ build: $(dependencies)
 
 
 obj/%.o: %.cpp
-	$(cc) -c $< -o $@ $(flags)
+	$(cc) -c $< -o $@ $(flags) -O4
 
 clean:
 	rm obj/*

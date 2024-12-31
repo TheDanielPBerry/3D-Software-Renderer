@@ -9,6 +9,7 @@
 #include <SDL2/SDL_video.h>
 #include <algorithm>
 #include <iostream>
+#include <unordered_map>
 #include <cstdlib>
 #include <chrono>
 #include <vector>
@@ -56,9 +57,9 @@ int main(int argc, char* argv[]) {
 	
 	SDL_DisplayMode DM;
 	SDL_GetCurrentDisplayMode(0, &DM);
-	SDL_Rect screen_rect = SDL_Rect{0, 0, int(DM.w*0.8), int(DM.h*0.8)};
+	SDL_Rect screen_rect = SDL_Rect{0, 0, int(DM.w*1), int(DM.h*1)};
 
-	Vec2f dimensions = Vec2f{ (float)floor(screen_rect.w/2), (float)floor(screen_rect.h/2) };
+	Vec2f dimensions = Vec2f{ (float)floor(screen_rect.w/1), (float)floor(screen_rect.h/1) };
 
 	SDL_Window* window = SDL_CreateWindow("Pixel Buffer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_rect.w, screen_rect.h, SDL_WINDOW_SHOWN);
 	if (!window) {
@@ -88,13 +89,14 @@ int main(int argc, char* argv[]) {
 
 
 	std::vector<Plane> scene;
-	std::vector<SDL_Surface *> texture_pool;
+	std::unordered_map<std::string, SDL_Surface *> texture_pool;
 	std::vector<Entity> entities;
 	std::vector<Box> staticBoxes;
 	scene.reserve(8192);
-	texture_pool.reserve(32);
+	texture_pool.reserve(64);
 	staticBoxes.reserve(1024);
 	build_scene(scene, texture_pool, entities, staticBoxes);
+	texture_pool.clear();
 	for(Entity &entity : entities) {
 		setRotationMatrix(entity, true);	//Initialize rotation matrices
 	}
@@ -151,7 +153,7 @@ int main(int argc, char* argv[]) {
 		uint diffMillis = currentFrameMillis - millisecond;
 		player_tick(camera, signals);
 		tick(entities, staticTree, diffMillis);
-		camera->rotational_velocity = camera->rotational_velocity * 0.6;
+		camera->rotational_velocity = camera->rotational_velocity * 0.4;
 		millisecond = currentFrameMillis;
 		if((1000 / diffMillis) > 100) {
 			//SDL_Delay(1000/100);

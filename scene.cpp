@@ -2,7 +2,7 @@
 #include <SDL2/SDL_surface.h>
 #include <iostream>
 #include <vector>
-#include <random>
+#include <unordered_map>
 
 #include "Plane.h"
 #include "model.h"
@@ -10,7 +10,7 @@
 
 
 
-void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_pool, std::vector<Entity> &entities, std::vector<Box> &staticBoxes)
+void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_Surface *> &texture_pool, std::vector<Entity> &entities, std::vector<Box> &staticBoxes)
 {
 	std::vector<Model> models;
 	int shotgun = load_obj_model("assets/models/shotgun.obj", scene, texture_pool, models);
@@ -21,7 +21,7 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 	int floor = load_obj_model("assets/models/floor.obj", scene, texture_pool, models);
 	int crate = load_obj_model("assets/models/crate.obj", scene, texture_pool, models);
 	int rpg = load_obj_model("assets/models/rpg.obj", scene, texture_pool, models);
-	int level_one = load_obj_model("assets/models/level_one.obj", scene, texture_pool, models);
+	int level_one = load_obj_model("assets/models/level_two.obj", scene, texture_pool, models);
 	int skybox = load_obj_model("assets/models/skybox.obj", scene, texture_pool, models);
 
 	models[chest].boxes.push_back(models[crate].boxes[0]);
@@ -32,7 +32,7 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 	entities.push_back(Entity {
 		.pos = Vec3f{ -3, -4, 0},
 		.vel = Vec3f{},
-		.drag = Vec3f{0.7, 0.92, 0.7},
+		.drag = Vec3f{0.7, 0.98, 0.7},
 		.rotation = Vec3f{},
 		.rotational_velocity = Vec3f{},
 		.name = "player",
@@ -50,7 +50,7 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 		.vel = Vec3f{0, 0, 0},
 		.drag = Vec3f{0.9, 0.9, 0.9},
 		.rotation = Vec3f{ 3.14192, 0, 0 },
-		.rotational_velocity = Vec3f{ 0, 0.01, 0},
+		.rotational_velocity = Vec3f{ 0, 1.0, 0},
 		.name = "shotgun",
 	});
 	entities.push_back(Entity {
@@ -64,8 +64,8 @@ void build_scene(std::vector<Plane> &scene, std::vector<SDL_Surface *> &texture_
 
 
 	add_model_to_scene(models[shotgun], scene, texture_pool, staticBoxes, Vec3f{ 0.2, 0.2, 0.3 }, Vec3f{ 0, 3.14/2, 3.18 }, Vec3f{ 0.1, 0.1, 0.08 }, true, &(entities[0]), true);
-	entities[0].boxes[0].pos = Vec3f{ -0.25, -0.25, -0.25 };
-	entities[0].boxes[0].dim = Vec3f{ 0.5, 1.8, 0.5 };
+	entities[0].boxes[0].pos = Vec3f{ -0.3, -0.25, -0.3 };
+	entities[0].boxes[0].dim = Vec3f{ 0.6, 2.0, 0.6 };
 
 	//add_model_to_scene(models[rpg], scene, texture_pool, staticBoxes, Vec3f{ 0.0, 0.22, 0.0}, Vec3f{ -0.15, 3.141592, 3.141592 }, Vec3f{ 0.1, 0.1, 0.1 }, true, &(entities[0]), true);
 	add_model_to_scene(models[chest], scene, texture_pool, staticBoxes, Vec3f{}, Vec3f{}, Vec3f{ 0.3, 0.3, 0.3 }, true, &(entities[1]));

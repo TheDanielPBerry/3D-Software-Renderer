@@ -86,8 +86,8 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 	for(auto &entity : entities) {
 		//Forces
 		Vec3f velocity = entity.vel;
-		velocity.y += 0.7;	//Gravity
-		velocity = velocity * entity.drag;
+		velocity.y += (180.0 * proportion);	//Gravity
+		velocity = velocity * (entity.drag);
 
 
 		velocity = velocity * proportion;
@@ -109,6 +109,7 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 					}
 				}
 				box.pos.x = tempCoordinate;
+				entity.pos.x += velocity.x;
 			}
 
 			if(velocity.y != 0.0) {
@@ -130,6 +131,7 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 					}
 				}
 				box.pos.y = tempCoordinate;
+				entity.pos.y += velocity.y;
 			}
 
 			if(velocity.z != 0.0) {
@@ -144,13 +146,13 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 					}
 				}
 				box.pos.z = tempCoordinate;
+				entity.pos.z += velocity.z;
 			}
 		}
 
-		entity.pos = entity.pos + velocity;
 
 		entity.vel = velocity / proportion;
-		entity.rotation = entity.rotation + entity.rotational_velocity;
+		entity.rotation = (entity.rotation + entity.rotational_velocity * proportion);
 
 		setRotationMatrix(entity, false);
 

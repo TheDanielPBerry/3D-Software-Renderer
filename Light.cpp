@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "Plane.h"
+#include "Vec.h"
 
 typedef struct Light {
 	Vec3f pos;
@@ -18,7 +19,7 @@ void light_scene(std::vector<Plane> &scene, const std::vector<Light> lights)
 			//Vec3f lumos = Vec3f { AMBIENT_LIGHT, AMBIENT_LIGHT, AMBIENT_LIGHT };
 			float lumos = AMBIENT_LIGHT;
 			for(const Light &light : lights) {
-				lumos += std::max((light.luminosity / distance_cubed(scene[i].points[p], light.pos)), (float)0);
+				lumos += std::max((light.luminosity / distance_squared(scene[i].points[p], light.pos)), (float)0);
 	 			// lumos.x += intensity * light.color.x;
 	 			// lumos.y += intensity * light.color.y;
 	 			// lumos.z += intensity * light.color.z;
@@ -39,7 +40,7 @@ void some_lights(std::vector<Light> &lights)
 			.pos = Vec3f {
 				0, -15, 5
 			},
-			.luminosity = 2000,
+			.luminosity = 80,
 		}
 	);
 
@@ -49,7 +50,7 @@ void some_lights(std::vector<Light> &lights)
 				.pos = Vec3f {
 					(float)-i, 15, (float) i
 				},
-				.luminosity = 1000,
+				.luminosity = 100,
 			}
 		);
 	}
