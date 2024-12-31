@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_pixels.h>
 #include <execinfo.h>
 #include <signal.h>
 #include <SDL2/SDL_events.h>
@@ -118,7 +119,7 @@ int main(int argc, char* argv[]) {
 
 	// Create a texture from the pixel buffemain
 	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, (int)dimensions.x, (int)dimensions.y);
-
+	SDL_PixelFormat *pixel_format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
 
 	bool running = true;
 
@@ -135,7 +136,7 @@ int main(int argc, char* argv[]) {
 			//screen_buffer[i] = 0x000000FF; // Bleck color
 			z_buffer[i] = 0.0;
 		}
-		draw_scene(scene, screen_buffer, dimensions, translate, rotate, z_buffer);
+		draw_scene(scene, screen_buffer, dimensions, translate, rotate, z_buffer, pixel_format, lights);
 		draw_bounding_boxes(staticBoxes, entities, translate, rotate, dimensions, screen_buffer, z_buffer);
 
 

@@ -49,7 +49,7 @@ void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_
 		.pos = Vec3f{4, -8, 2},
 		.vel = Vec3f{0, 0, 0},
 		.drag = Vec3f{0.9, 0.9, 0.9},
-		.rotation = Vec3f{ 3.14192, 0, 0 },
+		.rotation = Vec3f{ 0, 0, 0 },
 		.rotational_velocity = Vec3f{ 0, 1.0, 0},
 		.name = "shotgun",
 	});
@@ -64,12 +64,12 @@ void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_
 
 
 	add_model_to_scene(models[shotgun], scene, texture_pool, staticBoxes, Vec3f{ 0.2, 0.2, 0.3 }, Vec3f{ 0, 3.14/2, 3.18 }, Vec3f{ 0.1, 0.1, 0.08 }, true, &(entities[0]), true);
-	entities[0].boxes[0].pos = Vec3f{ -0.3, -0.25, -0.3 };
-	entities[0].boxes[0].dim = Vec3f{ 0.6, 2.0, 0.6 };
+	entities[0].boxes[0].pos = Vec3f{ -0.4, -0.2, -0.4 };
+	entities[0].boxes[0].dim = Vec3f{ 0.8, 2.4, 0.8 };
 
 	//add_model_to_scene(models[rpg], scene, texture_pool, staticBoxes, Vec3f{ 0.0, 0.22, 0.0}, Vec3f{ -0.15, 3.141592, 3.141592 }, Vec3f{ 0.1, 0.1, 0.1 }, true, &(entities[0]), true);
 	add_model_to_scene(models[chest], scene, texture_pool, staticBoxes, Vec3f{}, Vec3f{}, Vec3f{ 0.3, 0.3, 0.3 }, true, &(entities[1]));
-	add_model_to_scene(models[rpg], scene, texture_pool, staticBoxes, Vec3f{}, Vec3f{}, Vec3f{0.1,0.1,0.07}, true, &(entities[2]));
+	add_model_to_scene(models[rpg], scene, texture_pool, staticBoxes, Vec3f{0, -0.3, 0}, Vec3f{3.14192}, Vec3f{0.1,0.1,0.1}, true, &(entities[2]));
 
 	add_model_to_scene(models[crate], scene, texture_pool, staticBoxes, Vec3f{ }, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, &(entities[3]));
 

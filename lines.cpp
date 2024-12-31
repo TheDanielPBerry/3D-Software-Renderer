@@ -68,8 +68,8 @@ void project_line(Line &line, const Vec2f &dimensions)
 {
 	for(u_char p=0; p<N_POINTS; p++) {
 		float z = line.buffer[p].z;
-		line.buffer[p].x = ((line.buffer[p].x /z) + 0.5) * dimensions.x;
-		line.buffer[p].y = ((line.buffer[p].y /z) + 0.5) * dimensions.y;
+		line.buffer[p].x = ((line.buffer[p].x /(z*2)) + 0.5) * dimensions.x;
+		line.buffer[p].y = ((line.buffer[p].y /(z*2)) + 0.5) * dimensions.y;
 	}
 }
 

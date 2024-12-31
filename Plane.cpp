@@ -30,9 +30,7 @@ bool transform(Plane &plane, const Vec3f &translate, const Vec3f rotationTrig[2]
 
 	for(u_char p=0; p<N_POINTS; p++) {
 		plane.buffer[p] = plane.points[p];
-		if(plane.cameraStatic) {
-			continue;
-		}
+
 		float x, y, z, temp_y;
 		if(plane.entity != nullptr) {
 			rotate(plane.buffer[p], plane.entity->rotationMatrix);
@@ -207,9 +205,9 @@ void project_and_scale(Plane &plane, const Vec2f &dimensions)
 	for(uint p=0; p<N_POINTS; p++) {
 		float z = plane.buffer[p].z;
 		plane.buffer[p].x = ((plane.buffer[p].x
-			* (1 / (z))) + 0.5) * dimensions.x;
+			* (1 / (z*2))) + 0.5) * dimensions.x;
 
 		plane.buffer[p].y = ((plane.buffer[p].y 
-			* (1 / (z))) + 0.5) * dimensions.y;
+			* (1 / (z*2))) + 0.5) * dimensions.y;
 	}
 }

@@ -273,7 +273,6 @@ void add_model_to_scene(
 	for(Box box : model.boxes) {
 		box.pos = box.pos * scale;
 		rotate(box.pos, trig);
-		box.pos = box.pos + pos;
 
 		box.dim = box.dim * scale;
 		rotate(box.dim, trig);
@@ -285,6 +284,7 @@ void add_model_to_scene(
 		if(entity != nullptr) {
 			entity->boxes.push_back(box);
 		} else {
+			box.pos = box.pos + pos;
 			staticBoxes.push_back(box);
 		}
 	}
@@ -320,15 +320,8 @@ void add_model_to_scene(
 			rotate(plane.points[p], trig);
 			plane.points[p] = plane.points[p] + pos;
 
-
-			// scale normals and make offset of point
-			plane.normals[p] = (plane.normals[p]) * scale;
-			rotate(plane.normals[p], trig);
-			plane.normals[p] = plane.normals[p] + plane.points[p];
 		}
 
-
-		plane.normal = plane.normals[0];
 
 		plane.cullable = cullable;
 

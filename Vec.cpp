@@ -89,6 +89,16 @@ typedef struct Vec4f {
 	float y;
 	float z;
 	float w;
+
+	Vec4f operator*(const Vec4f &b)
+	{
+		return Vec4f {
+			x * b.x,
+			y * b.y,
+			z * b.z,
+			w * b.w,
+		};
+	}
 } Vec4f;
 
 Vec2f ident(const Vec3f t, const char type)
@@ -113,6 +123,17 @@ Vec2f ident(const Vec3f t, const char type)
 	}
 	return v;
 }
+
+Vec4f vec4f(Vec3f &v, float w)
+{
+	return Vec4f {
+		v.x,
+		v.y,
+		v.z,
+		w,
+	};
+}
+
 
 float line(Vec2f &coeff, float x)
 {
@@ -170,9 +191,9 @@ float distance_squared(const Vec3f v)
 
 float distance_squared(const Vec3f &a, const Vec3f &b)
 {
-	return (a.x - b.z) * (a.x - b.x)
-		+ (a.y - b.y) * (a.y - b.y)
-		+ (a.z - b.z) * (a.z - b.z);
+	return ((a.x - b.x) * (a.x - b.x))
+		+ ((a.y - b.y) * (a.y - b.y))
+		+ ((a.z - b.z) * (a.z - b.z));
 }
 float distance_cubed(const Vec3f &a, const Vec3f &b)
 {
@@ -198,4 +219,10 @@ void rotate(Vec3f &v, Vec3f (&trig)[2])
 	y = (temp_y * trig[COSINE].z) - (x * trig[SINE].z);
 	x = (x * trig[COSINE].z) + (temp_y * trig[SINE].z);
 	v = Vec3f{x, y, z};
+}
+
+Vec3f normalize(Vec3f v)
+{
+	float distance = sqrt(distance_squared(v));
+	return v / distance;
 }

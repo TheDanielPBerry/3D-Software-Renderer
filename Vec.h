@@ -89,9 +89,21 @@ typedef struct Vec4f {
 	float y;
 	float z;
 	float w;
+
+	Vec4f operator*(const Vec4f &b)
+	{
+		return Vec4f {
+			x * b.x,
+			y * b.y,
+			z * b.z,
+			w * b.w,
+		};
+	}
 } Vec4f;
 
 Vec2f ident(const Vec3f t, const char type);
+
+Vec4f vec4f(Vec3f &v, float w);
 
 float line(Vec2f &coeff, float x);
 
@@ -105,7 +117,8 @@ float dot_product(const Vec3f v, const Vec3f &n);
 float distance_squared(const Vec3f &a, const Vec3f &b);
 float distance_cubed(const Vec3f &a, const Vec3f &b);
 
-
 void rotate(Vec3f &v, Vec3f (&trig)[2]);
+
+Vec3f normalize(Vec3f v);
 
 #endif

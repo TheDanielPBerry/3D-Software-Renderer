@@ -1,11 +1,35 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_pixels.h>
 #include <iostream>
 #include <vector>
 #include <cmath>
 
 #include "Plane.h"
+#include "Light.h"
 
-
+Uint32 get_pixel(SDL_Surface* surface, Sint16 x, Sint16 y)
+{
+	if (x >= 0 && y >= 0 && x < surface->w && y < surface->h) {
+		int bpp = surface->format->BytesPerPixel;
+		Uint8 *pixel = (Uint8*)surface->pixels + y * surface->pitch + x * bpp;
+		
+		switch(bpp) {
+		case 1:
+			return *pixel;
+		case 2:
+			return *(Uint16 *) pixel;
+		case 3:
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+			return pixel[0] << 16 | pixel[1] << 8 | pixel[2];
+#else
+			return pixel[0] | pixel[1] << 8 | pixel[2] << 16;
+#endif
+		case 4:
+			return *(Uint32 *) pixel;
+		}
+	}
+	return 0;
+}
 
 Vec2f interpolate_lines(
 	Plane &plane,
@@ -15,12 +39,13 @@ Vec2f interpolate_lines(
 	const Vec2f &dimensions,
 	Uint32 *buffer,
 	float *z_buffer,
-	Vec2f starting_x
+	Vec2f starting_x,
+	SDL_PixelFormat *pixel_format
 )
 {
 	uint pixel_size;
 	if(plane.texture != nullptr) {
-		pixel_size = ((float)plane.texture->pitch) / ((float)plane.texture->w);
+		pixel_size = plane.texture->format->BytesPerPixel;
 	}
 
 	#define START 0
@@ -156,7 +181,7 @@ Vec2f interpolate_lines(
 			}
 			float luminosity = 1.0;
 
-			if(z_buffer[yOffset + x] < perspective) {
+			if((z_buffer[yOffset + x] < perspective) || (plane.cameraStatic && (z_buffer[yOffset + x] < 1000+perspective))) {
 				float red = line(red_coeff, x);
 				float green = line(green_coeff, x);
 				float blue = line(blue_coeff, x);
@@ -176,18 +201,19 @@ Vec2f interpolate_lines(
 					}
 					texture_coord_y %= plane.texture->h;
 
-					int texture_offset = (plane.texture->pitch * texture_coord_y) + (texture_coord_x * pixel_size);
-					if(pixel_size > 3 && ((char *)plane.texture->pixels)[texture_offset + 3] == 0) {
+					Uint8 textureColor[4];
+					Uint32 txp = get_pixel(plane.texture, texture_coord_x, texture_coord_y);
+					SDL_GetRGBA(txp, plane.texture->format,
+						&textureColor[0], &textureColor[1], &textureColor[2], &textureColor[3]);
+
+					if(textureColor[3] == 0) {
 						continue;
 					}
-					red *= ((char *)plane.texture->pixels)[texture_offset + 0];
-					green *= ((char *)plane.texture->pixels)[texture_offset + 1];
-					blue *= ((char *)plane.texture->pixels)[texture_offset + 2];
+					red *= textureColor[0];
+					green *= textureColor[1];
+					blue *= textureColor[2];
 
-					pixel = ((uint)(std::min((red * luminosity),red)) << 24);
-					pixel += ((uint)(std::min((green * luminosity), green)) << 16);
-					pixel += ((uint)(std::min((blue * luminosity), blue)) << 8);
-					pixel += 255;
+					pixel = SDL_MapRGB(pixel_format, red, green, blue);
 				} else {
 					pixel = ((uint)(std::min((red * luminosity),red) * 255) << 24);
 					pixel += ((uint)(std::min((green * luminosity), green) * 255) << 16);
@@ -197,7 +223,11 @@ Vec2f interpolate_lines(
 
 
 				buffer[yOffset + x] = pixel;
-				z_buffer[yOffset + x] = perspective;
+				if(plane.cameraStatic) {
+					z_buffer[yOffset + x] = perspective + 1000;
+				} else {
+					z_buffer[yOffset + x] = perspective;
+				}
 			}
 		}
 	}
@@ -209,7 +239,7 @@ Vec2f interpolate_lines(
 * The plan for this function is to take points that are already projected and mapped for a buffer and rasterize them.
 * I think the z_buffer will need to be filled with zeros the same as the main buffer
 */
-void rasterize(Plane &plane, Uint32 *buffer, const Vec2f &dimensions, float *z_buffer)
+void rasterize(Plane &plane, Uint32 *buffer, const Vec2f &dimensions, float *z_buffer, SDL_PixelFormat *pixel_format)
 {
 
 	char top = 0, middle = 1, bottom = 2;
@@ -272,7 +302,7 @@ void rasterize(Plane &plane, Uint32 *buffer, const Vec2f &dimensions, float *z_b
 		right[0] = top;
 		right[1] = middle;
 	}
-	Vec2f x_end = interpolate_lines(plane, left, right, y_bounds, dimensions, buffer, z_buffer, Vec2f{ -1, -1 });
+	Vec2f x_end = interpolate_lines(plane, left, right, y_bounds, dimensions, buffer, z_buffer, Vec2f{ -1, -1 }, pixel_format);
 
 	y_bounds = Vec2f {
 		std::max(plane.buffer[middle].y, (float)0.0),
@@ -286,10 +316,18 @@ void rasterize(Plane &plane, Uint32 *buffer, const Vec2f &dimensions, float *z_b
 		right[0] = middle;
 		right[1] = bottom;
 	}
-	interpolate_lines(plane, left, right, y_bounds, dimensions, buffer, z_buffer, x_end);
+	interpolate_lines(plane, left, right, y_bounds, dimensions, buffer, z_buffer, x_end, pixel_format);
 }
 
-void draw_scene(std::vector<Plane> &scene, Uint32 *buffer, const Vec2f &dimensions, const Vec3f &translate, const Vec3f &rotate, float *z_buffer)
+void draw_scene(std::vector<Plane> &scene,
+	Uint32 *buffer,
+	const Vec2f &dimensions,
+	const Vec3f &translate,
+	const Vec3f &rotate,
+	float *z_buffer,
+	SDL_PixelFormat *pixel_format,
+	std::vector<Light> &lights
+)
 {
 	const Vec3f rotationTrig[2] = {
 		Vec3f{cos(rotate.x), cos(rotate.y), 0},
@@ -302,11 +340,22 @@ void draw_scene(std::vector<Plane> &scene, Uint32 *buffer, const Vec2f &dimensio
 		if(!transform(scene[p], translate, rotationTrig)) {
 			continue;
 		}
+		if(scene[p].entity != nullptr) {
+			scene[p].color[0] = Vec4f{1,1,1,1};
+			scene[p].color[1] = Vec4f{1,1,1,1};
+			scene[p].color[2] = Vec4f{1,1,1,1};
+			calculate_plane_vertex_lights(scene[p], lights);
+		}
+		if(scene[p].cameraStatic) {
+			scene[p].buffer[0] = scene[p].points[0];
+			scene[p].buffer[1] = scene[p].points[1];
+			scene[p].buffer[2] = scene[p].points[2];
+		}
 
 		int split_plane_count = clip_plane(scene[p], splits);
 		for(int s=0; s<split_plane_count; s++) {
 			project_and_scale(splits[s], dimensions);
-			rasterize(splits[s], buffer, dimensions, z_buffer);
+			rasterize(splits[s], buffer, dimensions, z_buffer, pixel_format);
 		}
 	}
 }
