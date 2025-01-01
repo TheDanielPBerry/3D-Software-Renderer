@@ -10,8 +10,10 @@
 typedef struct Box {
 	Vec3f pos;
 	Vec3f dim;
-	Box *branches[8];
+	Box *left;
+	Box *right;
 	Vec3f max;
+	Vec3f min;
 	struct Entity *entity;
 } Box;
 
@@ -27,7 +29,7 @@ typedef struct Entity {
 	std::string name;
 } Entity;
 
-Box *insert_box(Box *root, Box &box);
+Box *insert_box(Box *root, Box &box, uint dim);
 
 void setRotationMatrix(Entity &entity, bool initialize);
 void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds);

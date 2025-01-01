@@ -77,6 +77,15 @@ void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_
 	//add_model_to_scene(models[floor], scene, texture_pool, staticBoxes, Vec3f{0, 1, 0}, Vec3f{}, Vec3f{ 0.5, 1.0, 0.5 }, true, nullptr);
 	//return;
 	add_model_to_scene(models[skybox], scene, texture_pool, staticBoxes, Vec3f{}, Vec3f{2,0,0}, Vec3f{ 8, 8, 8 }, true, nullptr);
+	/*
+	Vec3f pos;
+	for(uint i=0; i<10; i++) {
+		pos.x = rand() % 10 - 5;
+		pos.y = rand() % 2 - 1;
+		pos.z = rand() % 10 - 5;
+		add_model_to_scene(models[crate], scene, texture_pool, staticBoxes, pos, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, nullptr);
+	}
+	*/
 
 	std::cout << "Scene triangle count: " << scene.size() << std::endl;
 }

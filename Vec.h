@@ -105,7 +105,9 @@ Vec2f ident(const Vec3f t, const char type);
 
 Vec4f vec4f(Vec3f &v, float w);
 
+//Return a vector that has components dimensions max or min of the 2
 Vec3f max(Vec3f a, Vec3f b);
+Vec3f min(Vec3f a, Vec3f b);
 
 float line(Vec2f &coeff, float x);
 

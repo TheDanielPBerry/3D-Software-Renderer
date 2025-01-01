@@ -15,44 +15,66 @@ bool intersects(Box *a, Box *b)
 	&& a->pos.z + a->dim.z >= b->pos.z;
 }
 
-Box *insert_box(Box *root, Box &box)
+Box *insert_box(Box *root, Box &box, uint dim)
 {
 	if(root == nullptr) {
 		Box *b = &box;
 		b->max = box.pos + box.dim;
-		for(unsigned char branches=0; branches<8; branches++) {
-			b->branches[branches] = nullptr;
-		}
+		b->min = box.pos;
+		b->left = nullptr;
+		b->right = nullptr;
 		return b;
 	}
-
-	uint branch = 0;
-	for(unsigned char dim=0; dim<3; dim++) {
-		if(box.pos[dim] > root->pos[dim]) {
-			branch += pow(2, dim);
-		}
+	
+	if(root->pos[dim] < box.pos[dim]) {
+		root->right = insert_box(root->right, box, (dim+1)%3);
+		root->max = max(root->max, root->right->max);
+		root->min = min(root->min, root->right->min);
+	} else {
+		root->left = insert_box(root->left, box, (dim+1)%3);
+		root->max = max(root->max, root->left->max);
+		root->min = min(root->min, root->left->min);
 	}
-	root->branches[branch] = insert_box(root->branches[branch], box);
-	root->max = max(root->max, root->branches[branch]->max);
-
 	return root;
 }
 
 uint number_of_checks = 0;
-Box *intersects_tree(Box *root, Box box)
+Box *intersects_tree(Box *root, Box &box, uint dim)
 {
-	if(root == nullptr || intersects(root, &box)) {
-		return root;
+	if(root == nullptr) {
+		return nullptr;
 	}
-	uint branch = 0;
-	Box *left;
-	for(unsigned char dim=0; dim<3; dim++) {
-		left = root->branches[branch + (dim*2)];
-		if(left == nullptr || box.pos[dim] > left->max[dim]) {
-			branch += pow(2, dim);
+	Box *n = nullptr;
+	Box *b = nullptr;
+	number_of_checks++;
+	if(intersects(root, &box)) {
+		b = root;
+	}
+	if(root->left != nullptr && (root->left->max[dim] >= box.pos[dim]) && (root->left->min[dim] <= box.max[dim])) {
+		Box *n = intersects_tree(root->left, box, (dim+1)%3);
+		if(n!=nullptr) b = n;
+	}
+	if(root->right != nullptr && (root->right->max[dim] >= box.pos[dim]) && (root->right->min[dim] <= box.max[dim])) {
+		n = intersects_tree(root->right, box, (dim+1)%3);
+		if(n!=nullptr) b = n;
+	}
+	return b;
+}
+
+Box *intersects_tree_procedural(Box *root, Box &box)
+{
+	uint dim = 0;
+	while(root != nullptr) {
+		if(intersects(root, &box)) {
+			return root;
+		} else if(root->left == nullptr || root->left->max[dim] <= box.pos[dim]) {
+			root = root->right;
+		} else {
+			root = root->left;
 		}
+		dim++;
 	}
-	return intersects_tree(root->branches[branch], box);
+	return root;
 }
 
 void setRotationMatrix(Entity &entity, bool initialize)
@@ -90,7 +112,7 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 	for(auto &entity : entities) {
 		//Forces
 		Vec3f velocity = entity.vel;
-		velocity.y += (180.0 * proportion);	//Gravity
+		//velocity.y += (180.0 * proportion);	//Gravity
 		velocity = velocity * (entity.drag);
 
 
@@ -99,12 +121,15 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 		//x axis
 		for(auto box : entity.boxes) {
 			box.pos = box.pos + entity.pos;
+			box.max = box.pos + box.dim;
 			float tempCoordinate;
 
 			if(velocity.x != 0.0) {
+				number_of_checks = 0;
 				tempCoordinate = box.pos.x;
 				box.pos.x += velocity.x;
-				if(intersects_tree(staticTree, box) != nullptr) {
+				box.max.x += velocity.x;
+				if(intersects_tree(staticTree, box, 0) != nullptr) {
 					velocity.x = 0.0;
 				} else {
 					Box *target = intersects_entities(box, entities);
@@ -114,13 +139,16 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 				}
 				box.pos.x = tempCoordinate;
 				box.pos.x += velocity.x;
+				box.max.x += velocity.x;
+				std::cout << number_of_checks << "\n";
 			}
 
 			if(velocity.y != 0.0) {
 				entity.grounded = false;
 				tempCoordinate = box.pos.y;
 				box.pos.y += velocity.y;
-				if(intersects_tree(staticTree, box) != nullptr) {
+				box.max.y += velocity.y;
+				if(intersects_tree(staticTree, box, 0) != nullptr) {
 					if(velocity.y > 0) {
 						entity.grounded = true;
 					}
@@ -134,14 +162,15 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 						velocity.y = 0;
 					}
 				}
-				box.pos.y = tempCoordinate;
-				box.pos.y += velocity.y;
+				box.pos.y = tempCoordinate + velocity.y;
+				box.max.y += velocity.y;
 			}
 
 			if(velocity.z != 0.0) {
 				tempCoordinate = box.pos.z;
 				box.pos.z += velocity.z;
-				if(intersects_tree(staticTree, box) != nullptr) {
+				box.max.z += velocity.z;
+				if(intersects_tree(staticTree, box, 0) != nullptr) {
 					velocity.z = 0.0;
 				} else {
 					Box *target = intersects_entities(box, entities);
@@ -149,8 +178,6 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 						velocity.z = 0;
 					}
 				}
-				box.pos.z = tempCoordinate;
-				box.pos.z += velocity.z;
 			}
 		}
 

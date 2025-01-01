@@ -142,6 +142,14 @@ Vec3f max(Vec3f a, Vec3f b)
 		std::max(a.z, b.z),
 	};
 }
+Vec3f min(Vec3f a, Vec3f b)
+{
+	return Vec3f {
+		std::min(a.x, b.x),
+		std::min(a.y, b.y),
+		std::min(a.z, b.z),
+	};
+}
 
 float line(Vec2f &coeff, float x)
 {

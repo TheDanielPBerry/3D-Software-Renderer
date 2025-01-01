@@ -29,7 +29,7 @@ void player_tick(Entity *camera, Signals &signals)
 {
 	#define PLAYER_ACCELERATION 4.0
 	#define JUMP_HEIGHT -60.0
-	#define GOD_MODE false
+	#define GOD_MODE true
 
 	if(signals.forward) {
 		camera->vel.z += cos(camera->rotation.y) * PLAYER_ACCELERATION;
@@ -49,11 +49,12 @@ void player_tick(Entity *camera, Signals &signals)
 	}
 	if(GOD_MODE) {
 		if(signals.jump) {
-			camera->vel.y = -4;
+			camera->vel.y -= 1;
 		}
 		if(signals.crouch) {
-			camera->vel.y = 4;
+			camera->vel.y += 1;
 		}
+		camera->vel.y *= 0.9;
 	} else {
 		if(signals.jump) {
 			if(camera->grounded) {
