@@ -19,6 +19,7 @@ Box *insert_box(Box *root, Box &box)
 {
 	if(root == nullptr) {
 		Box *b = &box;
+		b->max = box.pos + box.dim;
 		for(unsigned char branches=0; branches<8; branches++) {
 			b->branches[branches] = nullptr;
 		}
@@ -27,11 +28,12 @@ Box *insert_box(Box *root, Box &box)
 
 	uint branch = 0;
 	for(unsigned char dim=0; dim<3; dim++) {
-		if(true) {
+		if(box.pos[dim] > root->pos[dim]) {
 			branch += pow(2, dim);
 		}
 	}
 	root->branches[branch] = insert_box(root->branches[branch], box);
+	root->max = max(root->max, root->branches[branch]->max);
 
 	return root;
 }
@@ -39,12 +41,14 @@ Box *insert_box(Box *root, Box &box)
 uint number_of_checks = 0;
 Box *intersects_tree(Box *root, Box box)
 {
-	if(root == NULL || intersects(root, &box)) {
+	if(root == nullptr || intersects(root, &box)) {
 		return root;
 	}
 	uint branch = 0;
+	Box *left;
 	for(unsigned char dim=0; dim<3; dim++) {
-		if(true) {
+		left = root->branches[branch + (dim*2)];
+		if(left == nullptr || box.pos[dim] > left->max[dim]) {
 			branch += pow(2, dim);
 		}
 	}
@@ -109,7 +113,7 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 					}
 				}
 				box.pos.x = tempCoordinate;
-				entity.pos.x += velocity.x;
+				box.pos.x += velocity.x;
 			}
 
 			if(velocity.y != 0.0) {
@@ -131,7 +135,7 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 					}
 				}
 				box.pos.y = tempCoordinate;
-				entity.pos.y += velocity.y;
+				box.pos.y += velocity.y;
 			}
 
 			if(velocity.z != 0.0) {
@@ -146,11 +150,12 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 					}
 				}
 				box.pos.z = tempCoordinate;
-				entity.pos.z += velocity.z;
+				box.pos.z += velocity.z;
 			}
 		}
 
 
+		entity.pos = entity.pos + velocity;
 		entity.vel = velocity / proportion;
 		entity.rotation = (entity.rotation + entity.rotational_velocity * proportion);
 

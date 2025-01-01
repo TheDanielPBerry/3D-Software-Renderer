@@ -134,6 +134,14 @@ Vec4f vec4f(Vec3f &v, float w)
 	};
 }
 
+Vec3f max(Vec3f a, Vec3f b)
+{
+	return Vec3f {
+		std::max(a.x, b.x),
+		std::max(a.y, b.y),
+		std::max(a.z, b.z),
+	};
+}
 
 float line(Vec2f &coeff, float x)
 {

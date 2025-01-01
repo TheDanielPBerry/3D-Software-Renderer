@@ -11,6 +11,7 @@ typedef struct Box {
 	Vec3f pos;
 	Vec3f dim;
 	Box *branches[8];
+	Vec3f max;
 	struct Entity *entity;
 } Box;
 
