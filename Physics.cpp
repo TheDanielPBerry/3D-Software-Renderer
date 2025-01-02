@@ -7,75 +7,96 @@
 
 bool intersects(Box *a, Box *b)
 {
-	return a->pos.x <= b->pos.x + b->dim.x
-	&& a->pos.x + a->dim.x >= b->pos.x
-	&& a->pos.y <= b->pos.y + b->dim.y
-	&& a->pos.y + a->dim.y >= b->pos.y
-	&& a->pos.z <= b->pos.z + b->dim.z
-	&& a->pos.z + a->dim.z >= b->pos.z;
+	return a->src.x <= b->dest.x
+	&& a->dest.x >= b->src.x
+	&& a->src.y <= b->dest.y
+	&& a->dest.y >= b->src.y
+	&& a->src.z <= b->dest.z
+	&& a->dest.z >= b->src.z;
+}
+
+Vec3f volume(Box &a, Box &b)
+{
+	return Vec3f {
+		std::min(a.dest.x, b.dest.x)-std::max(a.src.x, b.src.x),
+		std::min(a.dest.y, b.dest.y)-std::max(a.src.y, b.src.y),
+		std::min(a.dest.z, b.dest.z)-std::max(a.src.z, b.src.z),
+	};
 }
 
 Box *insert_box(Box *root, Box &box, uint dim)
 {
 	if(root == nullptr) {
 		Box *b = &box;
-		b->max = box.pos + box.dim;
-		b->min = box.pos;
 		b->left = nullptr;
 		b->right = nullptr;
 		return b;
 	}
 	
-	if(root->pos[dim] < box.pos[dim]) {
+	if(root->left == nullptr) {
+		root->right = nullptr;
+		Box *b = new Box;
+		b->src = root->src;
+		b->dest = root->dest;
+		b->left = root;
+		b->right = nullptr;
+		root = b;
+	}
+	if(root->src[dim] < box.src[dim]) {
 		root->right = insert_box(root->right, box, (dim+1)%3);
-		root->max = max(root->max, root->right->max);
-		root->min = min(root->min, root->right->min);
+		root->src = min(root->right->src, root->src);
+		root->dest = max(root->right->dest, root->dest);
+
 	} else {
 		root->left = insert_box(root->left, box, (dim+1)%3);
-		root->max = max(root->max, root->left->max);
-		root->min = min(root->min, root->left->min);
+		root->src = min(root->left->src, root->src);
+		root->dest = max(root->left->dest, root->dest);
 	}
 	return root;
+}
+
+void recalculate_box_ray(Box &b, Vec3f &vel)
+{
 }
 
 uint number_of_checks = 0;
-Box *intersects_tree(Box *root, Box &box, uint dim)
+Vec3f intersects_tree(Box *root, Box &box, uint dim)
 {
+	Vec3f vol = Vec3f{-1,-1,-1};
 	if(root == nullptr) {
-		return nullptr;
+		return vol;
 	}
-	Box *n = nullptr;
-	Box *b = nullptr;
 	number_of_checks++;
-	if(intersects(root, &box)) {
-		b = root;
+
+	Vec3f v = volume(*root, box);
+	if(v[0] >= 0 && v[1] >= 0 && v[2] >= 0) {
+		if(root->left == nullptr) {
+			std::cout << v.x << " " << v.y << " " << v.z << "\n";
+			return v;
+		} else {
+			v = intersects_tree(root->left, box, (dim+1)%3);
+			if(v[0] > 0 && v[1] > 0 && v[2] > 0) {
+				if(vol[dim] < 0) {
+					vol = v;
+				} else {
+					vol = min(v, vol);
+				}
+			}
+			if(root->right != nullptr) {
+				v = intersects_tree(root->right, box, (dim+1)%3);
+				if(v[0] > 0 && v[1] > 0 && v[2] > 0) {
+					if(vol[dim] < 0) {
+						vol = v;
+					} else {
+						vol = min(v, vol);
+					}
+				}
+			}
+		}
 	}
-	if(root->left != nullptr && (root->left->max[dim] >= box.pos[dim]) && (root->left->min[dim] <= box.max[dim])) {
-		Box *n = intersects_tree(root->left, box, (dim+1)%3);
-		if(n!=nullptr) b = n;
-	}
-	if(root->right != nullptr && (root->right->max[dim] >= box.pos[dim]) && (root->right->min[dim] <= box.max[dim])) {
-		n = intersects_tree(root->right, box, (dim+1)%3);
-		if(n!=nullptr) b = n;
-	}
-	return b;
+	return vol;
 }
 
-Box *intersects_tree_procedural(Box *root, Box &box)
-{
-	uint dim = 0;
-	while(root != nullptr) {
-		if(intersects(root, &box)) {
-			return root;
-		} else if(root->left == nullptr || root->left->max[dim] <= box.pos[dim]) {
-			root = root->right;
-		} else {
-			root = root->left;
-		}
-		dim++;
-	}
-	return root;
-}
 
 void setRotationMatrix(Entity &entity, bool initialize)
 {
@@ -93,12 +114,12 @@ Box *intersects_entities(Box &box, std::vector<Entity> &entities)
 	for(Entity &entity : entities) {
 		if(box.entity != &entity) {
 			for(Box &target : entity.boxes) {
-				target.pos = target.pos + entity.pos;
+				target.src = target.src + entity.pos;
 				//number_of_checks++;
 				if(intersects(&target, &box)) {
 					b = &target;
 				}
-				target.pos = target.pos - entity.pos;
+				target.src = target.src - entity.pos;
 			}
 		}
 	}
@@ -120,16 +141,15 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 		//Check each axis individually
 		//x axis
 		for(auto box : entity.boxes) {
-			box.pos = box.pos + entity.pos;
-			box.max = box.pos + box.dim;
+			box.src = box.src + entity.pos;
+			box.dest = box.dest + entity.pos;
 			float tempCoordinate;
 
 			if(velocity.x != 0.0) {
-				number_of_checks = 0;
-				tempCoordinate = box.pos.x;
-				box.pos.x += velocity.x;
-				box.max.x += velocity.x;
-				if(intersects_tree(staticTree, box, 0) != nullptr) {
+				tempCoordinate = box.src.x;
+				box.src.x += velocity.x;
+				Vec3f volume = intersects_tree(staticTree, box, 0);
+				if(volume.x > 0 && volume.y > 0 && volume.z > 0) {
 					velocity.x = 0.0;
 				} else {
 					Box *target = intersects_entities(box, entities);
@@ -137,18 +157,16 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 						velocity.x = 0;
 					}
 				}
-				box.pos.x = tempCoordinate;
-				box.pos.x += velocity.x;
-				box.max.x += velocity.x;
-				std::cout << number_of_checks << "\n";
+				box.src.x = tempCoordinate;
+				box.src.x += velocity.x;
 			}
 
 			if(velocity.y != 0.0) {
 				entity.grounded = false;
-				tempCoordinate = box.pos.y;
-				box.pos.y += velocity.y;
-				box.max.y += velocity.y;
-				if(intersects_tree(staticTree, box, 0) != nullptr) {
+				tempCoordinate = box.src.y;
+				box.src.y += velocity.y;
+				Vec3f volume = intersects_tree(staticTree, box, 0);
+				if(volume.x > 0 && volume.y > 0 && volume.z > 0) {
 					if(velocity.y > 0) {
 						entity.grounded = true;
 					}
@@ -162,15 +180,14 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 						velocity.y = 0;
 					}
 				}
-				box.pos.y = tempCoordinate + velocity.y;
-				box.max.y += velocity.y;
+				box.src.y = tempCoordinate + velocity.y;
 			}
 
 			if(velocity.z != 0.0) {
-				tempCoordinate = box.pos.z;
-				box.pos.z += velocity.z;
-				box.max.z += velocity.z;
-				if(intersects_tree(staticTree, box, 0) != nullptr) {
+				tempCoordinate = box.src.z;
+				box.src.z += velocity.z;
+				Vec3f volume = intersects_tree(staticTree, box, 0);
+				if(volume.x > 0 && volume.y > 0 && volume.z > 0) {
 					velocity.z = 0.0;
 				} else {
 					Box *target = intersects_entities(box, entities);

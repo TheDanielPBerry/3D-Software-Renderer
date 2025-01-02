@@ -219,28 +219,30 @@ int load_obj_model(
 
 			tie(index, slash) = next_word(vertexStr, '/', 0);
 			float d = std::stof(index);
-			box.pos.x = d;
+			box.src.x = d;
 
 			tie(index, slash) = next_word(vertexStr, '/', slash+1);
 			d = std::stof(index);
-			box.pos.y = d;
+			box.src.y = d;
 
 			tie(index, slash) = next_word(vertexStr, '/', slash+1);
 			d = std::stof(index);
-			box.pos.z = d;
+			box.src.z = d;
 
 			tie(vertexStr, space) = next_word(line, space+1);
 			tie(index, slash) = next_word(vertexStr, '/', 0);
 			d = std::stof(index);
-			box.dim.x = d;
+			box.dest.x = d;
 
 			tie(index, slash) = next_word(vertexStr, '/', slash+1);
 			d = std::stof(index);
-			box.dim.y = d;
+			box.dest.y = d;
 
 			tie(index, slash) = next_word(vertexStr, '/', slash+1);
 			d = std::stof(index);
-			box.dim.z = d;
+			box.dest.z = d;
+
+			box.dest = box.dest + box.src;
 
 			model.boxes.push_back(box);
 		}
@@ -271,12 +273,12 @@ void add_model_to_scene(
 	};
 
 	for(Box box : model.boxes) {
-		box.pos = box.pos * scale;
-		rotate(box.pos, trig);
+		box.src = box.src * scale;
+		rotate(box.src, trig);
 
-		box.dim = box.dim * scale;
-		rotate(box.dim, trig);
-		box.dim = box.dim;
+		box.dest = box.dest * scale;
+		rotate(box.dest, trig);
+		box.dest = box.dest;
 
 		box.entity = entity;
 
@@ -284,7 +286,8 @@ void add_model_to_scene(
 		if(entity != nullptr) {
 			entity->boxes.push_back(box);
 		} else {
-			box.pos = box.pos + pos;
+			box.src = box.src + pos;
+			box.dest = box.dest + pos;
 			staticBoxes.push_back(box);
 		}
 	}

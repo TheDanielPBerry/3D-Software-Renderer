@@ -8,12 +8,10 @@
 
 
 typedef struct Box {
-	Vec3f pos;
-	Vec3f dim;
+	Vec3f src;
+	Vec3f dest;
 	Box *left;
 	Box *right;
-	Vec3f max;
-	Vec3f min;
 	struct Entity *entity;
 } Box;
 
