@@ -135,16 +135,17 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 					target = intersects_entities(box, entities);
 				}
 				if(target != nullptr) {
-					if(entity.type == Player && entity.grounded) {
-						box.pos.y -= 0.3;
-						box.max.y -= 0.3;
+					float diff = (box.max.y-target->pos.y);
+					if(entity.type == Player && entity.grounded && diff <= 0.4) {
+						box.pos.y -= (diff + 0.01);
+						box.max.y -= (diff + 0.01);
 						Box *diagonal = intersects_tree(staticTree, box, 0); 
 						if(diagonal == nullptr) {
 							diagonal = intersects_entities(box, entities);
 						}
 						if(diagonal == nullptr) {
-							velocity.y -= 0.3;
-							velocity.x *= 0.1;
+							velocity.y -= diff;
+							velocity.x *= 0.3;
 							entity.grounded = false;
 						} else {
 							box.pos.y += 0.3;
@@ -170,16 +171,17 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 					target = intersects_entities(box, entities);
 				}
 				if(target != nullptr) {
-					if(entity.type == Player && entity.grounded) {
-						box.pos.y -= 0.3;
-						box.max.y -= 0.3;
+					float diff = (box.max.y-target->pos.y);
+					if(entity.type == Player && entity.grounded && diff <= 0.4) {
+						box.pos.y -= (diff + 0.01);
+						box.max.y -= (diff + 0.01);
 						Box *diagonal = intersects_tree(staticTree, box, 0); 
 						if(diagonal == nullptr) {
 							diagonal = intersects_entities(box, entities);
 						}
 						if(diagonal == nullptr) {
-							velocity.y -= 0.3;
-							velocity.z *= 0.1;
+							velocity.y -= (diff+0.01);
+							velocity.z *= 0.3;
 							entity.grounded = false;
 						} else {
 							std::cout << velocity.y << std::endl;

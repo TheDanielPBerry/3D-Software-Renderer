@@ -53,7 +53,7 @@ bool transform(Plane &plane, const Vec3f &translate, const Vec3f rotationTrig[2]
 	}
 
 	if(plane.cullable) {
-		Vec3f camera = Vec3f{ -1, -1, -1} * plane.buffer[0];
+		Vec3f camera =  Vec3f{-1, -1, -1} * plane.buffer[0];
 		Vec3f normal = cross_product(plane.buffer[0] - plane.buffer[1], plane.buffer[0] - plane.buffer[2]);
 		float dot = dot_product(normal, camera);
 		return dot > 0;

@@ -344,6 +344,11 @@ void draw_scene(std::vector<Plane> &scene,
 			scene[p].color[0] = Vec4f{1,1,1,1};
 			scene[p].color[1] = Vec4f{1,1,1,1};
 			scene[p].color[2] = Vec4f{1,1,1,1};
+			if(scene[p].cameraStatic) {
+				scene[p].buffer[0] = scene[p].buffer[0] - scene[p].entity->pos;
+				scene[p].buffer[1] = scene[p].buffer[1] - scene[p].entity->pos;
+				scene[p].buffer[2] = scene[p].buffer[2] - scene[p].entity->pos;
+			}
 			calculate_plane_vertex_lights(scene[p], lights);
 		}
 		if(scene[p].cameraStatic) {
