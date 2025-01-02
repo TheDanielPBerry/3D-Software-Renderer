@@ -63,9 +63,9 @@ void some_lights(std::vector<Light> &lights)
 			.pos = Vec3f {
 				0, -20, 0
 			},
-			.color = Vec3f{1.0, 1.0, 1.0},
+			.color = Vec3f{1.0, 0.8, 1.0},
 			.constant = 0.005,
-			.linear = 0.009,
+			.linear = 0.09,
 			.quadratic = 0.0032,
 		}
 	);

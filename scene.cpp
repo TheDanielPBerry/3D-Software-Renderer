@@ -64,8 +64,8 @@ void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_
 
 
 	add_model_to_scene(models[shotgun], scene, texture_pool, staticBoxes, Vec3f{ 0.2, 0.2, 0.3 }, Vec3f{ 0, 3.14/2, 3.18 }, Vec3f{ 0.1, 0.1, 0.08 }, true, &(entities[0]), true);
-	entities[0].boxes[0].src = Vec3f{ -0.4, -0.2, -0.4 };
-	entities[0].boxes[0].dest = Vec3f{ 0.4, 2.6, 0.4 };
+	entities[0].boxes[0].pos = Vec3f{ -0.4, -0.2, -0.4 };
+	entities[0].boxes[0].dim = Vec3f{ 0.8, 2.4, 0.8 };
 
 	//add_model_to_scene(models[rpg], scene, texture_pool, staticBoxes, Vec3f{ 0.0, 0.22, 0.0}, Vec3f{ -0.15, 3.141592, 3.141592 }, Vec3f{ 0.1, 0.1, 0.1 }, true, &(entities[0]), true);
 	add_model_to_scene(models[chest], scene, texture_pool, staticBoxes, Vec3f{}, Vec3f{}, Vec3f{ 0.3, 0.3, 0.3 }, true, &(entities[1]));

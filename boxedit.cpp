@@ -18,8 +18,8 @@ void draw_box(
 	Line subject = Line{
 		.box = &box,
 	};
-	subject.points[0] = box.src;
-	subject.points[1] = Vec3f{ box.dest.x, box.src.x, box.src.z };
+	subject.points[0] = box.pos;
+	subject.points[1] = Vec3f{ box.pos.x + box.dim.x, box.pos.y, box.pos.z };
 	if(transform_line(subject, translate, rotationTrig)) {
 		project_line(subject, dimensions);
 		draw_line(subject, dimensions, buffer, z_buffer);
@@ -31,8 +31,8 @@ void draw_box(
 		draw_line(subject, dimensions, buffer, z_buffer);
 	}
 
-	subject.points[1].x = box.src.x;
-	subject.points[1].y = box.dest.y;
+	subject.points[1].x = box.pos.x;
+	subject.points[1].y = box.pos.y + box.dim.y;
 	if(transform_line(subject, translate, rotationTrig)) {
 		project_line(subject, dimensions);
 		draw_line(subject, dimensions, buffer, z_buffer);
@@ -44,8 +44,8 @@ void draw_box(
 		draw_line(subject, dimensions, buffer, z_buffer);
 	}
 
-	subject.points[1].y = box.src.y;
-	subject.points[1].z = box.dest.z;
+	subject.points[1].y = box.pos.y;
+	subject.points[1].z = box.pos.z + box.dim.z;
 	if(transform_line(subject, translate, rotationTrig)) {
 		project_line(subject, dimensions);
 		draw_line(subject, dimensions, buffer, z_buffer);
@@ -59,8 +59,8 @@ void draw_box(
 
 
 
-	subject.points[0] = box.dest;
-	subject.points[1] = Vec3f{ box.src.x, box.dest.y, box.dest.z };
+	subject.points[0] = box.pos + box.dim;
+	subject.points[1] = Vec3f{ box.pos.x, box.pos.y + box.dim.y, box.pos.z + box.dim.z };
 	if(transform_line(subject, translate, rotationTrig)) {
 		project_line(subject, dimensions);
 		draw_line(subject, dimensions, buffer, z_buffer);
@@ -72,8 +72,8 @@ void draw_box(
 		draw_line(subject, dimensions, buffer, z_buffer);
 	}
 
-	subject.points[1].x = box.dest.x;
-	subject.points[1].y = box.src.y;
+	subject.points[1].x = subject.points[0].x;
+	subject.points[1].y = box.pos.y;
 	if(transform_line(subject, translate, rotationTrig)) {
 		project_line(subject, dimensions);
 		draw_line(subject, dimensions, buffer, z_buffer);
@@ -85,8 +85,8 @@ void draw_box(
 		draw_line(subject, dimensions, buffer, z_buffer);
 	}
 
-	subject.points[1].y = box.dest.y;
-	subject.points[1].z = box.src.z;
+	subject.points[1].y = subject.points[0].y;
+	subject.points[1].z = box.pos.z;
 	if(transform_line(subject, translate, rotationTrig)) {
 		project_line(subject, dimensions);
 		draw_line(subject, dimensions, buffer, z_buffer);
@@ -98,8 +98,8 @@ void draw_box(
 		draw_line(subject, dimensions, buffer, z_buffer);
 	}
 
-	subject.points[0] = Vec3f{box.src.x, box.dest.y, box.dest.z};
-	subject.points[1] = Vec3f{box.src.x, box.dest.y, box.src.z };
+	subject.points[0] = Vec3f{box.pos.x, box.pos.y + box.dim.y, box.pos.z + box.dim.z};
+	subject.points[1] = Vec3f{box.pos.x, box.pos.y + box.dim.y, box.pos.z };
 	if(transform_line(subject, translate, rotationTrig)) {
 		project_line(subject, dimensions);
 		draw_line(subject, dimensions, buffer, z_buffer);
@@ -111,8 +111,8 @@ void draw_box(
 		draw_line(subject, dimensions, buffer, z_buffer);
 	}
 
-	subject.points[0] = Vec3f{ box.dest.x, box.src.y, box.dest.z};
-	subject.points[1] = Vec3f{ box.dest.x, box.src.y, box.src.z };
+	subject.points[0] = Vec3f{box.pos.x + box.dim.x, box.pos.y, box.pos.z + box.dim.z};
+	subject.points[1] = Vec3f{box.pos.x + box.dim.x, box.pos.y, box.pos.z };
 	if(transform_line(subject, translate, rotationTrig)) {
 		project_line(subject, dimensions);
 		draw_line(subject, dimensions, buffer, z_buffer);
@@ -172,25 +172,25 @@ void check_boxedit_keys(SDL_Event &event, Signals &signals)
 			return;
 		}
 		if(pos_mode) {
-			box_of_interest->src[box_axis] += box_edit_granularity;
+			box_of_interest->pos[box_axis] += box_edit_granularity;
 		} else {
-			box_of_interest->dest[box_axis] += box_edit_granularity;
+			box_of_interest->dim[box_axis] += box_edit_granularity;
 		}
 	} else if(event.key.keysym.scancode == 86) {
 		if(box_of_interest == nullptr) {
 			return;
 		}
 		if(pos_mode) {
-			box_of_interest->src[box_axis] -= box_edit_granularity;
+			box_of_interest->pos[box_axis] -= box_edit_granularity;
 		} else {
-			box_of_interest->dest[box_axis] -= box_edit_granularity;
+			box_of_interest->dim[box_axis] -= box_edit_granularity;
 		}
 	} else if(event.key.keysym.scancode == 40) {	//Enter Key
 		if(box_of_interest == nullptr) {
 			return;
 		}
-		std::cout << "\nb " << box_of_interest->src.x << "/" << box_of_interest->src.y << "/" << box_of_interest->src.z;
-		std::cout << " " << box_of_interest->dest.x << "/" << box_of_interest->dest.y << "/" << box_of_interest->dest.z << std::endl;
+		std::cout << "\nb " << box_of_interest->pos.x << "/" << box_of_interest->pos.y << "/" << box_of_interest->pos.z;
+		std::cout << " " << box_of_interest->dim.x << "/" << box_of_interest->dim.y << "/" << box_of_interest->dim.z << std::endl;
 	} else if(event.key.keysym.scancode == SDL_SCANCODE_P) {
 		pos_mode = !pos_mode;
 	} else if(event.key.keysym.scancode == SDL_SCANCODE_X) {
@@ -222,8 +222,8 @@ void box_signals(Signals &signals, std::vector<Box> &staticBoxes, Entity *camera
 		signals.addBox = false;
 
 		staticBoxes.push_back(Box{
-			.src = camera->pos,
-			.dest = Vec3f{ 1, 1, 1 }
+			.pos = camera->pos,
+			.dim = Vec3f{ 1, 1, 1 }
 		});
 		box_of_interest = &staticBoxes[staticBoxes.size()-1];
 		//insert_box(staticTree, *box_of_interest);
