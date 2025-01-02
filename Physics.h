@@ -17,6 +17,13 @@ typedef struct Box {
 	struct Entity *entity;
 } Box;
 
+typedef enum EntityType {
+	Player = 0,
+	Object = 1,
+	Rpg = 2,
+	Shotgun = 3,
+} EntityType;
+
 typedef struct Entity {
 	Vec3f pos;
 	Vec3f vel;
@@ -26,7 +33,7 @@ typedef struct Entity {
 	std::vector<Box> boxes;
 	Vec3f rotationMatrix[2];
 	bool grounded;
-	std::string name;
+	enum EntityType type;
 } Entity;
 
 Box *insert_box(Box *root, Box &box, uint dim);
