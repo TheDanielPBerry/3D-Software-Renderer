@@ -35,7 +35,7 @@ void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_
 		.drag = Vec3f{0.7, 0.98, 0.7},
 		.rotation = Vec3f{},
 		.rotational_velocity = Vec3f{},
-		.name = "player",
+		.type=Player,
 	});
 	entities.push_back(Entity {
 		.pos = Vec3f{0, -8, 2},
@@ -43,7 +43,7 @@ void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_
 		.drag = Vec3f{0.9, 0.9, 0.9},
 		.rotation = Vec3f{ 3.14192, 0, 0 },
 		.rotational_velocity = Vec3f{ 0, 0, 0},
-		.name = "chest",
+		.type=Object
 	});
 	entities.push_back(Entity {
 		.pos = Vec3f{4, -8, 2},
@@ -51,7 +51,7 @@ void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_
 		.drag = Vec3f{0.9, 0.9, 0.9},
 		.rotation = Vec3f{ 0, 0, 0 },
 		.rotational_velocity = Vec3f{ 0, 1.0, 0},
-		.name = "shotgun",
+		.type=Shotgun
 	});
 	entities.push_back(Entity {
 		.pos = Vec3f{-2, -10, 3},
@@ -59,7 +59,7 @@ void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_
 		.drag = Vec3f{0.9, 0.9, 0.9},
 		.rotation = Vec3f{ 0, 0, 0 },
 		.rotational_velocity = Vec3f{ 0, 0, 0 },
-		.name = "crate",
+		.type=Object
 	});
 
 

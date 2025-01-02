@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include "Plane.h"
+#include "Vec.h"
 
 typedef struct Face {
 	SDL_Surface *texture;
@@ -322,6 +323,7 @@ void add_model_to_scene(
 
 		}
 
+		plane.normal = normalize(cross_product(plane.points[0] - plane.points[1], plane.points[0]-plane.points[1]));
 
 		plane.cullable = cullable;
 

@@ -25,11 +25,20 @@ void player_model(std::vector<Plane> &scene, std::unordered_map<std::string, SDL
 
 }
 
+
+/*
+Plane &vec_plane_intersection(std::Vec3f &plane, )
+{
+
+}
+*/
+
+
 void player_tick(Entity *camera, Signals &signals)
 {
 	#define PLAYER_ACCELERATION 4.0
 	#define JUMP_HEIGHT -60.0
-	#define GOD_MODE true
+	#define GOD_MODE false
 
 	if(signals.forward) {
 		camera->vel.z += cos(camera->rotation.y) * PLAYER_ACCELERATION;
