@@ -167,7 +167,8 @@ int main(int argc, char* argv[]) {
 		SDL_RenderPresent(renderer);
 
 		rotate = camera->rotation;
-		//translate = camera->pos * -1;
+		//Over the shoulder angles
+		translate = camera->pos * -1;
 		//translate.z += cos(rotate.y) * 1.8;
 		//translate.x += sin(rotate.y) * 1.8;
 		//translate.y += 0.3;
@@ -178,7 +179,7 @@ int main(int argc, char* argv[]) {
 		//translate.z -= sin(camera->rotation.y) * 3;
 
 
-		translate = camera->pos * -1;
+		//translate = camera->pos * -1;
 		//Fixed Camera Angles
 		//translate = Vec3f{6, 8, -7};
 		//rotate = Vec3f{ 0.6, 2.5, 0};

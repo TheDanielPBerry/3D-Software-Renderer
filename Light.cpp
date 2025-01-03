@@ -36,10 +36,9 @@ void calculate_plane_vertex_lights(Plane &plane, std::vector<Light> &lights)
 			float diff = std::max(dot_product(normal, lightDir), (float) 0.0);
 			result = result + (light.color * diff * attenuation);
 		}
-		//plane.color[p] = plane.color[p] * vec4f(result, 1.0);
-		plane.color[p].x = std::max((float)0, std::min(plane.color[p].x * result.x, (float)1.0));
-		plane.color[p].y = std::max((float)0, std::min(plane.color[p].y * result.y, (float)1.0));
-		plane.color[p].z = std::max((float)0, std::min(plane.color[p].z * result.z, (float)1.0));
+		//plane.color[p].x = std::max((float)0, std::min(plane.color[p].x * result.x, (float)1.0));
+		//plane.color[p].y = std::max((float)0, std::min(plane.color[p].y * result.y, (float)1.0));
+		//plane.color[p].z = std::max((float)0, std::min(plane.color[p].z * result.z, (float)1.0));
 	}
 }
 
