@@ -69,16 +69,22 @@ Vec2f interpolate_lines(
 
 	//Interpolate each corners color
 	Vec2f left_coeff_red, right_coeff_red;
-	coeffs(Vec2f { plane.color[left[START]].x, plane.buffer[left[START]].y }, Vec2f { plane.color[left[END]].x, plane.buffer[left[END]].y }, left_coeff_red);
-	coeffs(Vec2f { plane.color[right[START]].x, plane.buffer[right[START]].y }, Vec2f { plane.color[right[END]].x, plane.buffer[right[END]].y }, right_coeff_red);
+	coeffs(Vec2f { plane.color[left[START]].x / plane.buffer[left[START]].z, plane.buffer[left[START]].y },
+		Vec2f { plane.color[left[END]].x / plane.buffer[left[END]].z, plane.buffer[left[END]].y }, left_coeff_red);
+	coeffs(Vec2f { plane.color[right[START]].x / plane.buffer[right[START]].z, plane.buffer[right[START]].y },
+		Vec2f { plane.color[right[END]].x / plane.buffer[right[END]].z, plane.buffer[right[END]].y }, right_coeff_red);
 
 	Vec2f left_coeff_green, right_coeff_green;
-	coeffs(Vec2f { plane.color[left[START]].y, plane.buffer[left[START]].y }, Vec2f { plane.color[left[END]].y, plane.buffer[left[END]].y }, left_coeff_green);
-	coeffs(Vec2f { plane.color[right[START]].y, plane.buffer[right[START]].y }, Vec2f { plane.color[right[END]].y, plane.buffer[right[END]].y }, right_coeff_green);
+	coeffs(Vec2f { plane.color[left[START]].y / plane.buffer[left[START]].z, plane.buffer[left[START]].y },
+		Vec2f { plane.color[left[END]].y / plane.buffer[left[END]].z, plane.buffer[left[END]].y }, left_coeff_green);
+	coeffs(Vec2f { plane.color[right[START]].y / plane.buffer[right[START]].z, plane.buffer[right[START]].y },
+		Vec2f { plane.color[right[END]].y / plane.buffer[right[END]].z, plane.buffer[right[END]].y }, right_coeff_green);
 
 	Vec2f left_coeff_blue, right_coeff_blue;
-	coeffs(Vec2f { plane.color[left[START]].z, plane.buffer[left[START]].y }, Vec2f { plane.color[left[END]].z, plane.buffer[left[END]].y }, left_coeff_blue);
-	coeffs(Vec2f { plane.color[right[START]].z, plane.buffer[right[START]].y }, Vec2f { plane.color[right[END]].z, plane.buffer[right[END]].y }, right_coeff_blue);
+	coeffs(Vec2f { plane.color[left[START]].z / plane.buffer[left[START]].z, plane.buffer[left[START]].y },
+		Vec2f { plane.color[left[END]].z / plane.buffer[left[END]].z, plane.buffer[left[END]].y }, left_coeff_blue);
+	coeffs(Vec2f { plane.color[right[START]].z / plane.buffer[right[START]].z, plane.buffer[right[START]].y },
+		Vec2f { plane.color[right[END]].z / plane.buffer[right[END]].z, plane.buffer[right[END]].y }, right_coeff_blue);
 
 
 	Vec2f left_coeff_texture_x, right_coeff_texture_x;
@@ -182,9 +188,9 @@ Vec2f interpolate_lines(
 			float luminosity = 1.0;
 
 			if((z_buffer[yOffset + x] < perspective) || (plane.cameraStatic && (z_buffer[yOffset + x] < 1000+perspective))) {
-				float red = line(red_coeff, x);
-				float green = line(green_coeff, x);
-				float blue = line(blue_coeff, x);
+				float red = line(red_coeff, x) / perspective;
+				float green = line(green_coeff, x) / perspective;
+				float blue = line(blue_coeff, x) / perspective;
 
 
 				Uint32 pixel;
