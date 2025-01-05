@@ -37,7 +37,7 @@ Plane &vec_plane_intersection(std::Vec3f &plane, )
 void player_tick(Entity *camera, Signals &signals)
 {
 	#define PLAYER_ACCELERATION 4.0
-	#define JUMP_HEIGHT -60.0
+	#define JUMP_HEIGHT -50.0
 	#define GOD_MODE false
 
 	if(signals.forward) {

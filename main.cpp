@@ -137,7 +137,7 @@ int main(int argc, char* argv[]) {
 			z_buffer[i] = 0.0;
 		}
 		draw_scene(scene, screen_buffer, dimensions, translate, rotate, z_buffer, pixel_format, lights);
-		draw_bounding_boxes(staticBoxes, entities, translate, rotate, dimensions, screen_buffer, z_buffer);
+		//draw_bounding_boxes(staticBoxes, entities, translate, rotate, dimensions, screen_buffer, z_buffer);
 
 
 		auto currentFrameMillis = getCurrentMilliseconds();

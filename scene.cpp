@@ -23,6 +23,7 @@ void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_
 	int rpg = load_obj_model("assets/models/rpg.obj", scene, texture_pool, models);
 	int level_one = load_obj_model("assets/models/level_two.obj", scene, texture_pool, models);
 	int skybox = load_obj_model("assets/models/skybox.obj", scene, texture_pool, models);
+	int wood_step = load_obj_model("assets/models/wood_step.obj", scene, texture_pool, models);
 
 	models[chest].boxes.push_back(models[crate].boxes[0]);
 	models[rpg].boxes.push_back(models[crate].boxes[0]);
@@ -77,15 +78,13 @@ void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_
 	//add_model_to_scene(models[floor], scene, texture_pool, staticBoxes, Vec3f{0, 1, 0}, Vec3f{}, Vec3f{ 0.5, 1.0, 0.5 }, true, nullptr);
 	//return;
 	add_model_to_scene(models[skybox], scene, texture_pool, staticBoxes, Vec3f{}, Vec3f{2,0,0}, Vec3f{ 8, 8, 8 }, true, nullptr);
-	/*
-	Vec3f pos;
-	for(uint i=0; i<10; i++) {
-		pos.x = rand() % 10 - 5;
-		pos.y = rand() % 2 - 1;
-		pos.z = rand() % 10 - 5;
-		add_model_to_scene(models[crate], scene, texture_pool, staticBoxes, pos, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, nullptr);
+	
+	Vec3f pos = Vec3f{ 0, 0, 0 };
+	for(uint i=0; i<7; i++) {
+		pos.x =	(i * -0.7) - 5;
+		pos.y = (i * -0.3);
+		add_model_to_scene(models[wood_step], scene, texture_pool, staticBoxes, pos, Vec3f{}, Vec3f{0.4,0.4,1.5}, true, nullptr);
 	}
-	*/
 
 	std::cout << "Scene triangle count: " << scene.size() << std::endl;
 }

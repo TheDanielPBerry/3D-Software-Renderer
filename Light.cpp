@@ -12,7 +12,7 @@ typedef struct Light {
 } Light;
 
 
-#define AMBIENT_LIGHT 0.2
+#define AMBIENT_LIGHT 0.4
 void calculate_plane_vertex_lights(Plane &plane, std::vector<Light> &lights)
 {
 	for(uint p=0; p<N_POINTS; p++) {
