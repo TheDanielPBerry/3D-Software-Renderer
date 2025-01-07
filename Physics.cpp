@@ -41,7 +41,6 @@ Box *insert_box(Box *root, Box &box, uint dim)
 uint number_of_checks = 0;
 Box *intersects_tree(Box *root, Box &box, uint dim)
 {
-	return nullptr;
 	if(root == nullptr) {
 		return nullptr;
 	}

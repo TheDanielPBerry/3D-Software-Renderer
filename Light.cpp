@@ -34,6 +34,7 @@ void calculate_plane_vertex_lights(Plane &plane, std::vector<Light> &lights)
 			//Diffuse calculation
 			Vec3f lightDir = (light.pos - plane.buffer[p]) / dist;
 			float diff = std::max(dot_product(normal, lightDir), (float) 0.0);
+
 			result = result + (light.color * diff * attenuation);
 		}
 		plane.color[p].x = std::max((float)0, std::min(plane.color[p].x * result.x, (float)1.0));
@@ -60,12 +61,12 @@ void some_lights(std::vector<Light> &lights)
 	lights.push_back(
 		Light {
 			.pos = Vec3f {
-				0.0,-480,480
+				0.0,-600,480
 			},
 			.color = Vec3f{1.0, 1.0, 1.0},
 			.constant = 0.000001,
-			.linear = 0.000000001,
-			.quadratic = 0.00001,
+			.linear = 0.00000000001,
+			.quadratic = 0.000005,
 		}
 	);
 
@@ -74,7 +75,7 @@ void some_lights(std::vector<Light> &lights)
 	lights.push_back(
 		Light {
 			.pos = Vec3f {
-				-17.7341,-7.34089,-20.8009
+				-22.7341,-7.34089,-20.8009
 			},
 			.color = Vec3f{1.0, 0.6, 0.0},
 			.constant = 0.05,
@@ -120,7 +121,18 @@ void some_lights(std::vector<Light> &lights)
 	lights.push_back(
 		Light {
 			.pos = Vec3f {
-				-50.0712,-10.9387,-12.6789
+				-45.3701,-11.2328,-20.0964
+			},
+			.color = Vec3f{1.0, 0.6, 0.0},
+			.constant = 0.05,
+			.linear = 0.4,
+			.quadratic = 0.32,
+		}
+	);
+	lights.push_back(
+		Light {
+			.pos = Vec3f {
+				-34.3701,-11.2328,-20.1464
 			},
 			.color = Vec3f{1.0, 0.6, 0.0},
 			.constant = 0.05,

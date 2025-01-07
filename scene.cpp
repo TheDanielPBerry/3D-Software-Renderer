@@ -73,6 +73,8 @@ void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_
 
 
 	add_model_to_scene(models[shotgun], scene, texture_pool, staticBoxes, Vec3f{ 0.2, 0.2, 0.3 }, Vec3f{ 0, 3.14/2, 3.18 }, Vec3f{ 0.1, 0.1, 0.08 }, true, &(entities[0]), true);
+	//ADS RPG
+	//add_model_to_scene(models[rpg], scene, texture_pool, staticBoxes, Vec3f{ 0.0, 0.22, 0.0}, Vec3f{ -0.15, 3.141592, 3.141592 }, Vec3f{ 0.1, 0.1, 0.1 }, true, &(entities[0]), true);
 	entities[0].boxes[0].pos = Vec3f{ -0.4, -0.2, -0.4 };
 	entities[0].boxes[0].dim = Vec3f{ 0.8, 2.4, 0.8 };
 
@@ -82,21 +84,21 @@ void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_
 
 	add_model_to_scene(models[crate], scene, texture_pool, staticBoxes, Vec3f{ }, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, &(entities[3]));
 
-	Vec3f pos = Vec3f{ 0, 0, 0 };
+	Vec3f pos = Vec3f{ 0, 0, -0.9 };
 	for(uint i=0; i<7; i++) {
 		pos.x =	(i * -0.7) - 5;
 		pos.y = (i * -0.3);
-		add_model_to_scene(models[wood_step], scene, texture_pool, staticBoxes, pos, Vec3f{}, Vec3f{0.4,0.4,1.5}, true, nullptr);
+		add_model_to_scene(models[wood_step], scene, texture_pool, staticBoxes, pos, Vec3f{}, Vec3f{0.4,0.4,1.8}, true, nullptr);
 	}
 
 	add_model_to_scene(models[level_one], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
 
 	//Scene Geometry
-	add_model_to_scene(models[tunnels], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
 	add_model_to_scene(models[throne_room], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
-	add_model_to_scene(models[station], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
 	add_model_to_scene(models[courtyard], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
 	add_model_to_scene(models[library], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
+	add_model_to_scene(models[station], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
+	add_model_to_scene(models[tunnels], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
 
 	//Torches Lights
 	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{-5.0,-7,-6.48849}, Vec3f{0,0.1,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
@@ -109,7 +111,7 @@ void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_
 
 
 	//Courtyard Lights
-	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{-17.7341,-7.34089,-20.8009}, Vec3f{0,1.6,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
+	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{-22.7341,-7.34089,-20.8009}, Vec3f{0,1.6,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
 	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{-24.533,-9.79371,11.8}, Vec3f{0,-1.6,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
 
 	//Library Lights
@@ -117,8 +119,9 @@ void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_
 	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{-12.4549,-4.77474,-42.0326}, Vec3f{0,1.6,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
 
 
-	//Station Light
-	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{-50.0712,-10.9387,-12.6789}, Vec3f{0,0.2,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
+	//Station Lights
+	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{-45.3701,-11.2328,-20.0964}, Vec3f{0,1.7,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
+	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{-34.3701,-11.2328,-20.1464}, Vec3f{0,1.7,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
 	//add_model_to_scene(models[floor], scene, texture_pool, staticBoxes, Vec3f{0, 1, 0}, Vec3f{}, Vec3f{ 0.5, 1.0, 0.5 }, true, nullptr);
 	//return;
 	add_model_to_scene(models[skybox], scene, texture_pool, staticBoxes, Vec3f{}, Vec3f{2,0,0}, Vec3f{ 8, 8, 8 }, true, nullptr);
