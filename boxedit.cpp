@@ -210,6 +210,8 @@ void check_boxedit_keys(SDL_Event &event, Signals &signals)
 	} else if(event.key.keysym.scancode == SDL_SCANCODE_R) {
 		signals.prevBox = true;
 	}
+
+
 }
 
 void box_signals(Signals &signals, std::vector<Box> &staticBoxes, Entity *camera, Box *staticTree)

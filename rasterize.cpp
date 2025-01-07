@@ -197,15 +197,21 @@ Vec2f interpolate_lines(
 				if(plane.texture != nullptr) {
 					int texture_coord_x = (line(texture_x_coeff, x) / (perspective));
 					if(texture_coord_x < 0) {
-						texture_coord_x = 1-texture_coord_x;
+						//texture_coord_x = 1+texture_coord_x;
 					}
 					texture_coord_x %= plane.texture->w;
+					if(texture_coord_x < 0) {
+						texture_coord_x = abs(texture_coord_x);
+					}
 
 					int texture_coord_y = (line(texture_y_coeff, x) / (perspective));
 					if(texture_coord_y < 0) {
-						texture_coord_y = 1-texture_coord_y;
+						//texture_coord_y = 1+texture_coord_y;
 					}
 					texture_coord_y %= plane.texture->h;
+					if(texture_coord_y < 0) {
+						texture_coord_y = abs(texture_coord_y);
+					}
 
 					Uint8 textureColor[4];
 					Uint32 txp = get_pixel(plane.texture, texture_coord_x, texture_coord_y);

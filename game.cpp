@@ -38,23 +38,19 @@ void poll_controls(Entity *camera, Signals &signals)
 
 			case SDL_KEYUP: {
 				switch(event.key.keysym.scancode) {
-					case SDL_SCANCODE_W:
-					case SDL_SCANCODE_K: {
+					case SDL_SCANCODE_W: {
 						signals.forward = false;
 						break;
 					}
-					case SDL_SCANCODE_A:
-					case SDL_SCANCODE_H: {
+					case SDL_SCANCODE_A: {
 						signals.left = false;
 						break;
 					}
-					case SDL_SCANCODE_S:
-					case SDL_SCANCODE_J: {
+					case SDL_SCANCODE_S: {
 						signals.back = false;
 						break;
 					}
-					case SDL_SCANCODE_D:
-					case SDL_SCANCODE_L: {
+					case SDL_SCANCODE_D: {
 						signals.right = false;
 						break;
 					}

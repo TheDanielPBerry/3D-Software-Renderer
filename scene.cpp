@@ -16,14 +16,22 @@ void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_
 	int shotgun = load_obj_model("assets/models/shotgun.obj", scene, texture_pool, models);
 	int chest = load_obj_model("assets/models/chest.obj", scene, texture_pool, models);
 	int chest_open = load_obj_model("assets/models/chest_open.obj", scene, texture_pool, models);
-	int cube = load_obj_model("assets/models/cube.obj", scene, texture_pool, models);
-	int plane = load_obj_model("assets/models/plane.obj", scene, texture_pool, models);
 	int floor = load_obj_model("assets/models/floor.obj", scene, texture_pool, models);
 	int crate = load_obj_model("assets/models/crate.obj", scene, texture_pool, models);
 	int rpg = load_obj_model("assets/models/rpg.obj", scene, texture_pool, models);
 	int level_one = load_obj_model("assets/models/level_two.obj", scene, texture_pool, models);
 	int skybox = load_obj_model("assets/models/skybox.obj", scene, texture_pool, models);
 	int wood_step = load_obj_model("assets/models/wood_step.obj", scene, texture_pool, models);
+	int torch = load_obj_model("assets/models/torch.obj", scene, texture_pool, models);
+
+
+	//
+	//Level Geometry
+	int throne_room = load_obj_model("assets/models/throne_room.obj", scene, texture_pool, models);
+	int library = load_obj_model("assets/models/library.obj", scene, texture_pool, models);
+	int courtyard = load_obj_model("assets/models/courtyard.obj", scene, texture_pool, models);
+	int station = load_obj_model("assets/models/station.obj", scene, texture_pool, models);
+	int tunnels = load_obj_model("assets/models/tunnels.obj", scene, texture_pool, models);
 
 	models[chest].boxes.push_back(models[crate].boxes[0]);
 	models[rpg].boxes.push_back(models[crate].boxes[0]);
@@ -74,17 +82,47 @@ void build_scene(std::vector<Plane> &scene, std::unordered_map<std::string, SDL_
 
 	add_model_to_scene(models[crate], scene, texture_pool, staticBoxes, Vec3f{ }, Vec3f{}, Vec3f{ 0.5, 0.5, 0.5 }, true, &(entities[3]));
 
-	add_model_to_scene(models[level_one], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
-	//add_model_to_scene(models[floor], scene, texture_pool, staticBoxes, Vec3f{0, 1, 0}, Vec3f{}, Vec3f{ 0.5, 1.0, 0.5 }, true, nullptr);
-	//return;
-	add_model_to_scene(models[skybox], scene, texture_pool, staticBoxes, Vec3f{}, Vec3f{2,0,0}, Vec3f{ 8, 8, 8 }, true, nullptr);
-	
 	Vec3f pos = Vec3f{ 0, 0, 0 };
 	for(uint i=0; i<7; i++) {
 		pos.x =	(i * -0.7) - 5;
 		pos.y = (i * -0.3);
 		add_model_to_scene(models[wood_step], scene, texture_pool, staticBoxes, pos, Vec3f{}, Vec3f{0.4,0.4,1.5}, true, nullptr);
 	}
+
+	add_model_to_scene(models[level_one], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
+
+	//Scene Geometry
+	add_model_to_scene(models[tunnels], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
+	add_model_to_scene(models[throne_room], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
+	add_model_to_scene(models[station], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
+	add_model_to_scene(models[courtyard], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
+	add_model_to_scene(models[library], scene, texture_pool, staticBoxes, Vec3f{0,0,0}, Vec3f{}, Vec3f{ 1, 1, 1 }, true, nullptr);
+
+	//Torches Lights
+	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{-5.0,-7,-6.48849}, Vec3f{0,0.1,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
+	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{-5.0,-7,-10.48849}, Vec3f{0,0.1,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
+	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{-5.0,-7,-14.48849}, Vec3f{0,0.1,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
+
+	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{4.9,-7,-7.0}, Vec3f{0,3.2,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
+	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{4.9,-7,-11.0}, Vec3f{0,3.2,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
+	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{4.9,-7,-15.0}, Vec3f{0,3.2,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
+
+
+	//Courtyard Lights
+	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{-17.7341,-7.34089,-20.8009}, Vec3f{0,1.6,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
+	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{-24.533,-9.79371,11.8}, Vec3f{0,-1.6,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
+
+	//Library Lights
+	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{10.347,-5.72349,-26.2754}, Vec3f{0,3.2,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
+	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{-12.4549,-4.77474,-42.0326}, Vec3f{0,1.6,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
+
+
+	//Station Light
+	add_model_to_scene(models[torch], scene, texture_pool, staticBoxes, Vec3f{-50.0712,-10.9387,-12.6789}, Vec3f{0,0.2,0}, Vec3f{ 0.1, 0.1, 0.1 }, true, nullptr);
+	//add_model_to_scene(models[floor], scene, texture_pool, staticBoxes, Vec3f{0, 1, 0}, Vec3f{}, Vec3f{ 0.5, 1.0, 0.5 }, true, nullptr);
+	//return;
+	add_model_to_scene(models[skybox], scene, texture_pool, staticBoxes, Vec3f{}, Vec3f{2,0,0}, Vec3f{ 8, 8, 8 }, true, nullptr);
+	
 
 	std::cout << "Scene triangle count: " << scene.size() << std::endl;
 }

@@ -58,9 +58,9 @@ int main(int argc, char* argv[]) {
 	
 	SDL_DisplayMode DM;
 	SDL_GetCurrentDisplayMode(0, &DM);
-	SDL_Rect screen_rect = SDL_Rect{0, 0, int(DM.w*0.8), int(DM.h*0.8)};
+	SDL_Rect screen_rect = SDL_Rect{0, 0, int(DM.w*1), int(DM.h*1)};
 
-	Vec2f dimensions = Vec2f{ (float)floor(screen_rect.w/2.1), (float)floor(screen_rect.h/2.1) };
+	Vec2f dimensions = Vec2f{ (float)floor(screen_rect.w/1.4), (float)floor(screen_rect.h/3.0) };
 
 	SDL_Window* window = SDL_CreateWindow("Pixel Buffer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_rect.w, screen_rect.h, SDL_WINDOW_SHOWN);
 	if (!window) {
@@ -137,7 +137,7 @@ int main(int argc, char* argv[]) {
 			z_buffer[i] = 0.0;
 		}
 		draw_scene(scene, screen_buffer, dimensions, translate, rotate, z_buffer, pixel_format, lights);
-		//draw_bounding_boxes(staticBoxes, entities, translate, rotate, dimensions, screen_buffer, z_buffer);
+		draw_bounding_boxes(staticBoxes, entities, translate, rotate, dimensions, screen_buffer, z_buffer);
 
 
 		auto currentFrameMillis = getCurrentMilliseconds();

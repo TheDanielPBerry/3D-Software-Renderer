@@ -36,9 +36,9 @@ void calculate_plane_vertex_lights(Plane &plane, std::vector<Light> &lights)
 			float diff = std::max(dot_product(normal, lightDir), (float) 0.0);
 			result = result + (light.color * diff * attenuation);
 		}
-		//plane.color[p].x = std::max((float)0, std::min(plane.color[p].x * result.x, (float)1.0));
-		//plane.color[p].y = std::max((float)0, std::min(plane.color[p].y * result.y, (float)1.0));
-		//plane.color[p].z = std::max((float)0, std::min(plane.color[p].z * result.z, (float)1.0));
+		plane.color[p].x = std::max((float)0, std::min(plane.color[p].x * result.x, (float)1.0));
+		plane.color[p].y = std::max((float)0, std::min(plane.color[p].y * result.y, (float)1.0));
+		plane.color[p].z = std::max((float)0, std::min(plane.color[p].z * result.z, (float)1.0));
 	}
 }
 
@@ -56,29 +56,146 @@ void light_scene(std::vector<Plane> &scene, std::vector<Light> &lights)
 
 void some_lights(std::vector<Light> &lights)
 {
+	//Sun
 	lights.push_back(
 		Light {
 			.pos = Vec3f {
-				0, -20, 0
+				0.0,-480,480
 			},
-			.color = Vec3f{1.0, 0.8, 1.0},
-			.constant = 0.005,
-			.linear = 0.09,
-			.quadratic = 0.0032,
+			.color = Vec3f{1.0, 1.0, 1.0},
+			.constant = 0.000001,
+			.linear = 0.000000001,
+			.quadratic = 0.00001,
 		}
 	);
-	return;
-	for(int i = -20; i<0; i+=10) {
-		lights.push_back(
-			Light {
-				.pos = Vec3f {
-					(float)i, -20, (float)i
-				},
-				.color = Vec3f{1.0, 1.0, 1.0},
-				.constant = 0.0,
-				.linear = 0.09,
-				.quadratic = 0.0032,
-			}
-		);
-	}
+
+
+	//Courtyard Lights
+	lights.push_back(
+		Light {
+			.pos = Vec3f {
+				-17.7341,-7.34089,-20.8009
+			},
+			.color = Vec3f{1.0, 0.6, 0.0},
+			.constant = 0.05,
+			.linear = 0.4,
+			.quadratic = 0.032,
+		}
+	);
+	lights.push_back(
+		Light {
+			.pos = Vec3f {
+				-24.533,-9.79371,12.1226
+			},
+			.color = Vec3f{1.0, 0.6, 0.0},
+			.constant = 0.05,
+			.linear = 0.4,
+			.quadratic = 0.032,
+		}
+	);
+	//Library Lights
+	lights.push_back(
+		Light {
+			.pos = Vec3f {
+				10.347,-5.72349,-26.2754
+			},
+			.color = Vec3f{1.0, 0.6, 0.0},
+			.constant = 0.05,
+			.linear = 0.4,
+			.quadratic = 0.032,
+		}
+	);
+	lights.push_back(
+		Light {
+			.pos = Vec3f {
+				-12.4549,-4.77474,-42.0326
+			},
+			.color = Vec3f{1.0, 0.6, 0.0},
+			.constant = 0.05,
+			.linear = 0.4,
+			.quadratic = 0.032,
+		}
+	);
+	//Station Lights
+	lights.push_back(
+		Light {
+			.pos = Vec3f {
+				-50.0712,-10.9387,-12.6789
+			},
+			.color = Vec3f{1.0, 0.6, 0.0},
+			.constant = 0.05,
+			.linear = 0.4,
+			.quadratic = 0.32,
+		}
+	);
+
+	//West side throne torches
+	lights.push_back(
+		Light {
+			.pos = Vec3f {
+				4.9,-7.2,-7.0
+			},
+			.color = Vec3f{1.0, 0.6, 0.0},
+			.constant = 0.05,
+			.linear = 0.4,
+			.quadratic = 0.032,
+		}
+	);
+	lights.push_back(
+		Light {
+			.pos = Vec3f {
+				4.9,-7.2,-11.0
+			},
+			.color = Vec3f{1.0, 0.6, 0.0},
+			.constant = 0.05,
+			.linear = 0.4,
+			.quadratic = 0.032,
+		}
+	);
+	lights.push_back(
+		Light {
+			.pos = Vec3f {
+				4.9,-7.2,-15.0
+			},
+			.color = Vec3f{1.0, 0.6, 0.0},
+			.constant = 0.05,
+			.linear = 0.4,
+			.quadratic = 0.032,
+		}
+	);
+
+	//East side throne torches
+	lights.push_back(
+		Light {
+			.pos = Vec3f {
+				-5.0,-7.2,-6.48849	
+			},
+			.color = Vec3f{1.0, 0.6, 0.0},
+			.constant = 0.05,
+			.linear = 0.4,
+			.quadratic = 0.032,
+		}
+	);
+	lights.push_back(
+		Light {
+			.pos = Vec3f {
+				-5.0,-7.2,-10.48849	
+			},
+			.color = Vec3f{1.0, 0.6, 0.0},
+			.constant = 0.05,
+			.linear = 0.4,
+			.quadratic = 0.032,
+		}
+	);
+	lights.push_back(
+		Light {
+			.pos = Vec3f {
+				-5.0,-7.2,-14.48849	
+			},
+			.color = Vec3f{1.0, 0.6, 0.0},
+			.constant = 0.05,
+			.linear = 0.4,
+			.quadratic = 0.032,
+		}
+	);
 }
