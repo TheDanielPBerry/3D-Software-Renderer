@@ -34,41 +34,41 @@ Plane &vec_plane_intersection(std::Vec3f &plane, )
 */
 
 
-void player_tick(Entity *camera, Signals &signals)
+void player_tick(Entity *player, Signals &signals)
 {
 	#define PLAYER_ACCELERATION 4.0
 	#define JUMP_HEIGHT -50.0
 	#define GOD_MODE true
 
 	if(signals.forward) {
-		camera->vel.z += cos(camera->rotation.y) * PLAYER_ACCELERATION;
-		camera->vel.x += sin(camera->rotation.y) * PLAYER_ACCELERATION;
+		player->vel.z += cos(player->rotation.y) * PLAYER_ACCELERATION;
+		player->vel.x += sin(player->rotation.y) * PLAYER_ACCELERATION;
 	}
 	if(signals.back) {
-		camera->vel.z -= cos(camera->rotation.y) * PLAYER_ACCELERATION;
-		camera->vel.x -= sin(camera->rotation.y) * PLAYER_ACCELERATION;
+		player->vel.z -= cos(player->rotation.y) * PLAYER_ACCELERATION;
+		player->vel.x -= sin(player->rotation.y) * PLAYER_ACCELERATION;
 	}
 	if(signals.left) {
-		camera->vel.x -= cos(camera->rotation.y) * PLAYER_ACCELERATION;
-		camera->vel.z += sin(camera->rotation.y) * PLAYER_ACCELERATION;
+		player->vel.x -= cos(player->rotation.y) * PLAYER_ACCELERATION;
+		player->vel.z += sin(player->rotation.y) * PLAYER_ACCELERATION;
 	}
 	if(signals.right) {
-		camera->vel.x += cos(camera->rotation.y) * PLAYER_ACCELERATION;
-		camera->vel.z -= sin(camera->rotation.y) * PLAYER_ACCELERATION;
+		player->vel.x += cos(player->rotation.y) * PLAYER_ACCELERATION;
+		player->vel.z -= sin(player->rotation.y) * PLAYER_ACCELERATION;
 	}
 	if(GOD_MODE) {
 		if(signals.jump) {
-			camera->vel.y -= 1;
+			player->vel.y -= 1;
 		}
 		if(signals.crouch) {
-			camera->vel.y += 1;
+			player->vel.y += 1;
 		}
-		camera->vel.y *= 0.9;
+		player->vel.y *= 0.9;
 	} else {
 		if(signals.jump) {
-			if(camera->grounded) {
-				camera->vel.y = JUMP_HEIGHT;
-				camera->grounded = false;
+			if(player->grounded) {
+				player->vel.y = JUMP_HEIGHT;
+				player->grounded = false;
 			}
 		}
 	}
