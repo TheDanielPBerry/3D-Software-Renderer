@@ -1,8 +1,12 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include <vector>
+
+
 #include "Physics.h"
 #include "game.h"
+
 
 #define MAX_PLAYERS 8
 #define MAX_NAME_LENGTH 32
@@ -32,13 +36,25 @@ typedef struct WorldStateRequest {
 	short signals = 0;
 	Vec3f rotation;
 	Vec3f rotationalVelocity;
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version) {
+		ar & action;
+		ar & signals;
+		ar & rotation;
+		ar & rotationalVelocity;
+	}
 } WorldStateRequest;
 
 typedef struct WorldStateResponse {
 	CommType action = WorldState;
-	char number_of_players;
-	Entity entities;
-	struct OnlinePlayer players[MAX_PLAYERS];
+	std::vector<Entity> entities;
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version) {
+		ar & action;
+		ar & entities;
+	}
 } WorldStateResponse;
 
 

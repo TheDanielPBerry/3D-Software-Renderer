@@ -9,7 +9,7 @@
 
 Uint32 get_pixel(SDL_Surface* surface, Sint16 x, Sint16 y)
 {
-	if (x >= 0 && y >= 0 && x < surface->w && y < surface->h) {
+	if(x >= 0 && y >= 0 && x < surface->w && y < surface->h) {
 		int bpp = surface->format->BytesPerPixel;
 		Uint8 *pixel = (Uint8*)surface->pixels + y * surface->pitch + x * bpp;
 		

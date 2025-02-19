@@ -19,15 +19,17 @@ build: $(dependencies)
 	$(cc) -o $(output) main.cpp $(dependencies) $(flags) -O4
 
 
-server_dependencies = obj/Plane.o obj/scene.o obj/model.o obj/Vec.o obj/Physics.o obj/player.o
-net_flags = -Lgarnet/build -lgarnet -Igarnet/src -Iboost/include -Lboost/lib -lboost_serialization
-client:
-	$(cc) client.cpp $(flags) $(net_flags) -o client
+server_dependencies = obj/Plane.o obj/scene.o obj/model.o obj/Vec.o obj/Physics.o obj/player.o obj/game.o
+client_dependencies = $(server_dependencies)
+net_flags = -Llib/ -lboost_serialization
 
 
 
-server: $(server_dependencies) server.cpp
-	$(cc) server.cpp $(server_dependencies) $(flags) $(net_flags) -o server
+server: $(dependencies) server.cpp
+	$(cc) server.cpp $(dependencies) $(flags) $(net_flags) -o server
+
+client: $(dependencies) client.cpp
+	$(cc) client.cpp $(dependencies) $(flags) $(net_flags) -o client
 
 obj/%.o: %.cpp
 	$(cc) -c $< -o $@ $(flags) -O4

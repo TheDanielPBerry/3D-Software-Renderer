@@ -95,7 +95,7 @@ void tick(std::vector<Entity> &entities, Box *staticTree, uint milliseconds)
 	for(auto &entity : entities) {
 		//Forces
 		Vec3f velocity = entity.vel;
-		//velocity.y += (180.0 * proportion);	//Gravity
+		velocity.y += (180.0 * proportion);	//Gravity
 		velocity = velocity * (entity.drag);
 
 

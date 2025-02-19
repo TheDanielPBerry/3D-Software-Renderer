@@ -38,7 +38,7 @@ void player_tick(Entity *player, Signals &signals)
 {
 	#define PLAYER_ACCELERATION 4.0
 	#define JUMP_HEIGHT -50.0
-	#define GOD_MODE true
+	#define GOD_MODE false
 
 	if(signals.forward) {
 		player->vel.z += cos(player->rotation.y) * PLAYER_ACCELERATION;

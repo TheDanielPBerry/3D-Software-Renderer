@@ -1,8 +1,9 @@
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/streambuf.hpp>
 #include <iostream>
 #include <sstream>
 #include <vector>
 
-#include "garnet/src/Garnet.h"
 #include "server.h"
 
 #include "Vec.h"
@@ -10,12 +11,16 @@
 #include "Plane.h"
 #include "scene.h"
 
-#include "boost/include/boost/archive/text_oarchive.hpp"
-#include "boost/include/boost/archive/text_iarchive.hpp"
+#include <boost/asio.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 
+
+namespace asio = boost::asio;
+using boost::asio::ip::udp;
 
 typedef struct Client {
-	Garnet::Address address;
+	asio::ip::address address;
 	struct Entity *entity;
 } Client;
 
@@ -42,7 +47,7 @@ Vec3f get_spawn(std::vector<Client> &clients)
 }
 
 
-Client *new_player(std::vector<Entity> &entities, std::vector<Client> &clients, Garnet::Address address)
+Client *new_player(std::vector<Entity> &entities, std::vector<Client> &clients, asio::ip::address address)
 {
 	entities.push_back(Entity {
 		.pos = get_spawn(clients),
@@ -63,76 +68,49 @@ constexpr uint float_offset(uint i)
 	return sizeof(float) * i;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
 	//Initialize the game world
 	std::vector<Plane> scene;
 	std::unordered_map<std::string, SDL_Surface *> texture_pool;
-	std::vector<Entity> entities;
+	WorldStateResponse state = WorldStateResponse {
+		.action = WorldState,
+		.entities = std::vector<Entity>(),
+	};
 	std::vector<Box> staticBoxes;
 	scene.reserve(20000);
 	texture_pool.reserve(64);
 	staticBoxes.reserve(1024);
-	build_scene(scene, texture_pool, entities, staticBoxes);
+	build_scene(scene, texture_pool, state.entities, staticBoxes);
+
+	//Dispose of rendering stuff for now
 	texture_pool.clear();
 	scene.clear();
-	for(Entity &entity : entities) {
-	}
-	Entity *host = &entities[0];
-
-
-
-	std::cout << "SERVER Initiating\n\n";
-	Garnet::Init(true);
-	Garnet::Socket serverSocket(Garnet::Protocol::UDP);
-	serverSocket.bind(Garnet::Address{
-		.host = "127.0.0.1",
-		.port = 42069
-	});
 
 
 	std::vector<Client> clients;
 	clients.reserve(MAX_PLAYERS);
 
-	char buffer[1024];
-	char *output = &buffer[0];
+	OnlinePlayer players[MAX_PLAYERS] = {
+		OnlinePlayer{
 
-	Garnet::Address clientAddr;
-	while (true) {
-		Garnet::Address recvAddr;
-		bool received = serverSocket.receiveFrom(buffer, sizeof(buffer), &recvAddr);
-		if(received)
-		{
-			Client *client = new_player(entities, clients, recvAddr);
-			clientAddr = recvAddr;
-			if (strcmp(buffer, "!quit") == 0) {
-				std::cout << "Client left the chat.\n";
-				break;
-			}
-			else std::cout << "Client (" << clientAddr.host << ":" << clientAddr.port << "): " << buffer << "\n";
-		}
-		else continue;
+		},
+	};
+	
+	//Initialize server
+	std::cout << "SERVER Initiating\n\n";
+	asio::streambuf input;
+	asio::io_context io_context;
+	udp::socket socket(io_context, udp::endpoint(udp::v4(), 9001));
+	while(true) {
+		udp::endpoint endpoint;
+		WorldStateRequest request;
+		std::size_t length = socket.receive_from(asio::buffer(&request, sizeof(request)), endpoint);
 
-		//Send Data Back
-		std::cout << "Server: ";
-
-		std::ostringstream archive_stream;
-		boost::archive::text_oarchive oa(archive_stream);
-		if(!serverSocket.sendTo(archive, sizeof(archive), clientAddr)) std::cout << "MESSAGE NOT SENT\n";
-		
-		std::cout << "uuid/action/vel/pos/rotationalVelocity/rotation/shot";
-
-		output[0] = 'u';
-		output[1] = entities.size();
-		uint entity_offset = 0;
-		for(Entity &entity : entities) {
-			entity_offset += sizeof(entity);
-		}
+		socket.send_to(asio::buffer(&state, sizeof(state)), endpoint);
 	}
 
-	serverSocket.close();
-	Garnet::Terminate();
+
+
 	return 0;
 }
-
-

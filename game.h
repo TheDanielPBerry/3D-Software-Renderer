@@ -2,7 +2,11 @@
 #define GAME_H
 
 #include <SDL2/SDL.h>
+#include <vector>
 
+#include "Physics.h"
+#include "Plane.h"
+#include "Light.h"
 #include "Physics.h"
 
 #define SIGNAL_QUIT		0b10000000
@@ -32,5 +36,6 @@ typedef struct Signals {
 
 void poll_controls(Entity *camera, Signals &signals);
 
+int init_game(std::vector<Plane> &scene, Entity *camera, Box *staticTree, std::vector<Entity> &entities, std::vector<Light> &lights, std::vector<Box> &staticBoxes);
 
 #endif
